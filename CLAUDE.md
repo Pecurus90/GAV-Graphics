@@ -76,6 +76,48 @@ brand/formats.py ──► importato da NESSUNO (codice orfano)
 - **D3 — Prima la rete di sicurezza, poi l'estrazione del layout social.** Il
   layout va estratto dal metodo `generate()` (oggi le coordinate A4 sono fuse
   nel metodo, `R5`). Quel refactor tocca la geometria: si fa **dopo** i test.
+- **D4 — Distribuzione: repo pubblico su GitHub + `.exe` in Release.** I soci
+  scaricano ed eseguono sul proprio PC. Niente NAS, niente server.
+  Conseguenze vincolanti:
+  - La build dell'`.exe` si fa in **GitHub Actions**, mai a mano. Ambiente
+    pulito e riproducibile.
+  - `de421.bsp` (da `skyfield-data`) e `resvg_py` (libreria nativa) vanno
+    dichiarati esplicitamente al bundler e risolti a runtime: dentro un exe
+    `__file__` non funziona come credi. È il punto in cui il packaging fallisce.
+  - L'exe non firmato attiva **SmartScreen**. Va documentato nel README, o si
+    compra un certificato.
+  - **R4 (validazione input) diventa bloccante**: un HTTP 500 sul PC di un socio
+    è "il programma non funziona", e non hai i log.
+  - Prima di rendere pubblico il repo: `LICENSE` (senza, nessuno ha diritto di
+    usarlo) e README riallineato alla realtà.
+  - Font Inter / Space Grotesk sono **SIL Open Font License**: ridistribuibili
+    nel repo, citando la licenza.
+- **D6 — Si mette mano all'input, mai all'output.** Un SVG generato non si
+  ritocca a mano: la correzione muore alla rigenerazione successiva. Se ti
+  ritrovi a voler cambiare sempre la stessa cosa, quella cosa era un parametro
+  mancante. Eccezione unica e legittima: il ritocco irripetibile per un'occasione
+  singola. *Claude Code non deve mai proporre di correggere l'output.*
+- **D7 — Il disco è sigillato, la composizione è dati.**
+  - Il **disco del cielo** (geometria, astronomia) è la parte fissa. Esce dal
+    motore come frammento SVG auto-contenuto, in coordinate proprie: chi compone
+    lo scala e lo posiziona, non lo ridisegna mai.
+  - Il motore restituisce **disco + dati strutturati** (pianeti, fasi, data),
+    distinti. Oggi i valori sono infilati direttamente nel testo dell'A4: vanno
+    separati, altrimenti un file di layout non ha con cosa riempire i blocchi.
+  - **Composizione, tema e contenuto sono file, non codice.** Titolo, posizioni,
+    dimensioni, gerarchia tipografica: modificabili senza toccare Python.
+  - `cielo-del-mese_struttura.md` è la spec di design. Non va abbassata al
+    codice: è il codice che deve salire fino a lei.
+  - **Niente browser headless** per comporre (HTML/CSS→PNG): impacchettare
+    Chromium nell'`.exe` (D4) è insostenibile. Si resta su SVG + `resvg`.
+- **D5 — Il golden byte-a-byte ha una data di scadenza.** Regge finché gira solo
+  su questa macchina. Su GitHub Actions (altro OS, altra numpy) l'ultima cifra
+  dei `%.2f` cambierà e il test fallirà **senza che nulla sia rotto**.
+  Va convertito a confronto con tolleranza numerica *quando si accende la CI*,
+  non prima: adesso serve esatto, per sorvegliare il refactor del layout.
+  Inoltre, per D7, andrà **ristretto al solo disco**: se sorveglia anche la
+  composizione, fallirà a ogni ritocco estetico legittimo — e un test che è
+  sempre rosso viene ignorato, che è il modo in cui una rete di sicurezza muore.
 
 ---
 
