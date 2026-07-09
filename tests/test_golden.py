@@ -1,0 +1,73 @@
+"""
+TEST GOLDEN / DI REGRESSIONE — snapshot dell'SVG attuale.
+
+*** QUESTO TEST NON DIMOSTRA CHE L'OUTPUT SIA CORRETTO. ***
+Dimostra solo che l'output NON E' CAMBIATO rispetto al riferimento congelato.
+La correttezza (geometria, effemeridi) e' compito di test_correctness.py.
+
+A cosa serve: il prossimo lavoro sara' estrarre il layout dal metodo generate()
+per abilitare i formati social. E' un refactor che tocca la geometria. Questo
+test dice se sposta anche un solo pixel.
+
+Confronto: BYTE-A-BYTE. Verificato (2026-07-09) che due generazioni consecutive
+sullo stesso ambiente sono identiche (stesso sha256) grazie al seed fisso del
+rumore di sfondo (np.random.default_rng(7)) e a matematica deterministica.
+CAVEAT: il confronto byte-a-byte puo' rompersi cambiando ambiente (versione di
+numpy/OS -> ultimo bit dei float -> cifra diversa nei "%.2f"). In quel caso NON
+e' un vero cambiamento di output: passare a un confronto strutturale / con
+tolleranza numerica. Vedi "Decisioni per l'architetto" nel report del task.
+
+Parametri canonici del riferimento (devono combaciare con chi ha generato il
+golden): anno 2026, mese 8, lat 45.5455, lon 11.5353, Vicenza, tema osservatorio.
+"""
+import json
+import os
+
+import pytest
+
+GOLDEN = os.path.join(os.path.dirname(__file__), "golden", "cielo_2026-08_vicenza.svg")
+
+# Parametri canonici: NON cambiarli senza rigenerare il golden apposta.
+PARAMS = dict(year=2026, month=8, lat=45.5455, lon=11.5353, place="Vicenza")
+
+
+def _genera_svg(eng, root, tmp_path):
+    theme = json.load(open(os.path.join(root, "brand", "palettes", "osservatorio.json"),
+                           encoding="utf-8"))
+    out = str(tmp_path / "cielo.svg")
+    eng.generate(PARAMS["year"], PARAMS["month"], PARAMS["lat"], PARAMS["lon"],
+                 PARAMS["place"], theme, out)
+    return open(out, encoding="utf-8").read()
+
+
+def test_golden_svg_invariato(eng, root, tmp_path):
+    """Rigenera l'SVG canonico e lo confronta byte-a-byte col riferimento.
+    Se fallisce: il motore ha cambiato output. Capire SE il cambiamento e'
+    voluto. Se lo e', rigenerare il golden apposta e committarlo a parte."""
+    assert os.path.exists(GOLDEN), (
+        f"Riferimento golden mancante: {GOLDEN}. "
+        "Rigeneralo con i parametri canonici e committalo."
+    )
+    atteso = open(GOLDEN, encoding="utf-8").read()
+    ottenuto = _genera_svg(eng, root, tmp_path)
+
+    if ottenuto != atteso:
+        # messaggio diagnostico: prima riga divergente, per rendere il fallimento
+        # azionabile invece di un opaco "stringhe diverse".
+        la, lb = atteso.splitlines(), ottenuto.splitlines()
+        n = min(len(la), len(lb))
+        prima = next((i for i in range(n) if la[i] != lb[i]), n)
+        dett = (f"righe golden={len(la)} ottenute={len(lb)}; "
+                f"prima differenza alla riga {prima + 1}:\n"
+                f"  golden : {la[prima] if prima < len(la) else '<fine>'}\n"
+                f"  attuale: {lb[prima] if prima < len(lb) else '<fine>'}")
+        pytest.fail("SVG divergente dal golden (output del motore cambiato).\n" + dett)
+
+
+def test_golden_generazione_deterministica(eng, root, tmp_path):
+    """Genera due volte di fila e verifica che l'output sia identico: se non lo
+    fosse, ci sarebbe non-determinismo (seed mancante, ordinamento instabile) e
+    QUALSIASI test golden sarebbe inaffidabile. Rete di sicurezza del golden."""
+    a = _genera_svg(eng, root, tmp_path)
+    b = _genera_svg(eng, root, tmp_path)
+    assert a == b, "Output non deterministico: due generazioni differiscono."
