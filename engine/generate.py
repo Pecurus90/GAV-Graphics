@@ -61,7 +61,7 @@ def bv2hex(ramp, bv):
     xs=[p[0] for p in ramp]; bv=max(xs[0],min(xs[-1],bv))
     for i in range(len(ramp)-1):
         if ramp[i][0]<=bv<=ramp[i+1][0]:
-            f=(bv-ramp[i][0])/(ramp[i+1][0]-ramp[i][0]+1e-9)
+            f=(bv-ramp[i][0])/(ramp[i+1][0]-ramp[i][0])
             a=hex2rgb(ramp[i][1]); b=hex2rgb(ramp[i+1][1])
             return rgb2hex([a[k]+f*(b[k]-a[k]) for k in range(3)])
     return ramp[-1][1]
