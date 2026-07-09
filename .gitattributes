@@ -1,0 +1,12 @@
+# Fine-riga deterministici per i riferimenti "golden" dei test.
+#
+# Contesto: core.autocrlf=true su Windows fa sì che git normalizzi i file di
+# testo a LF nel blob e li estragga CRLF nel working tree. Il motore, però,
+# scrive l'SVG in modalità testo -> fine-riga dipendenti dall'OS (CRLF su
+# Windows, LF altrove). Il test rilegge in modalità testo (newline universali),
+# quindi oggi non fallisce; ma su un'altra macchina / in CI (D4, D5) la
+# combinazione autocrlf + confronto porterebbe a un fallimento FANTASMA.
+#
+# Forzando LF ovunque (blob e working tree), il riferimento golden è identico
+# su ogni piattaforma e coincide con l'output del motore su Linux/CI.
+tests/golden/*.svg text eol=lf
