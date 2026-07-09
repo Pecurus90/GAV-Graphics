@@ -110,7 +110,11 @@ brand/formats.py ──► importato da NESSUNO (codice orfano)
     codice: è il codice che deve salire fino a lei.
   - **Niente browser headless** per comporre (HTML/CSS→PNG): impacchettare
     Chromium nell'`.exe` (D4) è insostenibile. Si resta su SVG + `resvg`.
-- **D5 — Il golden byte-a-byte ha una data di scadenza.** Regge finché gira solo
+- **D5 — Il golden ha una data di scadenza.** *(Corretto 2026-07-09: il
+  confronto NON era byte-a-byte come credevamo. Il test legge in modalità testo,
+  con newline universali: normalizzava i fine-riga su entrambi i lati. La mina
+  era innescata — blob LF, output Windows CRLF — e non era esplosa per caso. Il
+  `.gitattributes` ora impone LF ovunque.)* Regge finché gira solo
   su questa macchina. Su GitHub Actions (altro OS, altra numpy) l'ultima cifra
   dei `%.2f` cambierà e il test fallirà **senza che nulla sia rotto**.
   Va convertito a confronto con tolleranza numerica *quando si accende la CI*,
