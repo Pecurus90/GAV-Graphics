@@ -55,7 +55,7 @@ CX, CY, R = 450.0, 500.0, 384.0
 
 
 def hex2rgb(h): return tuple(int(h[i:i+2],16) for i in (1,3,5))
-def rgb2hex(r): return '#%02x%02x%02x'%tuple(int(max(0,min(255,x))) for x in r)
+def rgb2hex(r): return '#%02x%02x%02x'%tuple(round(max(0,min(255,x))) for x in r)
 
 def bv2hex(ramp, bv):
     xs=[p[0] for p in ramp]; bv=max(xs[0],min(xs[-1],bv))
