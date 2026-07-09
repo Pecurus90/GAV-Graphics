@@ -1,0 +1,9 @@
+numpy>=1.26
+pytz>=2024.1
+skyfield>=1.49
+skyfield-data>=6.0
+resvg-py>=0.3          # export PNG (rende il glow, si impacchetta nell'.exe)
+fastapi>=0.110         # web app (opzionale)
+uvicorn>=0.29          # server ASGI
+jinja2>=3.1            # template HTML
+python-multipart>=0.0.9

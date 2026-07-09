@@ -1,0 +1,26 @@
+{
+  "name": "Osservatorio",
+  "bg": ["#0c1330", "#070c1e", "#04060f"],
+  "disk": ["#0a1533", "#060c22", "#0a1236"],
+  "neon": "#45c8ff",
+  "gold": "#ffd27a",
+  "border": "#2b3f73",
+  "border2": "#3a4d7d",
+  "grid": "#2a3a66",
+  "divider": "#243055",
+  "panel": "#0d1734",
+  "moon_lit": "#e6ecfb",
+  "bgstar": "#aab8e0",
+  "text": "#eef3ff",
+  "text2": "#aeb9d6",
+  "text3": "#8b98b8",
+  "text4": "#5b678a",
+  "label": "#7fb6d8",
+  "cardinal": "#9fb0d8",
+  "status": {"ok": "#5fd08a", "info": "#4bc3ff", "warn": "#e8b45f", "muted": "#6b7690"},
+  "star_ramp": [
+    [-0.33, "#96aaff"], [-0.10, "#a5b9ff"], [0.00, "#c3d2ff"], [0.20, "#e6ebff"],
+    [0.40, "#fff8eb"], [0.59, "#fff0cd"], [0.80, "#ffdfaa"], [1.00, "#ffce91"],
+    [1.30, "#ffb778"], [1.60, "#ff9f60"], [2.00, "#ff8246"], [3.30, "#ff6e3c"]
+  ]
+}

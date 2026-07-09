@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Ambienti virtuali
+.venv/
+venv/
+env/
+
+# Output generati dal motore / rendering
+*.svg
+*.png
+# ...ma i riferimenti "golden" dei test DEVONO essere tracciati
+!tests/golden/
+!tests/golden/**
+
+# Config locale di Claude Code (permessi macchina-specifici)
+.claude/settings.local.json
