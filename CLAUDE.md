@@ -110,6 +110,12 @@ brand/formats.py ──► importato da NESSUNO (codice orfano)
     codice: è il codice che deve salire fino a lei.
   - **Niente browser headless** per comporre (HTML/CSS→PNG): impacchettare
     Chromium nell'`.exe` (D4) è insostenibile. Si resta su SVG + `resvg`.
+- **D8 — L'app produce il file, non pubblica.** L'output è il PNG del post; la
+  pubblicazione su Instagram è manuale, la fa Marco (o chi gestisce il profilo
+  GAV). *Niente* pubblicazione automatica via API: richiederebbe account
+  business, app Meta, token OAuth e revisione — incompatibile con un `.exe`
+  offline distribuito ai soci (D4), che non può contenere le credenziali del
+  profilo. Il confine dell'app è l'immagine pronta. Non proporre di superarlo.
 - **D5 — Il golden ha una data di scadenza.** *(Corretto 2026-07-09: il
   confronto NON era byte-a-byte come credevamo. Il test legge in modalità testo,
   con newline universali: normalizzava i fine-riga su entrambi i lati. La mina
