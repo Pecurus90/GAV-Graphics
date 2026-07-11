@@ -382,6 +382,19 @@ class Engine:
                 out.append(self._render_text(tb, theme, {"label":mp.label,"date":mp.date}))
         return '\n'.join(out)
 
+    def _render_swatches(self, b, theme):
+        """Campioni di colore della legenda. Il colore viene da bv2hex(ramp,bv):
+        calcolo, resta qui; il file da' i bv, le etichette e le posizioni."""
+        ramp=theme["star_ramp"]; lab=b["label"]
+        out=[]; lx=b["x0"]
+        for it in b["items"]:
+            out.append(f'<circle cx="{lx}" cy="{b["cy"]}" r="{b["r"]}" fill="{bv2hex(ramp, it["bv"])}"/>')
+            tb={"x":lx+lab["dx"],"y":b["cy"]+lab["dy"],"fill":lab["fill"],
+                "size":lab["size"],"content":it["label"]}
+            out.append(self._render_text(tb, theme, {}))
+            lx+=b["step"]
+        return '\n'.join(out)
+
     # ---- render: volantino A4 ----
     def generate(self, year, month, lat, lon, place, theme, out,
                  hour_local=23, tzname='Europe/Rome', layout=None):
@@ -416,15 +429,10 @@ class Engine:
         # planets (composto dal file)
         a(self._render_text(T('PIANETI'), theme, ctx))
         a(self._render_planet_panel(next(b for b in L if b['type']=='planet_panel'), theme, data))
-        # legend
-        ly=1235
+        # legend (composto dal file)
         a(self._render_line(LN(1195), theme))
         a(self._render_text(T('Colore stelle'), theme, ctx))
-        leg=[(bv2hex(ramp,-0.2),"calde"),(bv2hex(ramp,0.3),"bianche"),(bv2hex(ramp,0.8),"gialle"),(bv2hex(ramp,1.3),"arancioni"),(bv2hex(ramp,1.9),"rosse")]
-        lx=290
-        for c,lab in leg:
-            a(f'<circle cx="{lx}" cy="{ly-20}" r="4.5" fill="{c}"/>')
-            a(f'<text x="{lx+9}" y="{ly-16}" fill="{theme["text3"]}" font-size="11.5">{lab}</text>'); lx+=100
+        a(self._render_swatches(next(b for b in L if b['type']=='swatches'), theme))
         a(self._render_line(LN(1235), theme))
         a(self._render_text(T('linee ='), theme, ctx))
         a(self._render_text(T('Effemeridi'), theme, ctx))
