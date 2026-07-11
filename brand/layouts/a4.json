@@ -1,0 +1,57 @@
+{
+  "_nota": "Layout A4 come DATI (D7). Contiene esattamente i valori cablati oggi in generate(): descrive l'A4, non lo cambia. L'ordine dei blocchi = ordine di disegno. I 'fill'/'stroke' nominano una chiave del tema; i 'content' sono template riempiti dal contesto di render (vedi compositore). Le coordinate rispettano int-vs-float dell'output attuale (es. 450.0 dell'header viene da CX=450.0).",
+  "canvas": {"w": 900, "h": 1273, "font_family": "Helvetica,Arial,sans-serif"},
+  "blocks": [
+    {"type": "background",
+     "starfield": {"seed": 7, "count": 240, "r_min": 0.3, "r_max": 1.0,
+                   "op_min": 0.15, "op_max": 0.5, "fill": "bgstar"}},
+
+    {"type": "disc", "cx": 450.0, "cy": 500.0, "rad": 384.0},
+
+    {"type": "text", "x": 450.0, "y": 52, "fill": "gold", "size": 21,
+     "weight": "bold", "anchor": "middle", "letter_spacing": 3,
+     "content": "GRUPPO ASTROFILI VICENTINI"},
+    {"type": "text", "x": 450.0, "y": 86, "fill": "text", "size": 30,
+     "weight": "bold", "anchor": "middle", "letter_spacing": 1.5,
+     "content": "IL CIELO DI {month_upper} {year}"},
+    {"type": "text", "x": 450.0, "y": 108, "fill": "text3", "size": 12.5,
+     "anchor": "middle",
+     "content": "Cielo visibile dal Nord Italia · {place} · valido ~15 {month_name}, ore {hour}:00"},
+
+    {"type": "text", "x": 60, "y": 960, "fill": "text", "size": 16,
+     "weight": "bold", "letter_spacing": 1, "content": "FASI LUNARI"},
+    {"type": "moon_panel", "from": "moon_phases",
+     "x0": 90, "cy": 1018, "gap": 200, "radius": 24,
+     "base": {"fill": "panel", "stroke": "border2", "stroke_width": 1},
+     "lit_fill": "moon_lit",
+     "label": {"dy": 44, "fill": "moon_label", "size": 12.5, "content": "{label}"},
+     "date":  {"dy": 61, "fill": "text3", "size": 12, "content": "{date}"}},
+
+    {"type": "text", "x": 470, "y": 960, "fill": "text", "size": 16,
+     "weight": "bold", "letter_spacing": 1,
+     "content": "PIANETI · alzata / tramonto (15 {month_abbr})"},
+    {"type": "planet_panel", "from": "planets",
+     "x0": 470, "y0": 994, "step": 38,
+     "dot":   {"dx": 6, "dy": -4, "r": 4, "fill_status": true},
+     "name":  {"dx": 20, "fill": "text",  "size": 13.5, "weight": "bold", "content": "{name}"},
+     "times": {"dx": 115, "fill": "text2", "size": 12.5, "content": "{rise} / {set}"},
+     "note":  {"dx": 20, "dy": 15, "fill": "text3", "size": 11.5, "content": "{note}"}},
+
+    {"type": "line", "x1": 60, "y1": 1195, "x2": 840, "y2": 1195,
+     "stroke": "divider", "stroke_width": 1},
+    {"type": "text", "x": 60, "y": 1219, "fill": "text3", "size": 11.5,
+     "content": "Colore stelle = temperatura reale:"},
+    {"type": "swatches", "from": "ramp", "x0": 290, "cy": 1215, "step": 100, "r": 4.5,
+     "label": {"dx": 9, "dy": 4, "fill": "text3", "size": 11.5},
+     "items": [{"bv": -0.2, "label": "calde"}, {"bv": 0.3, "label": "bianche"},
+               {"bv": 0.8, "label": "gialle"}, {"bv": 1.3, "label": "arancioni"},
+               {"bv": 1.9, "label": "rosse"}]},
+    {"type": "line", "x1": 60, "y1": 1235, "x2": 86, "y2": 1235,
+     "stroke": "neon", "stroke_width": 2, "filter": "glow"},
+    {"type": "text", "x": 94, "y": 1239, "fill": "text3", "size": 11.5,
+     "content": "linee = figure delle costellazioni"},
+    {"type": "text", "x": 840, "y": 1239, "fill": "text4", "size": 10.5,
+     "anchor": "end",
+     "content": "Effemeridi per {place} ({lat1}°N, {lon1}°E)"}
+  ]
+}

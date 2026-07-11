@@ -13,7 +13,7 @@ Nota onesta: la classificazione di visibilita dei pianeti (ok/telescopico/
 difficile/non osservabile) e un'euristica ragionevole ma semplificata; per un
 uso "serio" andrebbe rifinita (vedi README).
 """
-import json, argparse, calendar
+import os, json, argparse, calendar
 from dataclasses import dataclass
 from datetime import datetime
 import numpy as np
@@ -52,6 +52,10 @@ PLANETS = {"Mercurio":"mercury","Venere":"venus","Marte":"mars",
 # canvas
 W, Hpx = 900, 1273
 CX, CY, R = 450.0, 500.0, 384.0
+
+# file di layout di default: la composizione A4 come dati (D7)
+_BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DEFAULT_LAYOUT = os.path.join(_BASE, "brand", "layouts", "a4.json")
 
 
 # ---------------------------------------------------------------------------
@@ -305,12 +309,16 @@ class Engine:
 
     # ---- render: volantino A4 ----
     def generate(self, year, month, lat, lon, place, theme, out,
-                 hour_local=23, tzname='Europe/Rome'):
+                 hour_local=23, tzname='Europe/Rome', layout=None):
+        if layout is None:
+            with open(DEFAULT_LAYOUT, encoding='utf-8') as fh:
+                layout=json.load(fh)
         lst, lat_rad, _ = self.sky_context(year,month,lat,lon,hour_local,tzname)
         data=self.sky_data(year,month,lat,lon,place,hour_local,tzname)
         ramp=theme['star_ramp']
+        cv=layout['canvas']; cw,ch=cv['w'],cv['h']
         s=[]; a=s.append
-        a(f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{Hpx}" viewBox="0 0 {W} {Hpx}" font-family="Helvetica,Arial,sans-serif">')
+        a(f'<svg xmlns="http://www.w3.org/2000/svg" width="{cw}" height="{ch}" viewBox="0 0 {cw} {ch}" font-family="{cv["font_family"]}">')
         a(self.defs_svg(theme))
         a(f'<rect width="{W}" height="{Hpx}" fill="url(#bg)"/>')
         rng=np.random.default_rng(7)
