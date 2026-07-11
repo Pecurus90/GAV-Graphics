@@ -342,6 +342,23 @@ class Engine:
         if b.get("filter"): s+=f' filter="url(#{b["filter"]})"'
         return s+'/>'
 
+    def _render_planet_panel(self, b, theme, data):
+        """Righe pianeti (ancora x0/y0 + passo step). Il pallino di stato e'
+        l'unico fill guidato dal dato (fill_status)."""
+        out=[]
+        dot=b["dot"]
+        for i,pl in enumerate(data.planets):
+            item={"name":pl.name,"rise":pl.rise,"set":pl.set_,"note":pl.note,"status":pl.status}
+            y=b["y0"]+i*b["step"]
+            fill=theme["status"][pl.status] if dot.get("fill_status") else theme[dot["fill"]]
+            out.append(f'<circle cx="{b["x0"]+dot["dx"]}" cy="{y+dot["dy"]}" r="{dot["r"]}" fill="{fill}"/>')
+            for part in ("name","times","note"):
+                p=b[part]
+                tb={"x":b["x0"]+p["dx"],"y":y+p.get("dy",0),"fill":p["fill"],
+                    "size":p["size"],"weight":p.get("weight"),"content":p["content"]}
+                out.append(self._render_text(tb, theme, item))
+        return '\n'.join(out)
+
     # ---- render: volantino A4 ----
     def generate(self, year, month, lat, lon, place, theme, out,
                  hour_local=23, tzname='Europe/Rome', layout=None):
@@ -382,16 +399,9 @@ class Engine:
             elif mp.key=='last': a(f'<path d="M{mx},{my-mr} A{mr},{mr} 0 0 0 {mx},{my+mr} Z" fill="{theme["moon_lit"]}"/>')
             a(f'<text x="{mx}" y="{my+mr+20}" fill="{theme["moon_label"]}" font-size="12.5" text-anchor="middle">{mp.label}</text>')
             a(f'<text x="{mx}" y="{my+mr+37}" fill="{theme["text3"]}" font-size="12" text-anchor="middle">{mp.date}</text>')
-        # planets
-        px0=470
+        # planets (composto dal file)
         a(self._render_text(T('PIANETI'), theme, ctx))
-        ry=py+34
-        for pl in data.planets:
-            a(f'<circle cx="{px0+6}" cy="{ry-4}" r="4" fill="{theme["status"][pl.status]}"/>')
-            a(f'<text x="{px0+20}" y="{ry}" fill="{theme["text"]}" font-size="13.5" font-weight="bold">{pl.name}</text>')
-            a(f'<text x="{px0+115}" y="{ry}" fill="{theme["text2"]}" font-size="12.5">{pl.rise} / {pl.set_}</text>')
-            a(f'<text x="{px0+20}" y="{ry+15}" fill="{theme["text3"]}" font-size="11.5">{pl.note}</text>')
-            ry+=38
+        a(self._render_planet_panel(next(b for b in L if b['type']=='planet_panel'), theme, data))
         # legend
         ly=1235
         a(self._render_line(LN(1195), theme))
