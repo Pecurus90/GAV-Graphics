@@ -1,0 +1,87 @@
+"""
+TEST GOLDEN DEL SOLO DISCO — snapshot del frammento sky_disc_svg reso da solo.
+
+Perche' separato dal golden A4: il golden A4 sorveglia disco + composizione
+INSIEME. Per D7 la composizione diventa dati (file di layout) e cambiera' a ogni
+ritocco estetico legittimo; la geometria del disco NO. Questo golden isola la
+guardia sul rendering del disco, cosi' in #5c potremo cambiare le composizioni
+a occhio senza perdere la rete sulla matematica del disco.
+
+*** NON dimostra che il disco sia CORRETTO *** (quello e' test_correctness.py):
+dimostra che il suo RENDERING non e' cambiato.
+
+Confronto in modalita' testo (newline universali) come test_golden; il blob del
+riferimento e' forzato a LF da .gitattributes.
+
+Parametri canonici (uguali al golden A4, cosi' il frammento e' letteralmente una
+fetta dell'A4): anno 2026, mese 8, lat 45.5455, lon 11.5353, tema osservatorio,
+disco a (cx,cy,rad)=(450,500,384).
+"""
+import json
+import os
+
+import pytest
+
+GOLDEN = os.path.join(os.path.dirname(__file__), "golden", "disc_2026-08_vicenza.svg")
+A4_GOLDEN = os.path.join(os.path.dirname(__file__), "golden", "cielo_2026-08_vicenza.svg")
+
+# Parametri canonici del disco. NON cambiarli senza rigenerare il golden apposta.
+DISC = dict(year=2026, month=8, lat=45.5455, lon=11.5353, cx=450.0, cy=500.0, rad=384.0)
+
+
+def _theme(root):
+    return json.load(open(os.path.join(root, "brand", "palettes", "osservatorio.json"),
+                          encoding="utf-8"))
+
+
+def _fragment(eng, theme):
+    """Il frammento del SOLO disco, agli stessi parametri del golden A4."""
+    lst, lat_rad, _ = eng.sky_context(DISC["year"], DISC["month"], DISC["lat"], DISC["lon"])
+    return eng.sky_disc_svg(DISC["cx"], DISC["cy"], DISC["rad"], lst, lat_rad, theme)
+
+
+def disc_document(eng, theme):
+    """Il frammento reso come SVG autonomo: defs (gradienti/glow) + disco, dentro
+    un <svg> di cornice. E' cio' che un compositore assembla per il disco da solo.
+    Funzione pubblica: la usa anche lo script che (ri)genera il golden."""
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="900" height="950" '
+            f'viewBox="0 0 900 950" font-family="Helvetica,Arial,sans-serif">\n'
+            + eng.defs_svg(theme) + '\n'
+            + _fragment(eng, theme) + '\n'
+            + '</svg>')
+
+
+def test_disc_golden_invariato(eng, root):
+    """Rende il disco da solo e lo confronta col riferimento. Se fallisce: il
+    rendering del disco e' cambiato. Capire SE e' voluto; se lo e', rigenerare
+    il golden del disco apposta e committarlo a parte."""
+    assert os.path.exists(GOLDEN), (
+        f"Riferimento disc-golden mancante: {GOLDEN}. Rigeneralo e committalo.")
+    atteso = open(GOLDEN, encoding="utf-8").read()
+    ottenuto = disc_document(eng, _theme(root))
+    if ottenuto != atteso:
+        la, lb = atteso.splitlines(), ottenuto.splitlines()
+        n = min(len(la), len(lb))
+        prima = next((i for i in range(n) if la[i] != lb[i]), n)
+        dett = (f"righe golden={len(la)} ottenute={len(lb)}; "
+                f"prima differenza alla riga {prima + 1}:\n"
+                f"  golden : {la[prima] if prima < len(la) else '<fine>'}\n"
+                f"  attuale: {lb[prima] if prima < len(lb) else '<fine>'}")
+        pytest.fail("Disco divergente dal golden (rendering del disco cambiato).\n" + dett)
+
+
+def test_disc_e_fetta_dell_a4(eng, root):
+    """Cross-check fra le due guardie: agli stessi parametri, il frammento del
+    disco compare VERBATIM dentro il golden A4. Se un giorno divergono, una delle
+    due e' stata rigenerata a sproposito e lo scopriamo subito."""
+    a4 = open(A4_GOLDEN, encoding="utf-8").read()
+    frag = _fragment(eng, _theme(root))
+    assert frag in a4, "Il frammento del disco non e' piu' una fetta del golden A4."
+
+
+def test_disc_generazione_deterministica(eng, root):
+    """Due rendering di fila devono essere identici: il disco non ha rumore
+    casuale (a differenza dello sfondo A4), quindi deve essere deterministico."""
+    theme = _theme(root)
+    assert disc_document(eng, theme) == disc_document(eng, theme), \
+        "Rendering del disco non deterministico."
