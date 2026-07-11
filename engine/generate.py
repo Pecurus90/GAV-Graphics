@@ -359,6 +359,29 @@ class Engine:
                 out.append(self._render_text(tb, theme, item))
         return '\n'.join(out)
 
+    def _render_moon_panel(self, b, theme, data):
+        """Dischi delle fasi (fila x0 + passo gap). La forma illuminata dipende
+        da `key` (piena=cerchio, primo/ultimo=semicerchio ad arco): logica di
+        disegno, resta qui."""
+        out=[]
+        x0,cy,gap,mr=b["x0"],b["cy"],b["gap"],b["radius"]
+        base=b["base"]; lit=theme[b["lit_fill"]]
+        for i,mp in enumerate(data.moon_phases[:4]):
+            mx=x0+i*gap
+            out.append(f'<circle cx="{mx}" cy="{cy}" r="{mr}" fill="{theme[base["fill"]]}" stroke="{theme[base["stroke"]]}" stroke-width="{base["stroke_width"]}"/>')
+            if mp.key=='full':
+                out.append(f'<circle cx="{mx}" cy="{cy}" r="{mr}" fill="{lit}"/>')
+            elif mp.key=='first':
+                out.append(f'<path d="M{mx},{cy-mr} A{mr},{mr} 0 0 1 {mx},{cy+mr} Z" fill="{lit}"/>')
+            elif mp.key=='last':
+                out.append(f'<path d="M{mx},{cy-mr} A{mr},{mr} 0 0 0 {mx},{cy+mr} Z" fill="{lit}"/>')
+            for part in ("label","date"):
+                p=b[part]
+                tb={"x":mx,"y":cy+p["dy"],"fill":p["fill"],"size":p["size"],
+                    "anchor":"middle","content":p["content"]}
+                out.append(self._render_text(tb, theme, {"label":mp.label,"date":mp.date}))
+        return '\n'.join(out)
+
     # ---- render: volantino A4 ----
     def generate(self, year, month, lat, lon, place, theme, out,
                  hour_local=23, tzname='Europe/Rome', layout=None):
@@ -387,18 +410,9 @@ class Engine:
         a(self._render_text(T('GRUPPO'), theme, ctx))
         a(self._render_text(T('IL CIELO'), theme, ctx))
         a(self._render_text(T('Cielo visibile'), theme, ctx))
-        # moon phases
-        py=960
+        # moon phases (composto dal file)
         a(self._render_text(T('FASI LUNARI'), theme, ctx))
-        mr=24; startx=90; gap=200; my=py+58
-        for i,mp in enumerate(data.moon_phases[:4]):
-            mx=startx+i*gap
-            a(f'<circle cx="{mx}" cy="{my}" r="{mr}" fill="{theme["panel"]}" stroke="{theme["border2"]}" stroke-width="1"/>')
-            if mp.key=='full': a(f'<circle cx="{mx}" cy="{my}" r="{mr}" fill="{theme["moon_lit"]}"/>')
-            elif mp.key=='first': a(f'<path d="M{mx},{my-mr} A{mr},{mr} 0 0 1 {mx},{my+mr} Z" fill="{theme["moon_lit"]}"/>')
-            elif mp.key=='last': a(f'<path d="M{mx},{my-mr} A{mr},{mr} 0 0 0 {mx},{my+mr} Z" fill="{theme["moon_lit"]}"/>')
-            a(f'<text x="{mx}" y="{my+mr+20}" fill="{theme["moon_label"]}" font-size="12.5" text-anchor="middle">{mp.label}</text>')
-            a(f'<text x="{mx}" y="{my+mr+37}" fill="{theme["text3"]}" font-size="12" text-anchor="middle">{mp.date}</text>')
+        a(self._render_moon_panel(next(b for b in L if b['type']=='moon_panel'), theme, data))
         # planets (composto dal file)
         a(self._render_text(T('PIANETI'), theme, ctx))
         a(self._render_planet_panel(next(b for b in L if b['type']=='planet_panel'), theme, data))
