@@ -313,6 +313,35 @@ class Engine:
         sigillata in sky_disc_svg (gia' parametrica su cx/cy/rad)."""
         return self.sky_disc_svg(b["cx"], b["cy"], b["rad"], lst, lat_rad, theme)
 
+    @staticmethod
+    def _render_ctx(data):
+        """Presentazione DERIVATA da SkyData: stringhe pronte che i template del
+        layout referenziano per nome. Qui vivono MONTHS_IT, il troncamento a 3
+        lettere e il formato dei float (decisione #5b)."""
+        return {"year": data.year,
+                "month_name": MONTHS_IT[data.month],
+                "month_upper": MONTHS_IT[data.month].upper(),
+                "month_abbr": MONTHS_IT[data.month][:3],
+                "place": data.place, "hour": data.hour_local,
+                "lat1": f"{data.lat:.1f}", "lon1": f"{data.lon:.1f}"}
+
+    def _render_text(self, b, theme, ctx):
+        """Primitiva testo. Ordine di attributi canonico (ricavato dall'A4):
+        x, y, fill, font-size, [font-weight], [text-anchor], [letter-spacing].
+        `content` e' un template riempito da `ctx` (o dai campi di un item)."""
+        s=(f'<text x="{b["x"]}" y="{b["y"]}" fill="{theme[b["fill"]]}" '
+           f'font-size="{b["size"]}"')
+        if b.get("weight"): s+=f' font-weight="{b["weight"]}"'
+        if b.get("anchor"): s+=f' text-anchor="{b["anchor"]}"'
+        if "letter_spacing" in b: s+=f' letter-spacing="{b["letter_spacing"]}"'
+        return s+f'>{b["content"].format(**ctx)}</text>'
+
+    def _render_line(self, b, theme):
+        s=(f'<line x1="{b["x1"]}" y1="{b["y1"]}" x2="{b["x2"]}" y2="{b["y2"]}" '
+           f'stroke="{theme[b["stroke"]]}" stroke-width="{b["stroke_width"]}"')
+        if b.get("filter"): s+=f' filter="url(#{b["filter"]})"'
+        return s+'/>'
+
     # ---- render: volantino A4 ----
     def generate(self, year, month, lat, lon, place, theme, out,
                  hour_local=23, tzname='Europe/Rome', layout=None):
@@ -322,7 +351,12 @@ class Engine:
         lst, lat_rad, _ = self.sky_context(year,month,lat,lon,hour_local,tzname)
         data=self.sky_data(year,month,lat,lon,place,hour_local,tzname)
         ramp=theme['star_ramp']
+        ctx=self._render_ctx(data)
         cv=layout['canvas']; cw,ch=cv['w'],cv['h']
+        # helper transitori di selezione blocchi (spariranno col walk finale)
+        L=layout['blocks']
+        T=lambda p: next(b for b in L if b['type']=='text' and b['content'].startswith(p))
+        LN=lambda y1: next(b for b in L if b['type']=='line' and b['y1']==y1)
         s=[]; a=s.append
         a(f'<svg xmlns="http://www.w3.org/2000/svg" width="{cw}" height="{ch}" viewBox="0 0 {cw} {ch}" font-family="{cv["font_family"]}">')
         a(self.defs_svg(theme))
@@ -332,13 +366,13 @@ class Engine:
             a(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{rng.uniform(0.3,1.0):.2f}" fill="{theme["bgstar"]}" opacity="{rng.uniform(0.15,0.5):.2f}"/>')
         # disco cielo (composto dal file)
         a(self._render_disc(next(b for b in layout['blocks'] if b['type']=='disc'), theme, lst, lat_rad))
-        # header
-        a(f'<text x="{CX}" y="52" fill="{theme["gold"]}" font-size="21" font-weight="bold" text-anchor="middle" letter-spacing="3">GRUPPO ASTROFILI VICENTINI</text>')
-        a(f'<text x="{CX}" y="86" fill="{theme["text"]}" font-size="30" font-weight="bold" text-anchor="middle" letter-spacing="1.5">IL CIELO DI {MONTHS_IT[data.month].upper()} {data.year}</text>')
-        a(f'<text x="{CX}" y="108" fill="{theme["text3"]}" font-size="12.5" text-anchor="middle">Cielo visibile dal Nord Italia · {data.place} · valido ~15 {MONTHS_IT[data.month]}, ore {data.hour_local}:00</text>')
+        # header (composto dal file)
+        a(self._render_text(T('GRUPPO'), theme, ctx))
+        a(self._render_text(T('IL CIELO'), theme, ctx))
+        a(self._render_text(T('Cielo visibile'), theme, ctx))
         # moon phases
         py=960
-        a(f'<text x="60" y="{py}" fill="{theme["text"]}" font-size="16" font-weight="bold" letter-spacing="1">FASI LUNARI</text>')
+        a(self._render_text(T('FASI LUNARI'), theme, ctx))
         mr=24; startx=90; gap=200; my=py+58
         for i,mp in enumerate(data.moon_phases[:4]):
             mx=startx+i*gap
@@ -350,7 +384,7 @@ class Engine:
             a(f'<text x="{mx}" y="{my+mr+37}" fill="{theme["text3"]}" font-size="12" text-anchor="middle">{mp.date}</text>')
         # planets
         px0=470
-        a(f'<text x="{px0}" y="{py}" fill="{theme["text"]}" font-size="16" font-weight="bold" letter-spacing="1">PIANETI · alzata / tramonto (15 {MONTHS_IT[data.month][:3]})</text>')
+        a(self._render_text(T('PIANETI'), theme, ctx))
         ry=py+34
         for pl in data.planets:
             a(f'<circle cx="{px0+6}" cy="{ry-4}" r="4" fill="{theme["status"][pl.status]}"/>')
@@ -360,16 +394,16 @@ class Engine:
             ry+=38
         # legend
         ly=1235
-        a(f'<line x1="60" y1="{ly-40}" x2="{W-60}" y2="{ly-40}" stroke="{theme["divider"]}" stroke-width="1"/>')
-        a(f'<text x="60" y="{ly-16}" fill="{theme["text3"]}" font-size="11.5">Colore stelle = temperatura reale:</text>')
+        a(self._render_line(LN(1195), theme))
+        a(self._render_text(T('Colore stelle'), theme, ctx))
         leg=[(bv2hex(ramp,-0.2),"calde"),(bv2hex(ramp,0.3),"bianche"),(bv2hex(ramp,0.8),"gialle"),(bv2hex(ramp,1.3),"arancioni"),(bv2hex(ramp,1.9),"rosse")]
         lx=290
         for c,lab in leg:
             a(f'<circle cx="{lx}" cy="{ly-20}" r="4.5" fill="{c}"/>')
             a(f'<text x="{lx+9}" y="{ly-16}" fill="{theme["text3"]}" font-size="11.5">{lab}</text>'); lx+=100
-        a(f'<line x1="60" y1="{ly}" x2="86" y2="{ly}" stroke="{theme["neon"]}" stroke-width="2" filter="url(#glow)"/>')
-        a(f'<text x="94" y="{ly+4}" fill="{theme["text3"]}" font-size="11.5">linee = figure delle costellazioni</text>')
-        a(f'<text x="{W-60}" y="{ly+4}" fill="{theme["text4"]}" font-size="10.5" text-anchor="end">Effemeridi per {data.place} ({data.lat:.1f}°N, {data.lon:.1f}°E)</text>')
+        a(self._render_line(LN(1235), theme))
+        a(self._render_text(T('linee ='), theme, ctx))
+        a(self._render_text(T('Effemeridi'), theme, ctx))
         a('</svg>')
         with open(out,'w',encoding='utf-8') as fh:
             fh.write('\n'.join(s))
