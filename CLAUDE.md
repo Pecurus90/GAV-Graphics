@@ -28,23 +28,25 @@ dallo stesso motore. L'A4 resta, non è più il fuoco.
 ## Architettura reale (verificata, non dichiarata)
 
 ```
-uvicorn ──► app/main.py ──┬──► engine/generate.py ──► data/stars6.json
-                          │                         ├─► data/const_lines.json
-                          │                         └─► de421.bsp (skyfield-data)
-                          └──► render.py ──► resvg_py
-                          (legge brand/palettes/*.json)
+uvicorn ► app/main.py ─┐
+python cielo.py ───────┼─► engine/generate.py ──► data/stars6.json
+                       │   (motore puro: solo SVG) ├─► data/const_lines.json
+                       │                            └─► de421.bsp (skyfield-data)
+                       └─► render.py ──► resvg_py (SVG→PNG)
+                       (leggono brand/palettes/*.json + brand/layouts/*.json)
 
-CLI: python engine/generate.py   (NON passa da render.py → solo SVG)
+CLI: python cielo.py --format a4|post [--png]   (compone motore + render, D1)
 
 brand/formats.py ──► importato da NESSUNO (codice orfano)
 ```
 
 | File | Ruolo |
 |---|---|
-| `engine/generate.py` | Il motore + compositore magro. Geometria/effemeridi → `SkyData` + disco; `generate()` cammina i blocchi di un file di layout. |
-| `brand/layouts/*.json` | La composizione come dati (canvas + blocchi). `a4.json` esiste; i formati social sono altri file. |
+| `engine/generate.py` | Il motore + compositore magro. Geometria/effemeridi → `SkyData` + disco; `generate()` cammina i blocchi di un file di layout. Libreria pura: **nessun CLI, non importa `render`**. |
+| `cielo.py` | Il CLI (D1). Mappa i formati (`a4`/`post`) ai file di layout e **compone** motore + `render` (SVG, e PNG con `--png`). Vive fuori da `engine/`. |
+| `brand/layouts/*.json` | La composizione come dati (canvas + blocchi). `a4.json` e `post_1080.json` esistono; altri formati sono altri file. |
 | `app/main.py` | Web app FastAPI sottile: `/`, `/preview`, `/download`. |
-| `render.py` | SVG→PNG via resvg. Usato **solo** dalla web app. |
+| `render.py` | SVG→PNG via resvg. Usato dal CLI (`cielo.py`) **e** dalla web app. |
 | `brand/palettes/*.json` | I temi. **Non** in `themes/` (il README mente). |
 | `brand/formats.py` | Formati canvas. Orfano — ora **superato** da `brand/layouts/` (il canvas vive nel file). Candidato a rimozione. |
 | `data/stars6.json` | 5044 stelle GeoJSON, tutte con `mag` e `bv`. |
@@ -70,7 +72,8 @@ brand/formats.py ──► importato da NESSUNO (codice orfano)
 
 - **D1 — Il PNG si genera anche da CLI.** `render.py` resta un modulo separato
   che il CLI *compone*; non viene fuso nel motore. Un solo percorso d'uscita
-  SVG→PNG, testabile headless. *(Da implementare.)*
+  SVG→PNG, testabile headless. *(Fatto, giro #5d: `cielo.py` compone motore +
+  `render`; `--png` produce il PNG accanto all'SVG, larghezza per formato.)*
 - **D2 — Il tema è un contratto validato, non un dict libero.** Una palette a
   cui manca una chiave deve dare un errore leggibile, non un `KeyError`.
   Motivazione: stiamo per moltiplicare le palette. *(Da implementare.)*
@@ -207,8 +210,12 @@ Tre ruoli. Un ciclo: `prompt → esecuzione → report → allineamento → prom
 #   python -m venv .venv ; .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 
-# motore (solo SVG)
-python engine/generate.py --year 2026 --month 8 --place Vicenza --out cielo.svg
+# CLI (D1): A4 in SVG (default)
+python cielo.py --year 2026 --month 8 --place Vicenza
+# A4 in SVG + PNG (larghezza 1800)
+python cielo.py --year 2026 --month 8 --place Vicenza --png
+# post quadrato 1080 in SVG + PNG (larghezza 1080)
+python cielo.py --year 2026 --month 8 --format post --png
 
 # web app
 python -m uvicorn app.main:app --reload --port 8000
