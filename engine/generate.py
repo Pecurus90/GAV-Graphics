@@ -344,10 +344,13 @@ class Engine:
 
     def _render_planet_panel(self, b, theme, data):
         """Righe pianeti (ancora x0/y0 + passo step). Il pallino di stato e'
-        l'unico fill guidato dal dato (fill_status)."""
+        l'unico fill guidato dal dato (fill_status). `statuses` (opzionale)
+        filtra quali pianeti mostrare per stato: assente -> tutti (come A4)."""
         out=[]
         dot=b["dot"]
-        for i,pl in enumerate(data.planets):
+        keep=b.get("statuses")
+        planets=data.planets if keep is None else [p for p in data.planets if p.status in keep]
+        for i,pl in enumerate(planets):
             item={"name":pl.name,"rise":pl.rise,"set":pl.set_,"note":pl.note,"status":pl.status}
             y=b["y0"]+i*b["step"]
             fill=theme["status"][pl.status] if dot.get("fill_status") else theme[dot["fill"]]
