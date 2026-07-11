@@ -14,6 +14,7 @@ difficile/non osservabile) e un'euristica ragionevole ma semplificata; per un
 uso "serio" andrebbe rifinita (vedi README).
 """
 import json, argparse, calendar
+from dataclasses import dataclass
 from datetime import datetime
 import numpy as np
 import pytz
@@ -51,6 +52,45 @@ PLANETS = {"Mercurio":"mercury","Venere":"venus","Marte":"mars",
 # canvas
 W, Hpx = 900, 1273
 CX, CY, R = 450.0, 500.0, 384.0
+
+
+# ---------------------------------------------------------------------------
+# Contratto dei DATI (D7): tutto ciò che nel volantino finisce come TESTO/contenuto,
+# separato dal disegno. È l'interfaccia che il compositore A4 e i futuri file di
+# layout riempiono. NON contiene geometria del disco (lst, lat_rad): quella vive
+# nel frammento SVG sigillato, prodotto a parte da sky_disc_svg.
+# ---------------------------------------------------------------------------
+@dataclass(frozen=True)
+class MoonPhase:
+    """Una fase lunare del mese. `key` ('new'|'first'|'full'|'last') pilota la
+    forma del disco disegnato; `label`/`date` sono il testo mostrato."""
+    label: str    # es. 'Luna Piena'
+    key: str      # 'new'|'first'|'full'|'last'
+    date: str     # data locale, formato '%d/%m'
+
+
+@dataclass(frozen=True)
+class Planet:
+    """Un pianeta con la sua visibilità. `status` ('ok'|'info'|'warn'|'muted')
+    pilota il colore del pallino; il resto è testo."""
+    name: str     # es. 'Venere'
+    rise: str     # alzata '%H:%M' o '--'
+    set_: str     # tramonto '%H:%M' o '--'
+    note: str     # nota testuale di visibilità
+    status: str   # 'ok'|'info'|'warn'|'muted'
+
+
+@dataclass(frozen=True)
+class SkyData:
+    """I dati di contenuto del volantino, distinti dal disegno (D7)."""
+    year: int
+    month: int
+    place: str
+    lat: float
+    lon: float
+    hour_local: int
+    moon_phases: list[MoonPhase]
+    planets: list[Planet]
 
 
 def hex2rgb(h): return tuple(int(h[i:i+2],16) for i in (1,3,5))
@@ -248,14 +288,26 @@ class Engine:
                 a(f'<text x="{ax:.1f}" y="{ay+6*k:.1f}" fill="{theme["cardinal"]}" font-size="{19*k:.1f}" font-weight="bold" text-anchor="middle">{lab}</text>')
         return '\n'.join(s)
 
+    # ---- dati (contenuto, separato dal disegno) ----
+    def sky_data(self, year, month, lat, lon, place,
+                 hour_local=23, tzname='Europe/Rome'):
+        """Calcola i DATI del volantino (fasi lunari, pianeti, data, località)
+        come struttura esplicita, separata dal disegno. È l'interfaccia che il
+        compositore A4 — e i futuri file di layout (D7) — riempiono."""
+        _, _, tz = self.sky_context(year,month,lat,lon,hour_local,tzname)
+        loc=wgs84.latlon(lat,lon,elevation_m=50)
+        phases=[MoonPhase(nm,ph,dt)
+                for nm,ph,dt in self.moon_phases(year,month,tz)]
+        planets=[Planet(nm,rise,set_,note,st)
+                 for nm,rise,set_,note,st in self.planet_table(year,month,tz,loc)]
+        return SkyData(year=year, month=month, place=place, lat=lat, lon=lon,
+                       hour_local=hour_local, moon_phases=phases, planets=planets)
+
     # ---- render: volantino A4 ----
     def generate(self, year, month, lat, lon, place, theme, out,
                  hour_local=23, tzname='Europe/Rome'):
-        lst, lat_rad, tz = self.sky_context(year,month,lat,lon,hour_local,tzname)
-        loc=wgs84.latlon(lat,lon,elevation_m=50)
-
-        phases=self.moon_phases(year,month,tz)
-        planets=self.planet_table(year,month,tz,loc)
+        lst, lat_rad, _ = self.sky_context(year,month,lat,lon,hour_local,tzname)
+        data=self.sky_data(year,month,lat,lon,place,hour_local,tzname)
         ramp=theme['star_ramp']
         s=[]; a=s.append
         a(f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{Hpx}" viewBox="0 0 {W} {Hpx}" font-family="Helvetica,Arial,sans-serif">')
@@ -268,29 +320,29 @@ class Engine:
         a(self.sky_disc_svg(CX, CY, R, lst, lat_rad, theme, ramp))
         # header
         a(f'<text x="{CX}" y="52" fill="{theme["gold"]}" font-size="21" font-weight="bold" text-anchor="middle" letter-spacing="3">GRUPPO ASTROFILI VICENTINI</text>')
-        a(f'<text x="{CX}" y="86" fill="{theme["text"]}" font-size="30" font-weight="bold" text-anchor="middle" letter-spacing="1.5">IL CIELO DI {MONTHS_IT[month].upper()} {year}</text>')
-        a(f'<text x="{CX}" y="108" fill="{theme["text3"]}" font-size="12.5" text-anchor="middle">Cielo visibile dal Nord Italia · {place} · valido ~15 {MONTHS_IT[month]}, ore {hour_local}:00</text>')
+        a(f'<text x="{CX}" y="86" fill="{theme["text"]}" font-size="30" font-weight="bold" text-anchor="middle" letter-spacing="1.5">IL CIELO DI {MONTHS_IT[data.month].upper()} {data.year}</text>')
+        a(f'<text x="{CX}" y="108" fill="{theme["text3"]}" font-size="12.5" text-anchor="middle">Cielo visibile dal Nord Italia · {data.place} · valido ~15 {MONTHS_IT[data.month]}, ore {data.hour_local}:00</text>')
         # moon phases
         py=960
         a(f'<text x="60" y="{py}" fill="{theme["text"]}" font-size="16" font-weight="bold" letter-spacing="1">FASI LUNARI</text>')
         mr=24; startx=90; gap=200; my=py+58
-        for i,(nm,ph,dt) in enumerate(phases[:4]):
+        for i,mp in enumerate(data.moon_phases[:4]):
             mx=startx+i*gap
             a(f'<circle cx="{mx}" cy="{my}" r="{mr}" fill="{theme["panel"]}" stroke="{theme["border2"]}" stroke-width="1"/>')
-            if ph=='full': a(f'<circle cx="{mx}" cy="{my}" r="{mr}" fill="{theme["moon_lit"]}"/>')
-            elif ph=='first': a(f'<path d="M{mx},{my-mr} A{mr},{mr} 0 0 1 {mx},{my+mr} Z" fill="{theme["moon_lit"]}"/>')
-            elif ph=='last': a(f'<path d="M{mx},{my-mr} A{mr},{mr} 0 0 0 {mx},{my+mr} Z" fill="{theme["moon_lit"]}"/>')
-            a(f'<text x="{mx}" y="{my+mr+20}" fill="{theme["moon_label"]}" font-size="12.5" text-anchor="middle">{nm}</text>')
-            a(f'<text x="{mx}" y="{my+mr+37}" fill="{theme["text3"]}" font-size="12" text-anchor="middle">{dt}</text>')
+            if mp.key=='full': a(f'<circle cx="{mx}" cy="{my}" r="{mr}" fill="{theme["moon_lit"]}"/>')
+            elif mp.key=='first': a(f'<path d="M{mx},{my-mr} A{mr},{mr} 0 0 1 {mx},{my+mr} Z" fill="{theme["moon_lit"]}"/>')
+            elif mp.key=='last': a(f'<path d="M{mx},{my-mr} A{mr},{mr} 0 0 0 {mx},{my+mr} Z" fill="{theme["moon_lit"]}"/>')
+            a(f'<text x="{mx}" y="{my+mr+20}" fill="{theme["moon_label"]}" font-size="12.5" text-anchor="middle">{mp.label}</text>')
+            a(f'<text x="{mx}" y="{my+mr+37}" fill="{theme["text3"]}" font-size="12" text-anchor="middle">{mp.date}</text>')
         # planets
         px0=470
-        a(f'<text x="{px0}" y="{py}" fill="{theme["text"]}" font-size="16" font-weight="bold" letter-spacing="1">PIANETI · alzata / tramonto (15 {MONTHS_IT[month][:3]})</text>')
+        a(f'<text x="{px0}" y="{py}" fill="{theme["text"]}" font-size="16" font-weight="bold" letter-spacing="1">PIANETI · alzata / tramonto (15 {MONTHS_IT[data.month][:3]})</text>')
         ry=py+34
-        for nm,al,tr,note,st in planets:
-            a(f'<circle cx="{px0+6}" cy="{ry-4}" r="4" fill="{theme["status"][st]}"/>')
-            a(f'<text x="{px0+20}" y="{ry}" fill="{theme["text"]}" font-size="13.5" font-weight="bold">{nm}</text>')
-            a(f'<text x="{px0+115}" y="{ry}" fill="{theme["text2"]}" font-size="12.5">{al} / {tr}</text>')
-            a(f'<text x="{px0+20}" y="{ry+15}" fill="{theme["text3"]}" font-size="11.5">{note}</text>')
+        for pl in data.planets:
+            a(f'<circle cx="{px0+6}" cy="{ry-4}" r="4" fill="{theme["status"][pl.status]}"/>')
+            a(f'<text x="{px0+20}" y="{ry}" fill="{theme["text"]}" font-size="13.5" font-weight="bold">{pl.name}</text>')
+            a(f'<text x="{px0+115}" y="{ry}" fill="{theme["text2"]}" font-size="12.5">{pl.rise} / {pl.set_}</text>')
+            a(f'<text x="{px0+20}" y="{ry+15}" fill="{theme["text3"]}" font-size="11.5">{pl.note}</text>')
             ry+=38
         # legend
         ly=1235
@@ -303,7 +355,7 @@ class Engine:
             a(f'<text x="{lx+9}" y="{ly-16}" fill="{theme["text3"]}" font-size="11.5">{lab}</text>'); lx+=100
         a(f'<line x1="60" y1="{ly}" x2="86" y2="{ly}" stroke="{theme["neon"]}" stroke-width="2" filter="url(#glow)"/>')
         a(f'<text x="94" y="{ly+4}" fill="{theme["text3"]}" font-size="11.5">linee = figure delle costellazioni</text>')
-        a(f'<text x="{W-60}" y="{ly+4}" fill="{theme["text4"]}" font-size="10.5" text-anchor="end">Effemeridi per {place} ({lat:.1f}°N, {lon:.1f}°E)</text>')
+        a(f'<text x="{W-60}" y="{ly+4}" fill="{theme["text4"]}" font-size="10.5" text-anchor="end">Effemeridi per {data.place} ({data.lat:.1f}°N, {data.lon:.1f}°E)</text>')
         a('</svg>')
         with open(out,'w',encoding='utf-8') as fh:
             fh.write('\n'.join(s))
