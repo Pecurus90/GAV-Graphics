@@ -13,7 +13,7 @@ Nota onesta: la classificazione di visibilita dei pianeti (ok/telescopico/
 difficile/non osservabile) e un'euristica ragionevole ma semplificata; per un
 uso "serio" andrebbe rifinita (vedi README).
 """
-import os, json, argparse, calendar
+import os, json, calendar
 from dataclasses import dataclass
 from datetime import datetime
 import numpy as np
@@ -439,22 +439,3 @@ class Engine:
         with open(out,'w',encoding='utf-8') as fh:
             fh.write('\n'.join(s))
         return out
-
-
-def main():
-    p=argparse.ArgumentParser()
-    p.add_argument('--year',type=int,required=True)
-    p.add_argument('--month',type=int,required=True)
-    p.add_argument('--lat',type=float,default=45.5455)
-    p.add_argument('--lon',type=float,default=11.5353)
-    p.add_argument('--place',default='Vicenza')
-    p.add_argument('--theme',default='brand/palettes/osservatorio.json')
-    p.add_argument('--out',default='cielo.svg')
-    args=p.parse_args()
-    theme=json.load(open(args.theme,encoding='utf-8'))
-    eng=Engine()
-    out=eng.generate(args.year,args.month,args.lat,args.lon,args.place,theme,args.out)
-    print("scritto",out)
-
-if __name__=='__main__':
-    main()
