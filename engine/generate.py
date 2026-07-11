@@ -395,6 +395,17 @@ class Engine:
             lx+=b["step"]
         return '\n'.join(out)
 
+    def _render_background(self, b, theme, w, h):
+        """Sfondo pagina + campo di micro-stelle. La sequenza pseudo-casuale
+        (seed fisso) e' generazione procedurale: resta qui; il file da' i
+        parametri (seed, conteggio, raggi, opacita', colore)."""
+        sf=b["starfield"]; col=theme[sf["fill"]]
+        out=[f'<rect width="{w}" height="{h}" fill="url(#bg)"/>']
+        rng=np.random.default_rng(sf["seed"])
+        for x,y in zip(rng.uniform(0,w,sf["count"]),rng.uniform(0,h,sf["count"])):
+            out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{rng.uniform(sf["r_min"],sf["r_max"]):.2f}" fill="{col}" opacity="{rng.uniform(sf["op_min"],sf["op_max"]):.2f}"/>')
+        return '\n'.join(out)
+
     # ---- render: volantino A4 ----
     def generate(self, year, month, lat, lon, place, theme, out,
                  hour_local=23, tzname='Europe/Rome', layout=None):
@@ -413,10 +424,7 @@ class Engine:
         s=[]; a=s.append
         a(f'<svg xmlns="http://www.w3.org/2000/svg" width="{cw}" height="{ch}" viewBox="0 0 {cw} {ch}" font-family="{cv["font_family"]}">')
         a(self.defs_svg(theme))
-        a(f'<rect width="{W}" height="{Hpx}" fill="url(#bg)"/>')
-        rng=np.random.default_rng(7)
-        for x,y in zip(rng.uniform(0,W,240),rng.uniform(0,Hpx,240)):
-            a(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{rng.uniform(0.3,1.0):.2f}" fill="{theme["bgstar"]}" opacity="{rng.uniform(0.15,0.5):.2f}"/>')
+        a(self._render_background(next(b for b in L if b['type']=='background'), theme, cw, ch))
         # disco cielo (composto dal file)
         a(self._render_disc(next(b for b in layout['blocks'] if b['type']=='disc'), theme, lst, lat_rad))
         # header (composto dal file)
