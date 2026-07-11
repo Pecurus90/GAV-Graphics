@@ -41,11 +41,12 @@ brand/formats.py ──► importato da NESSUNO (codice orfano)
 
 | File | Ruolo |
 |---|---|
-| `engine/generate.py` | Il motore. Geometria, effemeridi, disegno SVG. Il cuore. |
+| `engine/generate.py` | Il motore + compositore magro. Geometria/effemeridi → `SkyData` + disco; `generate()` cammina i blocchi di un file di layout. |
+| `brand/layouts/*.json` | La composizione come dati (canvas + blocchi). `a4.json` esiste; i formati social sono altri file. |
 | `app/main.py` | Web app FastAPI sottile: `/`, `/preview`, `/download`. |
 | `render.py` | SVG→PNG via resvg. Usato **solo** dalla web app. |
 | `brand/palettes/*.json` | I temi. **Non** in `themes/` (il README mente). |
-| `brand/formats.py` | Formati canvas. Orfano: nessuno lo importa. |
+| `brand/formats.py` | Formati canvas. Orfano — ora **superato** da `brand/layouts/` (il canvas vive nel file). Candidato a rimozione. |
 | `data/stars6.json` | 5044 stelle GeoJSON, tutte con `mag` e `bv`. |
 
 ---
@@ -54,8 +55,8 @@ brand/formats.py ──► importato da NESSUNO (codice orfano)
 
 1. **Il motore non conosce la UI.** `engine/generate.py` non importa nulla di
    `app/` né di `render.py`.
-2. **La palette non è mai hardcoded.** *(Oggi è violato: `generate.py:285` ha un
-   `fill="#cdd6ee"` nei nomi delle fasi lunari. È debito noto, da sanare.)*
+2. **La palette non è mai hardcoded.** *(Sanato in #4b: `#cdd6ee` è ora il token
+   di tema `moon_label`, letto con accesso diretto che spacca se manca.)*
 3. **Orientamento della mappa:** N in alto, E a sinistra. Proiezione azimutale
    equidistante, zenit al centro. È identità visiva: non cambiarlo.
 4. **Stile neon + glow:** identità del brand.
@@ -144,8 +145,12 @@ Ordinato per rischio reale.
   `disk[0..2]`, `status.{ok,info,warn,muted}`, `star_ramp`. Zero validazione.
 - **R4 — Nessuna validazione input.** `month=13`, `lat=abc`, tema inesistente
   → HTTP 500. `fmt` non valido → 200 + JSON d'errore (incoerente).
-- **R5 — Layout A4 fuso in `generate()`.** Coordinate hardcoded (`py=960`,
-  `px0=470`, `ly=1235`…). È **il** blocco all'output social.
+- **R5 — RISOLTO (#5b).** Il layout A4 non è più fuso in `generate()`: vive in
+  `brand/layouts/a4.json`. `generate()` è un compositore che cammina i blocchi.
+  Il confine è: il **file** possiede cosa/dove/quale-dato; il **codice** possiede
+  "come disegnare" per 5 primitive (background procedurale, disco sigillato,
+  forma della fase lunare, colore da `bv2hex`, pallino da `status`) + la
+  derivazione di presentazione (`MONTHS_IT`, `[:3]`, `{:.1f}`).
 - **R6 — Font brand assenti.** `brand/fonts/` non contiene `.ttf`; l'SVG forza
   `Helvetica,Arial,sans-serif` in testa. L'identità tipografica **non** è
   applicata, benché il codice finga di sì.
