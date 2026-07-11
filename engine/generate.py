@@ -49,8 +49,8 @@ PLANETS = {"Mercurio":"mercury","Venere":"venus","Marte":"mars",
  "Giove":"jupiter barycenter","Saturno":"saturn barycenter",
  "Urano":"uranus barycenter","Nettuno":"neptune barycenter"}
 
-# canvas
-W, Hpx = 900, 1273
+# disco A4 di riferimento (centro/raggio): default geometrici di project()/
+# sky_disc_svg. Il canvas della pagina vive ora nel file di layout (D7).
 CX, CY, R = 450.0, 500.0, 384.0
 
 # file di layout di default: la composizione A4 come dati (D7)
@@ -406,7 +406,19 @@ class Engine:
             out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{rng.uniform(sf["r_min"],sf["r_max"]):.2f}" fill="{col}" opacity="{rng.uniform(sf["op_min"],sf["op_max"]):.2f}"/>')
         return '\n'.join(out)
 
-    # ---- render: volantino A4 ----
+    def _render_block(self, b, theme, data, ctx, lst, lat_rad, w, h):
+        """Dispatch di un blocco del layout sulla primitiva giusta."""
+        t=b["type"]
+        if t=="background":   return self._render_background(b, theme, w, h)
+        if t=="disc":         return self._render_disc(b, theme, lst, lat_rad)
+        if t=="text":         return self._render_text(b, theme, ctx)
+        if t=="line":         return self._render_line(b, theme)
+        if t=="moon_panel":   return self._render_moon_panel(b, theme, data)
+        if t=="planet_panel": return self._render_planet_panel(b, theme, data)
+        if t=="swatches":     return self._render_swatches(b, theme)
+        raise ValueError(f"tipo di blocco sconosciuto nel layout: {t!r}")
+
+    # ---- render: volantino A4 (compositore magro: cammina i blocchi) ----
     def generate(self, year, month, lat, lon, place, theme, out,
                  hour_local=23, tzname='Europe/Rome', layout=None):
         if layout is None:
@@ -414,37 +426,13 @@ class Engine:
                 layout=json.load(fh)
         lst, lat_rad, _ = self.sky_context(year,month,lat,lon,hour_local,tzname)
         data=self.sky_data(year,month,lat,lon,place,hour_local,tzname)
-        ramp=theme['star_ramp']
         ctx=self._render_ctx(data)
         cv=layout['canvas']; cw,ch=cv['w'],cv['h']
-        # helper transitori di selezione blocchi (spariranno col walk finale)
-        L=layout['blocks']
-        T=lambda p: next(b for b in L if b['type']=='text' and b['content'].startswith(p))
-        LN=lambda y1: next(b for b in L if b['type']=='line' and b['y1']==y1)
-        s=[]; a=s.append
-        a(f'<svg xmlns="http://www.w3.org/2000/svg" width="{cw}" height="{ch}" viewBox="0 0 {cw} {ch}" font-family="{cv["font_family"]}">')
-        a(self.defs_svg(theme))
-        a(self._render_background(next(b for b in L if b['type']=='background'), theme, cw, ch))
-        # disco cielo (composto dal file)
-        a(self._render_disc(next(b for b in layout['blocks'] if b['type']=='disc'), theme, lst, lat_rad))
-        # header (composto dal file)
-        a(self._render_text(T('GRUPPO'), theme, ctx))
-        a(self._render_text(T('IL CIELO'), theme, ctx))
-        a(self._render_text(T('Cielo visibile'), theme, ctx))
-        # moon phases (composto dal file)
-        a(self._render_text(T('FASI LUNARI'), theme, ctx))
-        a(self._render_moon_panel(next(b for b in L if b['type']=='moon_panel'), theme, data))
-        # planets (composto dal file)
-        a(self._render_text(T('PIANETI'), theme, ctx))
-        a(self._render_planet_panel(next(b for b in L if b['type']=='planet_panel'), theme, data))
-        # legend (composto dal file)
-        a(self._render_line(LN(1195), theme))
-        a(self._render_text(T('Colore stelle'), theme, ctx))
-        a(self._render_swatches(next(b for b in L if b['type']=='swatches'), theme))
-        a(self._render_line(LN(1235), theme))
-        a(self._render_text(T('linee ='), theme, ctx))
-        a(self._render_text(T('Effemeridi'), theme, ctx))
-        a('</svg>')
+        s=[f'<svg xmlns="http://www.w3.org/2000/svg" width="{cw}" height="{ch}" viewBox="0 0 {cw} {ch}" font-family="{cv["font_family"]}">',
+           self.defs_svg(theme)]
+        for b in layout['blocks']:
+            s.append(self._render_block(b, theme, data, ctx, lst, lat_rad, cw, ch))
+        s.append('</svg>')
         with open(out,'w',encoding='utf-8') as fh:
             fh.write('\n'.join(s))
         return out
