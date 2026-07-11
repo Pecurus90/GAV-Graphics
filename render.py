@@ -15,9 +15,8 @@ import resvg_py
 BASE = pathlib.Path(__file__).parent
 FONTS_DIR = BASE / "brand" / "fonts"
 
-# Famiglie di default usate dai template (risolte dai font in brand/fonts/).
+# Famiglia di default usata dai template (risolta dai font in brand/fonts/).
 SANS = "Inter"
-DISPLAY = "Space Grotesk"
 
 
 def _font_dirs():
