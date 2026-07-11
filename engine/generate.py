@@ -32,7 +32,7 @@ CONST_IT = {'Aql':'Aquila','Boo':'Boote','CrB':'Corona Boreale','Cas':'Cassiopea
  'Lib':'Bilancia','Cap':'Capricorno','And':'Andromeda','Aqr':'Acquario',
  'CVn':'Cani da Caccia','Ori':'Orione','Tau':'Toro','Gem':'Gemelli','Leo':'Leone',
  'Cnc':'Cancro','Per':'Perseo','Aur':'Auriga','CMi':'Cane Minore','CMa':'Cane Maggiore',
- 'Peg':'Pegaso','Cet':'Balena','Psc':'Pesci','Ari':'Ariete'}
+ 'Cet':'Balena','Psc':'Pesci','Ari':'Ariete'}
 
 # stelle guida: nome, RA(deg), Dec(deg), B-V (per colore reale dal tema)
 MARQUEE = [("Vega",279.234,38.784,0.00),("Deneb",310.358,45.280,0.09),
@@ -47,7 +47,6 @@ MARQUEE = [("Vega",279.234,38.784,0.00),("Deneb",310.358,45.280,0.09),
 PLANETS = {"Mercurio":"mercury","Venere":"venus","Marte":"mars",
  "Giove":"jupiter barycenter","Saturno":"saturn barycenter",
  "Urano":"uranus barycenter","Nettuno":"neptune barycenter"}
-NAKED_EYE = {"Mercurio","Venere","Marte","Giove","Saturno"}
 
 # canvas
 W, Hpx = 900, 1273
@@ -134,7 +133,7 @@ class Engine:
             if e==0 and set_ is None: set_=s
         return rise, set_
 
-    def planet_table(self, year, month, tz, obs, loc):
+    def planet_table(self, year, month, tz, loc):
         day=15
         earth=self.eph['earth']; sun=self.eph['sun']
         # sample night altitudes (local dark hours, summer & winter safe-ish)
@@ -254,10 +253,9 @@ class Engine:
                  hour_local=23, tzname='Europe/Rome'):
         lst, lat_rad, tz = self.sky_context(year,month,lat,lon,hour_local,tzname)
         loc=wgs84.latlon(lat,lon,elevation_m=50)
-        obs=self.eph['earth']+loc
 
         phases=self.moon_phases(year,month,tz)
-        planets=self.planet_table(year,month,tz,obs,loc)
+        planets=self.planet_table(year,month,tz,loc)
         ramp=theme['star_ramp']
         s=[]; a=s.append
         a(f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{Hpx}" viewBox="0 0 {W} {Hpx}" font-family="Helvetica,Arial,sans-serif">')
