@@ -280,7 +280,7 @@ class Engine:
             if ph=='full': a(f'<circle cx="{mx}" cy="{my}" r="{mr}" fill="{theme["moon_lit"]}"/>')
             elif ph=='first': a(f'<path d="M{mx},{my-mr} A{mr},{mr} 0 0 1 {mx},{my+mr} Z" fill="{theme["moon_lit"]}"/>')
             elif ph=='last': a(f'<path d="M{mx},{my-mr} A{mr},{mr} 0 0 0 {mx},{my+mr} Z" fill="{theme["moon_lit"]}"/>')
-            a(f'<text x="{mx}" y="{my+mr+20}" fill="#cdd6ee" font-size="12.5" text-anchor="middle">{nm}</text>')
+            a(f'<text x="{mx}" y="{my+mr+20}" fill="{theme["moon_label"]}" font-size="12.5" text-anchor="middle">{nm}</text>')
             a(f'<text x="{mx}" y="{my+mr+37}" fill="{theme["text3"]}" font-size="12" text-anchor="middle">{dt}</text>')
         # planets
         px0=470
