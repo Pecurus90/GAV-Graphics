@@ -307,6 +307,12 @@ class Engine:
         return SkyData(year=year, month=month, place=place, lat=lat, lon=lon,
                        hour_local=hour_local, moon_phases=phases, planets=planets)
 
+    # ---- compositore: primitive di blocco (leggono il layout, D7) ----
+    def _render_disc(self, b, theme, lst, lat_rad):
+        """Piazza il disco alla misura chiesta dal layout. La geometria e'
+        sigillata in sky_disc_svg (gia' parametrica su cx/cy/rad)."""
+        return self.sky_disc_svg(b["cx"], b["cy"], b["rad"], lst, lat_rad, theme)
+
     # ---- render: volantino A4 ----
     def generate(self, year, month, lat, lon, place, theme, out,
                  hour_local=23, tzname='Europe/Rome', layout=None):
@@ -324,8 +330,8 @@ class Engine:
         rng=np.random.default_rng(7)
         for x,y in zip(rng.uniform(0,W,240),rng.uniform(0,Hpx,240)):
             a(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{rng.uniform(0.3,1.0):.2f}" fill="{theme["bgstar"]}" opacity="{rng.uniform(0.15,0.5):.2f}"/>')
-        # disco cielo (componente riutilizzabile, a misura A4)
-        a(self.sky_disc_svg(CX, CY, R, lst, lat_rad, theme, ramp))
+        # disco cielo (composto dal file)
+        a(self._render_disc(next(b for b in layout['blocks'] if b['type']=='disc'), theme, lst, lat_rad))
         # header
         a(f'<text x="{CX}" y="52" fill="{theme["gold"]}" font-size="21" font-weight="bold" text-anchor="middle" letter-spacing="3">GRUPPO ASTROFILI VICENTINI</text>')
         a(f'<text x="{CX}" y="86" fill="{theme["text"]}" font-size="30" font-weight="bold" text-anchor="middle" letter-spacing="1.5">IL CIELO DI {MONTHS_IT[data.month].upper()} {data.year}</text>')
