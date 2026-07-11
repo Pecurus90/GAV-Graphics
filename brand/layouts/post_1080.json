@@ -1,0 +1,39 @@
+{
+  "_nota": "Post social quadrato 1080x1080. STESSA identita' dell'A4 (navy, disco neon, testata oro, colori reali delle stelle), tradotta nel quadrato. Prima bozza pensata per essere iterata a mano (D6). Criterio pianeti: solo status 'ok' = visibili a occhio nudo (vedi report). Composta dalle stesse primitive dell'A4; unica estensione usata: planet_panel.statuses.",
+  "canvas": {"w": 1080, "h": 1080, "font_family": "Helvetica,Arial,sans-serif"},
+  "blocks": [
+    {"type": "background",
+     "starfield": {"seed": 7, "count": 240, "r_min": 0.3, "r_max": 1.0,
+                   "op_min": 0.15, "op_max": 0.5, "fill": "bgstar"}},
+
+    {"type": "disc", "cx": 540, "cy": 550, "rad": 330},
+
+    {"type": "text", "x": 540, "y": 78, "fill": "gold", "size": 24,
+     "weight": "bold", "anchor": "middle", "letter_spacing": 3,
+     "content": "GRUPPO ASTROFILI VICENTINI"},
+    {"type": "text", "x": 540, "y": 128, "fill": "text", "size": 40,
+     "weight": "bold", "anchor": "middle", "letter_spacing": 1.5,
+     "content": "IL CIELO DI {month_upper} {year}"},
+    {"type": "text", "x": 540, "y": 160, "fill": "text3", "size": 16,
+     "anchor": "middle",
+     "content": "Cielo visibile dal Nord Italia · {place} · valido ~15 {month_name}, ore {hour}:00"},
+
+    {"type": "text", "x": 90, "y": 935, "fill": "text", "size": 18,
+     "weight": "bold", "letter_spacing": 1, "content": "FASI LUNARI"},
+    {"type": "moon_panel", "from": "moon_phases",
+     "x0": 135, "cy": 990, "gap": 115, "radius": 20,
+     "base": {"fill": "panel", "stroke": "border2", "stroke_width": 1},
+     "lit_fill": "moon_lit",
+     "label": {"dy": 40, "fill": "moon_label", "size": 12.5, "content": "{label}"},
+     "date":  {"dy": 57, "fill": "text3", "size": 12, "content": "{date}"}},
+
+    {"type": "text", "x": 560, "y": 935, "fill": "text", "size": 18,
+     "weight": "bold", "letter_spacing": 1, "content": "PIANETI A OCCHIO NUDO"},
+    {"type": "planet_panel", "from": "planets", "statuses": ["ok"],
+     "x0": 560, "y0": 975, "step": 32,
+     "dot":   {"dx": 6, "dy": -4, "r": 4, "fill_status": true},
+     "name":  {"dx": 20, "fill": "text",  "size": 15, "weight": "bold", "content": "{name}"},
+     "times": {"dx": 118, "fill": "text2", "size": 13, "content": "{rise} / {set}"},
+     "note":  {"dx": 20, "dy": 16, "fill": "text3", "size": 12, "content": "{note}"}}
+  ]
+}
