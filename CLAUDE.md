@@ -190,7 +190,10 @@ Tre ruoli. Un ciclo: `prompt → esecuzione → report → allineamento → prom
 ## Comandi (verificati su Windows/PowerShell, 2026-07-09)
 
 ```powershell
-.\.venv\Scripts\Activate.ps1
+# NB: non esiste una .venv nel repo. Oggi gira sul Python globale (3.12.2),
+# che ha già le dipendenze. Un venv + lockfile diventeranno utili al packaging
+# (D4, giro #9), non prima. Per crearne uno ora, se lo vuoi isolato:
+#   python -m venv .venv ; .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 
 # motore (solo SVG)
