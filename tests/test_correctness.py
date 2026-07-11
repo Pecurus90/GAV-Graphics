@@ -198,10 +198,10 @@ def test_bv2hex_interpolazione_lineare_a_meta():
 def test_bv2hex_estremi_e_clamp():
     """RIFERIMENTO: semantica di clamping. Valori fuori dalla rampa mappano al
     colore di estremita'; il minimo esatto deve dare il colore iniziale.
-    Tolleranza +-1/canale.
-    NOTA (finding, vedi report): al MASSIMO il codice restituisce #fefefe invece
-    di #ffffff (off-by-one da +1e-9 e int() troncante). Rientra nella tolleranza
-    +-1; il difetto e' segnalato, NON corretto (fuori scope del task)."""
+    Tolleranza +-1/canale: quando l'interpolazione cade a meta' fra due interi,
+    la quantizzazione a 8 bit puo' legittimamente arrotondare in su o in giu'
+    (round vs trunc) senza che sia un errore. Agli estremi il valore e' intero
+    esatto (qui il massimo da' #ffffff pieno)."""
     # sotto il minimo -> colore iniziale, esatto (#000000, f=0)
     assert bv2hex(RAMP_SINT, -5.0) == "#000000"
     # estremo minimo esatto
