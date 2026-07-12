@@ -94,8 +94,13 @@ brand/formats.py ──► importato da NESSUNO (codice orfano)
     è "il programma non funziona", e non hai i log.
   - Prima di rendere pubblico il repo: `LICENSE` (senza, nessuno ha diritto di
     usarlo) e README riallineato alla realtà.
-  - Font Inter / Space Grotesk sono **SIL Open Font License**: ridistribuibili
-    nel repo, citando la licenza.
+  - **Font del brand (decisi dal designer, 2026-07-12): Barlow Semi Condensed**
+    (testata, titoli, etichette, cardinali) **+ Instrument Sans** (corpo: nomi,
+    orari, note, date). Entrambi **SIL Open Font License**: ridistribuibili nel
+    repo e nell'`.exe`. *Superano* la proposta precedente (Inter / Space
+    Grotesk), che resta citata in `render.py` (`SANS = "Inter"`) e in
+    `cielo-del-mese_struttura.md`: **da riallineare**. I `.ttf` non sono ancora
+    nel repo — finché mancano, `resvg` ripiega sui font di sistema (R6).
 - **D6 — Si mette mano all'input, mai all'output.** Un SVG generato non si
   ritocca a mano: la correzione muore alla rigenerazione successiva. Se ti
   ritrovi a voler cambiare sempre la stessa cosa, quella cosa era un parametro
