@@ -124,7 +124,11 @@ def test_qualificatore_basso(eng):
             if p.status == "muted":
                 continue
             best_alt, _h, _az = _best_indip(eng, pkey, year, month)
-            if best_alt < 20.0:
+            if best_alt <= 0.0:
+                assert p.direction == "", (
+                    f"{name}: non sorge (alt {best_alt:.1f}<=0) ma direzione {p.direction!r}"
+                )
+            elif best_alt < 20.0:
                 assert p.direction.startswith("basso"), (
                     f"{name}: alt migliore {best_alt:.1f}<20 ma direzione {p.direction!r} senza 'basso'"
                 )
@@ -132,3 +136,20 @@ def test_qualificatore_basso(eng):
                 assert not p.direction.startswith("basso"), (
                     f"{name}: alt migliore {best_alt:.1f}>=20 ma direzione {p.direction!r} con 'basso'"
                 )
+
+
+def test_direzione_pura_e_correzione_sotto_orizzonte(eng):
+    """Unit test della funzione pura _planet_direction: settori, 'basso', e la
+    CORREZIONE #6d (best_alt<=0 -> '' anche se il pianeta non e' muted). Questo
+    ancora la correzione a un caso deterministico, indipendente dalle effemeridi
+    del mese (dove i pianeti sotto l'orizzonte capitano di essere anche muted)."""
+    d = eng._planet_direction
+    assert d(90.0, 30.0, "ok") == "a Est"
+    assert d(90.0, 10.0, "ok") == "basso a Est"        # sopra l'orizzonte ma basso
+    assert d(135.0, 30.0, "info") == "a Sud-Est"
+    assert d(270.0, 40.0, "ok") == "a Ovest"
+    assert d(0.0, 50.0, "ok") == "a Nord"
+    # la correzione: sotto o all'orizzonte -> nessuna direzione, anche se NON muted
+    assert d(90.0, 0.0, "warn") == "", "alt=0 dovrebbe dare direzione vuota"
+    assert d(90.0, -5.0, "ok") == "", "best_alt<0 dovrebbe dare direzione vuota"
+    assert d(90.0, -30.0, "muted") == ""

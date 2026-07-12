@@ -277,9 +277,11 @@ class Engine:
         compagno naturale del best_alt gia' calcolato per la visibilita', e da'
         la direzione "dove punto lo sguardo quando conviene". Qualificatore
         'basso' sotto 20 gradi (sotto questa quota estinzione e ostacoli
-        all'orizzonte pesano). Per i non osservabili (muted) niente direzione:
-        la nota dice gia' 'vicino al Sole'."""
-        if status=='muted':
+        all'orizzonte pesano). Niente direzione (stringa vuota) se il pianeta e'
+        non osservabile (muted) O se non sale sopra l'orizzonte quella notte
+        (best_alt <= 0): indicare 'basso a Est' di un pianeta che non sorge
+        manderebbe l'osservatore a cercare il nulla."""
+        if status=='muted' or alt<=0.0:
             return ''
         settore=DIREZIONI_IT[round(az/45.0)%8]
         return f'basso a {settore}' if alt<20.0 else f'a {settore}'
@@ -380,8 +382,14 @@ class Engine:
     # ---- compositore: primitive di blocco (leggono il layout, D7) ----
     def _render_disc(self, b, theme, lst, lat_rad):
         """Piazza il disco alla misura chiesta dal layout. La geometria e'
-        sigillata in sky_disc_svg (gia' parametrica su cx/cy/rad)."""
-        return self.sky_disc_svg(b["cx"], b["cy"], b["rad"], lst, lat_rad, theme)
+        sigillata in sky_disc_svg (gia' parametrica su cx/cy/rad). Il file puo'
+        SPEGNERE strati che a ~300px sul telefono diventano rumore: etichette
+        delle costellazioni (`labels`), stelle guida (`marquee`), cardinali
+        (`cardinals`). Assenti -> tutti accesi, quindi l'A4 non cambia."""
+        return self.sky_disc_svg(b["cx"], b["cy"], b["rad"], lst, lat_rad, theme,
+                                 cardinals=b.get("cardinals", True),
+                                 labels=b.get("labels", True),
+                                 marquee=b.get("marquee", True))
 
     @staticmethod
     def _render_ctx(data):
@@ -410,6 +418,17 @@ class Engine:
         s=(f'<line x1="{b["x1"]}" y1="{b["y1"]}" x2="{b["x2"]}" y2="{b["y2"]}" '
            f'stroke="{theme[b["stroke"]]}" stroke-width="{b["stroke_width"]}"')
         if b.get("filter"): s+=f' filter="url(#{b["filter"]})"'
+        return s+'/>'
+
+    def _render_panel(self, b, theme):
+        """Pannello: rettangolo (arrotondato con `rx`) usato come CONTENITORE nei
+        design social. Primitiva NUOVA in #6d: i tre mockup incorniciano pianeti,
+        luna e colori in pannelli, e nessuna primitiva esistente disegna un
+        riquadro. Fill e stroke sono TOKEN del tema (mai hex cablati)."""
+        s=(f'<rect x="{b["x"]}" y="{b["y"]}" width="{b["w"]}" height="{b["h"]}" '
+           f'rx="{b.get("rx",0)}" fill="{theme[b["fill"]]}"')
+        if b.get("stroke"):
+            s+=f' stroke="{theme[b["stroke"]]}" stroke-width="{b.get("stroke_width",1)}"'
         return s+'/>'
 
     def _render_planet_panel(self, b, theme, data):
@@ -509,27 +528,50 @@ class Engine:
                 tb={"x":f"{cx:.2f}","y":f"{cy+daynum['dy']:.2f}","fill":fill,
                     "size":daynum["size"],"anchor":"middle","content":"{day}"}
                 out.append(self._render_text(tb, theme, {"day":md.day}))
+        # riga opzionale di etichette delle fasi principali (giorno + nome),
+        # spaziate uniformemente sotto il calendario (dashboard/rail). Il file
+        # da' posizione, passo e la mappa chiave->nome breve; il dato da' quali
+        # giorni e in che ordine (i giorni con phase_key, gia' incrociati con
+        # moon_phases).
+        pl=b.get("phase_labels")
+        if pl:
+            names=pl["names"]
+            for j,md in enumerate(m for m in data.moon_days if m.phase_key):
+                tb={"x":pl["x0"]+j*pl["gap"],"y":pl["y"],"fill":pl["fill"],
+                    "size":pl["size"],"weight":pl.get("weight"),"content":pl["content"]}
+                out.append(self._render_text(tb, theme, {"day":md.day,"name":names[md.phase_key]}))
         return '\n'.join(out)
+
+    def _swatch_label(self, spec, cx, cy, text, theme):
+        """Un'etichetta di campione, con dx/dy dal centro del pallino; opzionali
+        weight e anchor (i design social allineano a destra la temperatura)."""
+        tb={"x":cx+spec["dx"],"y":cy+spec["dy"],"fill":spec["fill"],
+            "size":spec["size"],"content":text}
+        if spec.get("weight"): tb["weight"]=spec["weight"]
+        if spec.get("anchor"): tb["anchor"]=spec["anchor"]
+        return self._render_text(tb, theme, {})
 
     def _render_swatches(self, b, theme):
         """Campioni di colore della legenda. Il colore viene da bv2hex(ramp,bv):
         calcolo, resta qui; il file da' i bv, le etichette e le posizioni.
-        `label2` (opzionale) e' una SECONDA etichetta per campione (es. la
-        temperatura): se il blocco la definisce e l'item ha `label2`, viene
-        disegnata anch'essa. Assente -> comportamento identico a prima (A4)."""
+        Due disposizioni: FILA orizzontale storica (x0 + i*step, `cy` fisso; e'
+        l'A4) oppure GRIGLIA se il blocco dichiara `cols` (x0/cy origine,
+        `col_step`/`row_step`), come la legenda in colonna dei design social.
+        `label2` (opzionale) e' una seconda etichetta per campione (es. la
+        temperatura). Senza `cols` e senza `label2` -> identico all'A4."""
         ramp=theme["star_ramp"]; lab=b["label"]; lab2=b.get("label2")
-        out=[]; lx=b["x0"]
-        for it in b["items"]:
-            out.append(f'<circle cx="{lx}" cy="{b["cy"]}" r="{b["r"]}" fill="{bv2hex(ramp, it["bv"])}"/>')
-            tb={"x":lx+lab["dx"],"y":b["cy"]+lab["dy"],"fill":lab["fill"],
-                "size":lab["size"],"content":it["label"]}
-            out.append(self._render_text(tb, theme, {}))
+        cols=b.get("cols")
+        out=[]
+        for i,it in enumerate(b["items"]):
+            if cols:  # griglia (nuova): riga=i//cols, colonna=i%cols
+                cx=b["x0"]+(i%cols)*b.get("col_step",0)
+                cy=b["cy"]+(i//cols)*b.get("row_step",0)
+            else:     # fila orizzontale (storica, A4): x0 + i*step, cy fisso
+                cx=b["x0"]+i*b["step"]; cy=b["cy"]
+            out.append(f'<circle cx="{cx}" cy="{cy}" r="{b["r"]}" fill="{bv2hex(ramp, it["bv"])}"/>')
+            out.append(self._swatch_label(lab, cx, cy, it["label"], theme))
             if lab2 and "label2" in it:
-                tb2={"x":lx+lab2["dx"],"y":b["cy"]+lab2["dy"],"fill":lab2["fill"],
-                     "size":lab2["size"],"content":it["label2"]}
-                if lab2.get("weight"): tb2["weight"]=lab2["weight"]
-                out.append(self._render_text(tb2, theme, {}))
-            lx+=b["step"]
+                out.append(self._swatch_label(lab2, cx, cy, it["label2"], theme))
         return '\n'.join(out)
 
     def _render_background(self, b, theme, w, h):
@@ -550,6 +592,7 @@ class Engine:
         if t=="disc":         return self._render_disc(b, theme, lst, lat_rad)
         if t=="text":         return self._render_text(b, theme, ctx)
         if t=="line":         return self._render_line(b, theme)
+        if t=="panel":        return self._render_panel(b, theme)
         if t=="moon_panel":   return self._render_moon_panel(b, theme, data)
         if t=="moon_calendar":return self._render_moon_calendar(b, theme, data)
         if t=="planet_panel": return self._render_planet_panel(b, theme, data)
