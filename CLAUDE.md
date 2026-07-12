@@ -45,6 +45,7 @@ CLI: python cielo.py --format a4|post [--png]   (compone motore + render, D1)
 | `brand/layouts/*.json` | La composizione come dati (canvas + blocchi). Esistono `a4.json`, `post.json` e i tre design social `dashboard.json`/`editorial.json`/`rail.json`; aggiungerne uno = aggiungere un file (il CLI li scopre dalla cartella). |
 | `app/main.py` | Web app FastAPI sottile: `/`, `/preview`, `/download`. |
 | `render.py` | SVG→PNG via resvg. Usato dal CLI (`cielo.py`) **e** dalla web app. |
+| `validate.py` | Validazione input (R4) + contratto del tema (D2). Condiviso da CLI e web, **non** importato dal motore (invariante #1). Errori in italiano; `InputError`. |
 | `brand/palettes/*.json` | I temi. **Non** in `themes/` (il README mente). |
 | `data/stars6.json` | 5044 stelle GeoJSON, tutte con `mag` e `bv`. |
 
@@ -94,7 +95,12 @@ descrive lo fa scollare al primo cambiamento.
   `render`; `--png` produce il PNG accanto all'SVG, larghezza per formato.)*
 - **D2 — Il tema è un contratto validato, non un dict libero.** Una palette a
   cui manca una chiave deve dare un errore leggibile, non un `KeyError`.
-  Motivazione: stiamo per moltiplicare le palette. *(Da implementare.)*
+  Motivazione: stiamo per moltiplicare le palette. *(FATTO, #6n: `validate.py`
+  dice QUALE chiave manca e in QUALE file. Distingue STILE — colori liberi — da
+  FISICA: `star_ramp` deve avere B-V crescente e rosso↑/blu↓ al crescere di B-V,
+  monotonia DEBOLE — i canali saturano a 255; `planet_colors` coi 7 pianeti e
+  Marte rossastro/Nettuno bluastro. Una palette può cambiare un blu, non mentire
+  sull'astronomia.)*
 - **D3 — Prima la rete di sicurezza, poi l'estrazione del layout social.** Il
   layout va estratto dal metodo `generate()` (oggi le coordinate A4 sono fuse
   nel metodo, `R5`). Quel refactor tocca la geometria: si fa **dopo** i test.
@@ -198,8 +204,12 @@ Ordinato per rischio reale.
   nessuno. **È il rischio più grave del progetto.**
 - **R3 — Contratto del tema implicito.** ~15 chiavi piatte + `bg[0..2]`,
   `disk[0..2]`, `status.{ok,info,warn,muted}`, `star_ramp`. Zero validazione.
-- **R4 — Nessuna validazione input.** `month=13`, `lat=abc`, tema inesistente
-  → HTTP 500. `fmt` non valido → 200 + JSON d'errore (incoerente).
+- **R4 — RISOLTO (#6n).** La validazione vive in `validate.py`, un modulo a sé
+  condiviso da CLI e web (non nel motore: invariante #1; non duplicato). Mese
+  1-12, anno in copertura de421, lat/lon numerici e in range, formato/palette
+  esistenti + contratto del tema (D2). Errore = messaggio in italiano; il CLI
+  esce con exit 1, la web risponde **HTTP 400** (non più 500, non più 200
+  incoerente).
 - **R5 — RISOLTO (#5b).** Il layout A4 non è più fuso in `generate()`: vive in
   `brand/layouts/a4.json`. `generate()` è un compositore che cammina i blocchi.
   Il confine è: il **file** possiede cosa/dove/quale-dato; il **codice** possiede

@@ -22,32 +22,11 @@ import os, json, argparse
 
 from engine.generate import Engine
 import render
+import validate
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 LAYOUTS_DIR = os.path.join(BASE, "brand", "layouts")
 PALETTES_DIR = os.path.join(BASE, "brand", "palettes")
-
-# Il vocabolario dei formati E' la cartella brand/layouts/: ogni <nome>.json e'
-# un formato/design. Aggiungere un design domani = lasciar cadere un file, ZERO
-# modifiche qui (stessa filosofia di --palette e della web app). Un layout porta
-# gia' il proprio canvas (w/h/font_family): non serve una mappa che ripeta cosa
-# il file dice di se'. Il canvas puo' dichiarare 'png_width'; se non lo fa, la
-# larghezza PNG si deriva (2x sotto i 1000px, per la qualita' di stampa dell'A4;
-# 1x da 1000px in su, tipico dei social gia' a piena risoluzione).
-def _formati_disponibili():
-    return sorted(f[:-5] for f in os.listdir(LAYOUTS_DIR) if f.endswith(".json"))
-
-
-def _load_layout(fmt):
-    """Risolve un formato per NOME al suo file di layout. Errore leggibile (in
-    italiano, non un traceback) se il nome non esiste."""
-    path = os.path.join(LAYOUTS_DIR, f"{fmt}.json")
-    if not os.path.isfile(path):
-        disponibili = ", ".join(_formati_disponibili())
-        raise SystemExit(f"Errore: formato sconosciuto '{fmt}'. "
-                         f"Formati disponibili: {disponibili}.")
-    with open(path, encoding="utf-8") as fh:
-        return json.load(fh)
 
 
 def _png_width(layout, override):
@@ -62,32 +41,15 @@ def _png_width(layout, override):
     return w if w >= 1000 else w * 2
 
 
-def _palettes_disponibili():
-    """Il vocabolario delle palette E' la cartella brand/palettes/: ogni file
-    <nome>.json e' una palette. Aggiungere una palette = aggiungere un file,
-    zero modifiche a questo codice (stessa filosofia della web app, che gia'
-    scopre i temi cosi')."""
-    return sorted(f[:-5] for f in os.listdir(PALETTES_DIR) if f.endswith(".json"))
-
-
-def _load_palette(name):
-    """Risolve una palette per NOME (non per percorso). Errore leggibile (in
-    italiano, non un traceback) se il nome non esiste."""
-    path = os.path.join(PALETTES_DIR, f"{name}.json")
-    if not os.path.isfile(path):
-        disponibili = ", ".join(_palettes_disponibili())
-        raise SystemExit(f"Errore: palette sconosciuta '{name}'. "
-                         f"Palette disponibili: {disponibili}.")
-    with open(path, encoding="utf-8") as fh:
-        return json.load(fh)
-
-
 def main():
     p = argparse.ArgumentParser(description="Genera il Cielo del Mese (SVG, e PNG con --png).")
-    p.add_argument('--year', type=int, required=True)
-    p.add_argument('--month', type=int, required=True)
-    p.add_argument('--lat', type=float, default=45.5455)
-    p.add_argument('--lon', type=float, default=11.5353)
+    # NB: year/month/lat/lon sono stringhe, non type=int/float: cosi' un valore
+    # sbagliato (mese=13, lat=abc) e' validato da validate.py con un messaggio in
+    # italiano, non intercettato prima da argparse (in inglese).
+    p.add_argument('--year', required=True)
+    p.add_argument('--month', required=True)
+    p.add_argument('--lat', default='45.5455')
+    p.add_argument('--lon', default='11.5353')
     p.add_argument('--place', default='Vicenza')
     p.add_argument('--palette', default='osservatorio',
                    help="nome della palette in brand/palettes/ (default: osservatorio)")
@@ -100,19 +62,32 @@ def main():
                    help="larghezza PNG in px (default sensato per formato)")
     args = p.parse_args()
 
-    layout = _load_layout(args.format)
-    theme = _load_palette(args.palette)
+    # Validazione condivisa con la web app (R4/D2): input + contratto del tema.
+    # Un errore diventa un'uscita pulita con messaggio in italiano, mai un traceback.
+    try:
+        year = validate.valida_anno(args.year)
+        month = validate.valida_mese(args.month)
+        lat = validate.valida_lat(args.lat)
+        lon = validate.valida_lon(args.lon)
+        fmt = validate.valida_formato(args.format)
+        palette = validate.valida_palette(args.palette)
+        with open(os.path.join(LAYOUTS_DIR, f"{fmt}.json"), encoding="utf-8") as fh:
+            layout = json.load(fh)
+        with open(os.path.join(PALETTES_DIR, f"{palette}.json"), encoding="utf-8") as fh:
+            theme = json.load(fh)
+        validate.valida_tema(theme, f"{palette}.json")
+    except validate.InputError as e:
+        raise SystemExit(f"Errore: {e}")
     # Default: out/ e' la cartella dei prodotti (usa-e-getta, gitignored). Con
     # --out l'utente sceglie il proprio percorso. In entrambi i casi assicura
     # che la cartella esista, altrimenti la scrittura dell'SVG fallirebbe.
-    out = args.out or os.path.join("out", f"cielo_{args.format}.svg")
+    out = args.out or os.path.join("out", f"cielo_{fmt}.svg")
     outdir = os.path.dirname(out)
     if outdir:
         os.makedirs(outdir, exist_ok=True)
 
     eng = Engine(datadir=os.path.join(BASE, "data"))
-    svg = eng.generate(args.year, args.month, args.lat, args.lon, args.place,
-                       theme, out, layout=layout)
+    svg = eng.generate(year, month, lat, lon, args.place, theme, out, layout=layout)
     print("SVG:", svg)
 
     if args.png:

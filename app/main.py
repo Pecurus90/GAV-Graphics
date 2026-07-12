@@ -9,13 +9,14 @@ Questo e' uno SCHELETRO funzionante ma volutamente essenziale: e' il punto di
 partenza per Claude Code (vedi README, sezione "Cosa costruire con Claude Code").
 """
 import json, tempfile, os
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, FileResponse
 
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from engine.generate import Engine
 from render import svg_file_to_png
+import validate
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
 PALETTES = os.path.join(BASE, "brand", "palettes")
@@ -56,27 +57,42 @@ def index():
 
 
 def _render(year, month, lat, lon, place, theme):
+    # Stessa validazione condivisa del CLI (R4/D2). Alza validate.InputError: gli
+    # endpoint la traducono in HTTP 400 (input sbagliato), mai un 500 o un traceback.
+    year = validate.valida_anno(year)
+    month = validate.valida_mese(month)
+    lat = validate.valida_lat(lat)
+    lon = validate.valida_lon(lon)
+    theme = validate.valida_palette(theme)
     th = json.load(open(os.path.join(PALETTES, f"{theme}.json"), encoding="utf-8"))
+    validate.valida_tema(th, f"{theme}.json")
     out = os.path.join(tempfile.gettempdir(), "cielo.svg")
-    engine.generate(int(year), int(month), float(lat), float(lon), place, th, out)
+    engine.generate(year, month, lat, lon, place, th, out)
     return out
 
 
 @app.get("/preview")
 def preview(year=2026, month=8, lat=45.5455, lon=11.5353, place="Vicenza",
             theme="osservatorio"):
-    svg = _render(year, month, lat, lon, place, theme)
+    try:
+        svg = _render(year, month, lat, lon, place, theme)
+    except validate.InputError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     return FileResponse(svg, media_type="image/svg+xml")
 
 
 @app.get("/download")
 def download(fmt="svg", year=2026, month=8, lat=45.5455, lon=11.5353,
              place="Vicenza", theme="osservatorio"):
-    svg = _render(year, month, lat, lon, place, theme)
+    if fmt not in ("svg", "png"):
+        raise HTTPException(status_code=400,
+                            detail=f"Formato di uscita sconosciuto: '{fmt}'. Ammessi: svg, png.")
+    try:
+        svg = _render(year, month, lat, lon, place, theme)
+    except validate.InputError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     if fmt == "svg":
         return FileResponse(svg, media_type="image/svg+xml", filename="cielo.svg")
-    if fmt == "png":
-        tmp = os.path.join(tempfile.gettempdir(), "cielo.png")
-        svg_file_to_png(svg, tmp, width=1800)
-        return FileResponse(tmp, media_type="image/png", filename="cielo.png")
-    return {"error": "formato non valido"}
+    tmp = os.path.join(tempfile.gettempdir(), "cielo.png")
+    svg_file_to_png(svg, tmp, width=1800)
+    return FileResponse(tmp, media_type="image/png", filename="cielo.png")
