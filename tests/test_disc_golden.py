@@ -28,15 +28,26 @@ A4_GOLDEN = os.path.join(os.path.dirname(__file__), "golden", "cielo_2026-08_vic
 # Parametri canonici del disco. NON cambiarli senza rigenerare il golden apposta.
 DISC = dict(year=2026, month=8, lat=45.5455, lon=11.5353, cx=450.0, cy=500.0, rad=384.0)
 
+# Corona di tacche del disco social (niente numeri). Il golden del disco ora
+# sorveglia il disco SOCIAL: anti-collisione delle etichette + tacche. Le stelle
+# restano quelle del MARQUEE (star_names=None) e le costellazioni tutte, cosi'
+# cambiano SOLO etichette e tacche, non le posizioni di stelle/linee.
+TICKS = {"minor": 10, "major": 30}
+
 
 def _theme(root):
     return json.load(open(os.path.join(root, "brand", "palettes", "osservatorio.json"),
                           encoding="utf-8"))
 
 
-def _fragment(eng, theme):
-    """Il frammento del SOLO disco, agli stessi parametri del golden A4."""
+def _fragment(eng, theme, social=False):
+    """Il frammento del SOLO disco, agli stessi parametri del golden A4. Con
+    social=True accende anti-collisione + tacche (cio' che il disc-golden ora
+    sorveglia); senza, e' il disco ingenuo che resta una fetta VERBATIM dell'A4."""
     lst, lat_rad, _ = eng.sky_context(DISC["year"], DISC["month"], DISC["lat"], DISC["lon"])
+    if social:
+        return eng.sky_disc_svg(DISC["cx"], DISC["cy"], DISC["rad"], lst, lat_rad, theme,
+                                declutter=True, ticks=TICKS)
     return eng.sky_disc_svg(DISC["cx"], DISC["cy"], DISC["rad"], lst, lat_rad, theme)
 
 
@@ -47,7 +58,7 @@ def disc_document(eng, theme):
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="900" height="950" '
             f'viewBox="0 0 900 950" font-family="Helvetica,Arial,sans-serif">\n'
             + eng.defs_svg(theme) + '\n'
-            + _fragment(eng, theme) + '\n'
+            + _fragment(eng, theme, social=True) + '\n'
             + '</svg>')
 
 
