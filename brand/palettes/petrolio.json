@@ -32,6 +32,7 @@
     "warn": "#f3be55",
     "muted": "#6f95a0"
   },
+  "planet_colors": {"Mercurio": "#8f8a86", "Venere": "#e8dcb0", "Marte": "#b8532f", "Giove": "#d8b98a", "Saturno": "#e2c886", "Urano": "#aadde0", "Nettuno": "#3f6cb5"},
   "star_ramp": [
     [
       -0.33,

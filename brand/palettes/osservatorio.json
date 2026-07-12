@@ -19,6 +19,7 @@
   "label": "#7fb6d8",
   "cardinal": "#9fb0d8",
   "status": {"ok": "#5fd08a", "info": "#4bc3ff", "warn": "#e8b45f", "muted": "#6b7690"},
+  "planet_colors": {"Mercurio": "#8f8a86", "Venere": "#e8dcb0", "Marte": "#b8532f", "Giove": "#d8b98a", "Saturno": "#e2c886", "Urano": "#aadde0", "Nettuno": "#3f6cb5"},
   "star_ramp": [
     [-0.33, "#96aaff"], [-0.10, "#a5b9ff"], [0.00, "#c3d2ff"], [0.20, "#e6ebff"],
     [0.40, "#fff8eb"], [0.59, "#fff0cd"], [0.80, "#ffdfaa"], [1.00, "#ffce91"],

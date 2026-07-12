@@ -52,6 +52,12 @@ PLANETS = {"Mercurio":"mercury","Venere":"venus","Marte":"mars",
  "Giove":"jupiter barycenter","Saturno":"saturn barycenter",
  "Urano":"uranus barycenter","Nettuno":"neptune barycenter"}
 
+# Sagoma riconoscibile del pianeta (metadato ASTRONOMICO, come la chiave di
+# effemeride qui sopra): il DATO la porta con se', il disegno la sceglie per
+# TOKEN ('ringed'), mai con un if sul nome. Assenti = 'plain'. Domani Giove puo'
+# diventare 'banded' aggiungendo qui la voce + un ramo di disegno per quel token.
+PLANET_SHAPES = {"Saturno": "ringed"}
+
 # disco A4 di riferimento (centro/raggio): default geometrici di project()/
 # sky_disc_svg. Il canvas della pagina vive ora nel file di layout (D7).
 CX, CY, R = 450.0, 500.0, 384.0
@@ -102,6 +108,8 @@ class Planet:
     az: float     # azimut (gradi, 0=Nord, 90=Est) all'istante di massima altezza
     direction: str  # direzione dove guardare, es. 'a Sud-Est' / 'basso a Est' /
                   # '' se non osservabile. Campo NUOVO: l'A4 non lo usa.
+    shape: str    # sagoma del pianeta ('plain' | 'ringed'): il DATO porta con se'
+                  # la forma, cosi' il disegno la sceglie senza un if sul nome.
 
 
 @dataclass(frozen=True)
@@ -266,7 +274,8 @@ class Engine:
                       'a notte fonda' if best_h in (0,1,2) else 'verso l\'alba')
                 note=f'Visibile {when}'
             direction=self._planet_direction(best_az, best_alt, status)
-            rows.append((label,rise or '--',set_ or '--',note,status,best_az,direction))
+            shape=PLANET_SHAPES.get(label, "plain")
+            rows.append((label,rise or '--',set_ or '--',note,status,best_az,direction,shape))
         # ordine: osservabili prima
         order={'ok':0,'info':1,'warn':2,'muted':3}
         rows.sort(key=lambda r:order[r[4]])
@@ -403,8 +412,8 @@ class Engine:
                 for nm,ph,dt in self.moon_phases(year,month,tz)]
         days=[MoonDay(d,frac,wax,pk)
               for d,frac,wax,pk in self.moon_days(year,month,tz,hour_local)]
-        planets=[Planet(nm,rise,set_,note,st,az,dirn)
-                 for nm,rise,set_,note,st,az,dirn in self.planet_table(year,month,tz,loc)]
+        planets=[Planet(nm,rise,set_,note,st,az,dirn,shp)
+                 for nm,rise,set_,note,st,az,dirn,shp in self.planet_table(year,month,tz,loc)]
         return SkyData(year=year, month=month, place=place, lat=lat, lon=lon,
                        hour_local=hour_local, moon_phases=phases, moon_days=days,
                        planets=planets)
@@ -509,8 +518,29 @@ class Engine:
                   "note_dir":note_dir,"status":pl.status,"direction":pl.direction,
                   "az":f"{pl.az:.0f}"}
             y=b["y0"]+i*b["step"]
-            fill=theme["status"][pl.status] if dot.get("fill_status") else theme[dot["fill"]]
-            out.append(f'<circle cx="{b["x0"]+dot["dx"]}" cy="{y+dot["dy"]}" r="{dot["r"]}" fill="{fill}"/>')
+            cx=b["x0"]+dot["dx"]; cy=y+dot["dy"]; rr=dot["r"]
+            row=[]
+            # colore del pallino: il PIANETA (fill_planet, colore reale dal tema),
+            # lo STATO (fill_status, come l'A4) o un token fisso.
+            if dot.get("fill_planet"):
+                dotcol=theme["planet_colors"][pl.name]
+            elif dot.get("fill_status"):
+                dotcol=theme["status"][pl.status]
+            else:
+                dotcol=theme[dot["fill"]]
+            row.append(f'<circle cx="{cx}" cy="{cy}" r="{rr}" fill="{dotcol}"/>')
+            # sagoma dal DATO (solo coi pallini-pianeta): 'ringed' = anelli.
+            if dot.get("fill_planet") and pl.shape=="ringed":
+                rg=dot.get("ring", {})
+                erx=rr*rg.get("rx",1.95); ery=rr*rg.get("ry",0.52); rot=rg.get("rot",-18)
+                row.append(f'<ellipse cx="{cx}" cy="{cy}" rx="{erx:.1f}" ry="{ery:.1f}" '
+                           f'fill="none" stroke="{theme[rg.get("stroke","moon_lit")]}" '
+                           f'stroke-width="{rg.get("width",1.3)}" transform="rotate({rot} {cx} {cy})"/>')
+            # anello di stato (variante B): identita' nel disco + stato attorno.
+            if dot.get("status_ring"):
+                sr=dot["status_ring"]
+                row.append(f'<circle cx="{cx}" cy="{cy}" r="{rr+sr["r_extra"]}" fill="none" '
+                           f'stroke="{theme["status"][pl.status]}" stroke-width="{sr["width"]}"/>')
             for part in ("name","times","note"):
                 if part not in b:  # un design puo' omettere una parte (es. rail
                     continue        # senza nota, editorial senza orari)
@@ -518,7 +548,12 @@ class Engine:
                 tb={"x":b["x0"]+p["dx"],"y":y+p.get("dy",0),"fill":p["fill"],
                     "size":p["size"],"weight":p.get("weight"),"content":p["content"]}
                 if p.get("anchor"): tb["anchor"]=p["anchor"]
-                out.append(self._render_text(tb, theme, item))
+                row.append(self._render_text(tb, theme, item))
+            # variante A: i non osservabili si spengono (riga piu' tenue).
+            if b.get("dim_muted") and pl.status=="muted":
+                out.append(f'<g opacity="{b.get("dim_muted_opacity",0.4)}">'+"\n".join(row)+'</g>')
+            else:
+                out.extend(row)
         return '\n'.join(out)
 
     def _render_moon_panel(self, b, theme, data):
