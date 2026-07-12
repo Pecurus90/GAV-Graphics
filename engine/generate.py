@@ -408,19 +408,24 @@ class Engine:
 
     def _disc_ticks(self, cx, cy, rad, k, theme, ticks):
         """Corona di sole TACCHE (niente numeri): una ogni `minor` gradi, piu'
-        lunga ogni `major`. Colore da token. Da' l'aria da strumento del
-        planisfero senza chiedere a nessuno di leggere un 6px."""
+        lunga ogni `major`. Da' l'aria da strumento del planisfero senza chiedere
+        di leggere un 6px. Colore dal token `cardinal` (come i cardinali, che si
+        vedono benissimo): `grid` non ha contrasto col fondo. Dimensioni tarate
+        per VEDERSI a 1080 (rad ~270): minore ~1.1px×6px, maggiore ~1.7px×12px —
+        mai sotto il pixel. Tutto sovrascrivibile dal file."""
         minor=ticks.get("minor",10); major=ticks.get("major",30)
-        col=theme[ticks.get("stroke","grid")]
-        ml=ticks.get("minor_len",5); Ml=ticks.get("major_len",10)
+        col=theme[ticks.get("stroke","cardinal")]
+        minl=ticks.get("minor_len",9.0)*k;   majl=ticks.get("major_len",17.0)*k
+        minw=ticks.get("minor_width",1.6)*k;  majw=ticks.get("major_width",2.4)*k
+        mino=ticks.get("minor_op",0.5);       majo=ticks.get("major_op",0.9)
         out=[]
         for az in range(0,360,minor):
-            long=(az%major==0); t=(Ml if long else ml)*k; ar=np.radians(az)
+            long=(az%major==0); ar=np.radians(az)
+            t=majl if long else minl; w=majw if long else minw; op=majo if long else mino
             x1=cx-rad*np.sin(ar); y1=cy-rad*np.cos(ar)
             x2=cx-(rad+t)*np.sin(ar); y2=cy-(rad+t)*np.cos(ar)
             out.append(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" '
-                       f'stroke="{col}" stroke-width="{(1.1 if long else 0.8)*k:.2f}" '
-                       f'opacity="{0.85 if long else 0.55}"/>')
+                       f'stroke="{col}" stroke-width="{w:.2f}" opacity="{op}"/>')
         return '\n'.join(out)
 
     def _disc_labels_declutter(self, cx, cy, rad, k, lst, lat_rad, theme, ramp,
