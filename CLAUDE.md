@@ -133,16 +133,23 @@ descrive lo fa scollare al primo cambiamento.
     Galassia = ellisse · ammasso aperto = cerchio tratteggiato · ammasso
     globulare = cerchio con croce · nebulosa diffusa = quadrato · nebulosa
     planetaria = cerchio con quattro punte. Serve una **legenda** dei tipi.
-  - **Si mostrano TUTTI, si nominano solo i notevoli.** *(Deciso da Marco,
-    2026-07-12: "tutti gli oggetti dell'emisfero nord".)* Togliendo la gran parte
-    delle stelle il disco si svuota e il catalogo intero ci sta. La curatela non
-    è su *quali disegnare* ma su **quali etichettare**.
-    Motivo fisico, non estetico: l'**Ammasso della Vergine** ha 16 galassie
-    Messier (M49, M58-61, M84-91, M98-100, M104) in un fazzoletto di cielo.
-    Sedici *simboli* fitti sono informazione ("qui ci sono un sacco di
-    galassie" — è ciò che fanno gli atlanti veri). Sedici *etichette* in quel
-    fazzoletto sono **impossibili**: l'anti-collisione inizierebbe a scartarne
-    a caso.
+  - **LA MAPPA MOSTRA, LA TABELLA RACCONTA.** *(Deciso da Marco, 2026-07-12.)*
+    - La **mappa** disegna **tutti** i Messier sopra l'orizzonte (~50 in un mese),
+      col simbolo del tipo. È il cielo com'è: togliendo la gran parte delle stelle
+      il disco si svuota e il catalogo intero ci sta.
+    - Una **tabella** (come il pannello dei pianeti) elenca quelli che vale la
+      pena cercare **questo mese**: 15-20 righe, non 50 — cinquanta righe non
+      entrano in un 1080 più di quanto ci entrino cinquanta etichette.
+    - **L'etichetta sulla mappa ce l'ha solo chi sta in tabella.** Mappa e tabella
+      si guardano l'un l'altra: nessun nome sulla mappa senza spiegazione sotto.
+    - Colonne: *simbolo · M31 — Galassia di Andromeda · galassia · in Andromeda ·
+      binocolo*.
+  - **L'Ammasso della Vergine è UNA voce, non sedici.** M49, M58-61, M84-91,
+    M98-100, M104 stanno in un fazzoletto di cielo. Sedici *simboli* fitti sono
+    informazione ("qui ci sono un sacco di galassie" — è ciò che fanno gli atlanti
+    veri); sedici *etichette* sono **impossibili** (l'anti-collisione ne
+    scarterebbe a caso). Sulla mappa **una sola etichetta** appoggiata al
+    grappolo; in tabella **una sola riga** che li elenca.
   - **Onestà su cosa serve per vederli.** Quasi nessun Messier si vede a occhio
     nudo da un cielo suburbano come Vicenza: M13 col binocolo è una macchiolina,
     M57 vuole un telescopio, le galassie della Vergine vogliono cielo buono e
