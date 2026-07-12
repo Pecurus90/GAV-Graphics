@@ -36,8 +36,6 @@ python cielo.py ───────┼─► engine/generate.py ──► data
                        (leggono brand/palettes/*.json + brand/layouts/*.json)
 
 CLI: python cielo.py --format a4|post [--png]   (compone motore + render, D1)
-
-brand/formats.py ──► importato da NESSUNO (codice orfano)
 ```
 
 | File | Ruolo |
@@ -48,7 +46,6 @@ brand/formats.py ──► importato da NESSUNO (codice orfano)
 | `app/main.py` | Web app FastAPI sottile: `/`, `/preview`, `/download`. |
 | `render.py` | SVG→PNG via resvg. Usato dal CLI (`cielo.py`) **e** dalla web app. |
 | `brand/palettes/*.json` | I temi. **Non** in `themes/` (il README mente). |
-| `brand/formats.py` | Formati canvas. Orfano — ora **superato** da `brand/layouts/` (il canvas vive nel file). Candidato a rimozione. |
 | `data/stars6.json` | 5044 stelle GeoJSON, tutte con `mag` e `bv`. |
 
 ---
@@ -183,9 +180,10 @@ Ordinato per rischio reale.
 - **R6 — Font brand assenti.** `brand/fonts/` non contiene `.ttf`; l'SVG forza
   `Helvetica,Arial,sans-serif` in testa. L'identità tipografica **non** è
   applicata, benché il codice finga di sì.
-- **R7 — Codice morto:** `brand/formats.py` (orfano), `render.py:DISPLAY`,
-  `generate.py:NAKED_EYE`, param `obs` inutilizzato in `planet_table`, chiave
-  `'Peg'` duplicata in `CONST_IT`.
+- **R7 — Codice morto:** `render.py:DISPLAY`, `generate.py:NAKED_EYE`, param
+  `obs` inutilizzato in `planet_table`, chiave `'Peg'` duplicata in `CONST_IT`.
+  *(`brand/formats.py` era orfano — rimosso in #6a-riordino: il canvas vive nel
+  file di layout, come deciso in R5/D7.)*
 
 **Mai verificato:** la correttezza astronomica dell'output. Sappiamo che il
 codice produce un SVG. Non sappiamo che sia giusto.
