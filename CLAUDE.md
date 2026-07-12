@@ -119,6 +119,28 @@ descrive lo fa scollare al primo cambiamento.
     Grotesk), che resta citata in `render.py` (`SANS = "Inter"`) e in
     `cielo-del-mese_struttura.md`: **da riallineare**. I `.ttf` non sono ancora
     nel repo — finché mancano, `resvg` ripiega sui font di sistema (R6).
+- **D9 — La seconda mappa: il profondo cielo (Messier).** *(Decisa 2026-07-12,
+  da fare.)* Il post diventa **due pagine**: (1) costellazioni, stelle, Luna e
+  pianeti — quella attuale, che resta il default; (2) **profondo cielo**, con
+  meno stelle (solo quelle delle figure) e sopra gli **oggetti Messier**.
+  - **Simboli: usa la convenzione degli atlanti**, non icone inventate.
+    Galassia = ellisse · ammasso aperto = cerchio tratteggiato · ammasso
+    globulare = cerchio con croce · nebulosa diffusa = quadrato · nebulosa
+    planetaria = cerchio con quattro punte. Serve una **legenda** dei tipi.
+  - **Curatela obbligatoria.** In un mese ~50 Messier sono sopra l'orizzonte:
+    non entrano. Si sceglie come per stelle e costellazioni — criterio: *quelli
+    che il GAV punta davvero in una serata* (M13, M31, M42, M45, M57, M27…),
+    quindici o venti, non cinquanta.
+  - **Onestà su cosa serve per vederli.** Molti Messier da un cielo suburbano
+    come Vicenza non si vedono a occhio nudo né col binocolo. Va detto, o si
+    manda la gente a cercare il nulla (stesso principio della direzione tolta ai
+    pianeti sotto l'orizzonte).
+  - **Il test è gratis:** ogni Messier appartiene a una costellazione nota. M31
+    deve cadere in Andromeda, M42 in Orione, M13 in Ercole. Verifica incrociata,
+    come per pianeti e Luna.
+  - Costo reale: **un catalogo** (fonte pubblica, verificata — non copiata a
+    fiducia), **una primitiva** per i simboli, **un file di layout**. Il motore
+    non va rifattorizzato: la proiezione è già scritta e già testata.
 - **D6 — Si mette mano all'input, mai all'output.** Un SVG generato non si
   ritocca a mano: la correzione muore alla rigenerazione successiva. Se ti
   ritrovi a voler cambiare sempre la stessa cosa, quella cosa era un parametro
