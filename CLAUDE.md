@@ -140,6 +140,18 @@ descrive lo fa scollare al primo cambiamento.
     - Una **tabella** (come il pannello dei pianeti) elenca quelli che vale la
       pena cercare **questo mese**: 15-20 righe, non 50 — cinquanta righe non
       entrano in un 1080 più di quanto ci entrino cinquanta etichette.
+    - **Il criterio della tabella è una REGOLA, non una lista curata** *(Marco,
+      2026-07-12)*: gli oggetti **sopra i 30° di altezza** quel mese. Sotto quella
+      quota estinzione atmosferica e inquinamento luminoso dell'orizzonte
+      ammazzano il profondo cielo — è la regola pratica di chiunque osservi. Si
+      aggiorna da sola ogni mese.
+      Conseguenza corretta e voluta: da Vicenza (45°N) **Sagittario e Scorpione
+      culminano bassi**, quindi M8/M20/M22 (il cuore della Via Lattea) restano
+      fuori. Sono genuinamente difficili da lì: meglio non prometterli.
+      **DA MISURARE:** in primavera, con l'Ammasso della Vergine alto, i Messier
+      sopra i 30° potrebbero essere 30-40 — troppi per la tabella. Rimedio:
+      **ordinare per altezza e prendere i primi N** (i più alti = i meglio
+      piazzati). La regola resta automatica e la tabella non sfonda mai.
     - **L'etichetta sulla mappa ce l'ha solo chi sta in tabella.** Mappa e tabella
       si guardano l'un l'altra: nessun nome sulla mappa senza spiegazione sotto.
     - Colonne: *simbolo · M31 — Galassia di Andromeda · galassia · in Andromeda ·
@@ -150,11 +162,19 @@ descrive lo fa scollare al primo cambiamento.
     veri); sedici *etichette* sono **impossibili** (l'anti-collisione ne
     scarterebbe a caso). Sulla mappa **una sola etichetta** appoggiata al
     grappolo; in tabella **una sola riga** che li elenca.
-  - **Onestà su cosa serve per vederli.** Quasi nessun Messier si vede a occhio
-    nudo da un cielo suburbano come Vicenza: M13 col binocolo è una macchiolina,
-    M57 vuole un telescopio, le galassie della Vergine vogliono cielo buono e
-    apertura. La mappa deve dire **cosa serve**, non solo dove sono — stesso
-    principio della direzione tolta ai pianeti sotto l'orizzonte.
+  - **"Cosa serve per vederlo": due categorie (binocolo / telescopio), e NON si
+    calcolano dalla magnitudine.** *(Le due categorie le propone Marco; il vincolo
+    è dell'architetto.)* La magnitudine misura la luce **totale**: un oggetto
+    grande la spalma su un'area vasta e sparisce pur essendo "luminoso" sulla
+    carta. Conta la **brillanza superficiale**.
+    I bugiardi sono pochi ma sono proprio i famosi: **M33** (mag 5.7 — sulla carta
+    più luminosa di M31; col binocolo da Vicenza **non la vedi**), **M101**,
+    **M74**, **M1**. Scrivere "binocolo" accanto a M33 manda un socio a cercare il
+    nulla e a concludere che il programma sbaglia: peggio che non scrivere niente.
+    Quindi: **stima iniziale dalla magnitudine, ma il catalogo porta il valore
+    vero come DATO**, e i bugiardi li corregge il GAV (una dozzina, non 110).
+    Stesso principio della direzione tolta ai pianeti sotto l'orizzonte: mai
+    mandare l'osservatore a cercare il nulla.
   - **Il test è gratis:** ogni Messier appartiene a una costellazione nota. M31
     deve cadere in Andromeda, M42 in Orione, M13 in Ercole. Verifica incrociata,
     come per pianeti e Luna.
