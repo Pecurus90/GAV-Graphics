@@ -53,6 +53,27 @@ brand/formats.py ──► importato da NESSUNO (codice orfano)
 
 ---
 
+## La regola delle case — dove vive un file
+
+Il criterio **non** è "è roba di design?", è **"il motore lo legge a runtime?"**.
+
+| Cartella | Cosa contiene | Criterio |
+|---|---|---|
+| `brand/` | palette, layout, font, logo | ciò che il **motore LEGGE a runtime** |
+| `docs/`  | spec di design, mockup, riferimenti visivi | ciò che serve agli **UMANI** |
+| `out/`   | SVG/PNG generati | ciò che il programma **PRODUCE**: usa e getta, **mai** in git |
+
+Ragione operativa: `brand/` è esattamente ciò che verrà **impacchettato
+nell'`.exe`** (D4). Un mockup nell'exe sarebbe peso morto; una palette no.
+
+**Eccezione (documentazione degli asset):** un `LEGGIMI`/`README` che documenta
+una cartella vive **dentro** quella cartella, anche se è per umani —
+`brand/fonts/LEGGIMI.md` resta in `brand/fonts/`. La regola governa gli **asset**,
+non la documentazione che li accompagna: staccare il LEGGIMI dai file che
+descrive lo fa scollare al primo cambiamento.
+
+---
+
 ## Invarianti — non violare senza chiedere
 
 1. **Il motore non conosce la UI.** `engine/generate.py` non importa nulla di
