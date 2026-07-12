@@ -17,10 +17,14 @@
     {"type": "line", "x1": 56, "y1": 206, "x2": 1024, "y2": 206,
      "stroke": "divider", "stroke_width": 1},
 
-    {"type": "disc", "cx": 340, "cy": 520, "rad": 270, "marquee": false,
+    {"type": "disc", "cx": 340, "cy": 520, "rad": 270,
+     "declutter": true, "ticks": {"minor": 10, "major": 30},
      "labels": ["UMa", "UMi", "Cas", "Cep", "Dra", "Cyg", "Lyr", "Aql", "Her",
                 "CrB", "Boo", "Sco", "Sgr", "Peg", "And", "Per", "Aur", "Ori",
-                "Tau", "Gem", "Leo", "CMa"]},
+                "Tau", "Gem", "Leo", "CMa"],
+     "star_names": ["Sirio", "Vega", "Altair", "Deneb", "Arturo", "Capella",
+                    "Rigel", "Betelgeuse", "Aldebaran", "Pollux", "Regolo",
+                    "Antares", "Spica", "Fomalhaut", "Polare"]},
 
     {"type": "panel", "x": 690, "y": 234, "w": 334, "h": 266, "rx": 16,
      "fill": "panel", "stroke": "border2", "stroke_width": 1},
@@ -31,8 +35,8 @@
     {"type": "planet_panel", "from": "planets", "statuses": ["ok", "info"],
      "x0": 712, "y0": 302, "step": 40,
      "dot":   {"dx": 8, "dy": -4, "r": 6.5, "fill_planet": true,
-               "ring": {"stroke": "moon_lit", "width": 1.4}},
-     "name":  {"dx": 28, "fill": "text",  "size": 16, "weight": "600", "content": "{name}"},
+               "ring": {"stroke": "moon_lit", "width": 1.4, "rx": 1.75}},
+     "name":  {"dx": 34, "fill": "text",  "size": 16, "weight": "600", "content": "{name}"},
      "times": {"dx": 290, "anchor": "end", "fill": "text2", "size": 13, "weight": "500", "content": "{rise} / {set}"},
      "note":  {"dx": 28, "dy": 16, "fill": "text3", "size": 11.5, "content": "{note_dir}"}},
 

@@ -47,6 +47,23 @@ MARQUEE = [("Vega",279.234,38.784,0.00),("Deneb",310.358,45.280,0.09),
  ("Pollux",116.329,28.026,1.00),("Regolo",152.093,11.967,-0.09),
  ("Deneb Kaitos",10.897,-17.987,1.02),("Fomalhaut",344.413,-29.622,0.14)]
 
+# Catalogo delle stelle NOMINABILI (per il percorso social a etichette curate):
+# nome -> (RA deg, Dec deg, B-V, magnitudine). Superset del MARQUEE con l'aggiunta
+# di Sirio (la piu' brillante) e della Polare (fioca ma serve a orientarsi). La
+# magnitudine pilota la PRIORITA' dell'anti-collisione (piu' brillante = prima).
+# MARQUEE resta separato e intatto: e' cio' che l'A4 disegna di default.
+STARS = {
+ "Sirio":(101.287,-16.716,0.00,-1.46), "Arturo":(213.915,19.182,1.23,-0.05),
+ "Vega":(279.234,38.784,0.00,0.03), "Capella":(79.172,45.998,0.80,0.08),
+ "Rigel":(78.634,-8.202,-0.03,0.13), "Betelgeuse":(88.793,7.407,1.85,0.50),
+ "Altair":(297.696,8.868,0.22,0.76), "Aldebaran":(68.980,16.509,1.54,0.85),
+ "Spica":(201.298,-11.161,-0.23,0.97), "Antares":(247.352,-26.432,1.83,1.06),
+ "Pollux":(116.329,28.026,1.00,1.14), "Fomalhaut":(344.413,-29.622,0.14,1.16),
+ "Deneb":(310.358,45.280,0.09,1.25), "Regolo":(152.093,11.967,-0.09,1.35),
+ "Castore":(113.649,31.888,0.03,1.58), "Deneb Kaitos":(10.897,-17.987,1.02,2.04),
+ "Polare":(37.954,89.264,0.60,1.98),
+}
+
 # pianeti: etichetta -> chiave ephemeris
 PLANETS = {"Mercurio":"mercury","Venere":"venus","Marte":"mars",
  "Giove":"jupiter barycenter","Saturno":"saturn barycenter",
@@ -309,8 +326,8 @@ class Engine:
 </defs>'''
 
     def sky_disc_svg(self, cx, cy, rad, lst, lat_rad, theme, ramp=None,
-                     cardinals=True, labels=True, marquee=True, degrees=None,
-                     clip_id='dclip'):
+                     cardinals=True, labels=True, marquee=True, ticks=None,
+                     star_names=None, declutter=False, clip_id='dclip'):
         """Disegna SOLO il disco cielo (cornice + stelle + costellazioni) di
         centro (cx,cy) e raggio rad, a QUALSIASI misura. Restituisce il
         frammento SVG (stringa). Le costanti visive scalano con k=rad/R, quindi
@@ -347,20 +364,94 @@ class Engine:
                 a(f'<circle cx="{xs[i]:.1f}" cy="{ys[i]:.1f}" r="{sr*2.2:.1f}" fill="{col}" opacity="0.22" filter="url(#softglow)"/>')
             a(f'<circle cx="{xs[i]:.1f}" cy="{ys[i]:.1f}" r="{sr:.2f}" fill="{col}"/>')
         a('</g>')
-        # stelle guida (marquee)
-        if marquee:
-            for nm,ra,dec,bv in MARQUEE:
-                al,zz=self.altaz(ra,dec,lst,lat_rad)
-                if al<=2: continue
-                x,y=self.project(al,zz,cx,cy,rad); col=bv2hex(ramp,bv)
-                a(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{7*k:.1f}" fill="{col}" opacity="0.30" filter="url(#softglow)"/>')
-                a(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{2.6*k:.1f}" fill="{col}"/>')
-                a(f'<text x="{x+7*k:.1f}" y="{y-5*k:.1f}" fill="{theme["text"]}" font-size="{11.5*k:.1f}" opacity="0.95">{nm}</text>')
-        # etichette costellazioni. `labels` True = tutte (A4); False/[] = nessuna;
-        # una LISTA di sigle = solo quelle (sfoltimento per il social, deciso nel
-        # file: composizione, non codice, D7).
+        # ---- ETICHETTE (stelle-guida + costellazioni) ----
+        if not declutter:
+            # PERCORSO STORICO (A4): invariato, byte per byte. Le etichette sono
+            # piazzate ingenuamente (le sovrapposizioni restano); e' cio' che il
+            # golden A4 sorveglia.
+            if marquee:
+                for nm,ra,dec,bv in MARQUEE:
+                    al,zz=self.altaz(ra,dec,lst,lat_rad)
+                    if al<=2: continue
+                    x,y=self.project(al,zz,cx,cy,rad); col=bv2hex(ramp,bv)
+                    a(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{7*k:.1f}" fill="{col}" opacity="0.30" filter="url(#softglow)"/>')
+                    a(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{2.6*k:.1f}" fill="{col}"/>')
+                    a(f'<text x="{x+7*k:.1f}" y="{y-5*k:.1f}" fill="{theme["text"]}" font-size="{11.5*k:.1f}" opacity="0.95">{nm}</text>')
+            if labels:
+                label_set = None if labels is True else set(labels)
+                for f in self.clines:
+                    ab=f['id']
+                    if ab not in CONST_IT: continue
+                    if label_set is not None and ab not in label_set: continue
+                    allp=np.array([p for line in f['geometry']['coordinates'] for p in line])
+                    al,zz=self.altaz(allp[:,0],allp[:,1],lst,lat_rad); m=al>3
+                    if m.sum()<2: continue
+                    x,y=self.project(al[m],zz[m],cx,cy,rad)
+                    a(f'<text x="{x.mean():.1f}" y="{y.mean():.1f}" fill="{theme["label"]}" font-size="{12.5*k:.1f}" opacity="0.82" text-anchor="middle" letter-spacing="0.5">{CONST_IT[ab]}</text>')
+        else:
+            # PERCORSO SOCIAL: dischi delle stelle nominate + etichette con
+            # ANTI-COLLISIONE deterministica (vedi _disc_labels_declutter).
+            a(self._disc_labels_declutter(cx, cy, rad, k, lst, lat_rad, theme,
+                                          ramp, labels, marquee, star_names))
+        # tacche di azimut (corona SOLO tacche, niente numeri: a 1080 i numeri
+        # sono rumore). Default SPENTA -> l'A4 non la disegna. `ticks` e' un dict
+        # {"minor":10,"major":30}: una tacca ogni `minor` gradi, piu' lunga ogni
+        # `major`. Geometria del disco (D7), stessa proiezione dei cardinali.
+        if ticks:
+            a(self._disc_ticks(cx, cy, rad, k, theme, ticks))
+        # punti cardinali
+        if cardinals:
+            for lab,ang in (('N',0),('E',90),('S',180),('O',270)):
+                rr=rad+22*k; ax=cx-rr*np.sin(np.radians(ang)); ay=cy-rr*np.cos(np.radians(ang))
+                a(f'<text x="{ax:.1f}" y="{ay+6*k:.1f}" fill="{theme["cardinal"]}" font-size="{19*k:.1f}" font-weight="bold" text-anchor="middle">{lab}</text>')
+        return '\n'.join(s)
+
+    def _disc_ticks(self, cx, cy, rad, k, theme, ticks):
+        """Corona di sole TACCHE (niente numeri): una ogni `minor` gradi, piu'
+        lunga ogni `major`. Colore da token. Da' l'aria da strumento del
+        planisfero senza chiedere a nessuno di leggere un 6px."""
+        minor=ticks.get("minor",10); major=ticks.get("major",30)
+        col=theme[ticks.get("stroke","grid")]
+        ml=ticks.get("minor_len",5); Ml=ticks.get("major_len",10)
+        out=[]
+        for az in range(0,360,minor):
+            long=(az%major==0); t=(Ml if long else ml)*k; ar=np.radians(az)
+            x1=cx-rad*np.sin(ar); y1=cy-rad*np.cos(ar)
+            x2=cx-(rad+t)*np.sin(ar); y2=cy-(rad+t)*np.cos(ar)
+            out.append(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" '
+                       f'stroke="{col}" stroke-width="{(1.1 if long else 0.8)*k:.2f}" '
+                       f'opacity="{0.85 if long else 0.55}"/>')
+        return '\n'.join(out)
+
+    def _disc_labels_declutter(self, cx, cy, rad, k, lst, lat_rad, theme, ramp,
+                               labels, marquee, star_names):
+        """Etichette (stelle-guida + costellazioni) con ANTI-COLLISIONE
+        deterministica. Niente motore a forze: piazzamento greedy per priorita'.
+
+        Stelle nominate: da `star_names` (lista curata) o, in mancanza, dal MARQUEE.
+        Priorita': prima le STELLE (piu' brillante = prima; la Polare forzata in
+        testa, serve a orientarsi), poi le COSTELLAZIONI (impronta piu' grande
+        prima). Ogni etichetta si prova al punto naturale, poi in posizioni via
+        via piu' lontane attorno all'ancora; se non entra da nessuna parte, si
+        SCARTA (meglio un nome in meno che due impastati). Deterministico."""
+        out=[]; reqs=[]
+        # stelle nominate: disco (sempre) + richiesta d'etichetta
+        names = star_names if star_names is not None else [m[0] for m in MARQUEE]
+        for nm in names:
+            if nm not in STARS: continue
+            ra,dec,bv,mag = STARS[nm]
+            al,zz=self.altaz(ra,dec,lst,lat_rad)
+            if al<=2: continue
+            x,y=self.project(al,zz,cx,cy,rad); x,y=float(x),float(y); col=bv2hex(ramp,bv)
+            out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{7*k:.1f}" fill="{col}" opacity="0.30" filter="url(#softglow)"/>')
+            out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{2.6*k:.1f}" fill="{col}"/>')
+            reqs.append({"text":nm,"x":x+7*k,"y":y-5*k,"anchor":"start",
+                         "size":11.5*k,"fill":theme["text"],"opacity":0.95,
+                         "pri":(-100.0 if nm=="Polare" else mag),"extra":""})
+        # costellazioni: richiesta d'etichetta al baricentro, ordinate per impronta
+        label_set = None if labels is True else set(labels or [])
+        consts=[]
         if labels:
-            label_set = None if labels is True else set(labels)
             for f in self.clines:
                 ab=f['id']
                 if ab not in CONST_IT: continue
@@ -368,37 +459,38 @@ class Engine:
                 allp=np.array([p for line in f['geometry']['coordinates'] for p in line])
                 al,zz=self.altaz(allp[:,0],allp[:,1],lst,lat_rad); m=al>3
                 if m.sum()<2: continue
-                x,y=self.project(al[m],zz[m],cx,cy,rad)
-                a(f'<text x="{x.mean():.1f}" y="{y.mean():.1f}" fill="{theme["label"]}" font-size="{12.5*k:.1f}" opacity="0.82" text-anchor="middle" letter-spacing="0.5">{CONST_IT[ab]}</text>')
-        # corona dei gradi di azimut (default SPENTA: l'A4 non la usa -> golden
-        # invariato). Geometria del disco (D7): stessa proiezione dei cardinali
-        # (N=0 in alto, E=90 a sinistra). `degrees` e' un dict:
-        #   {"step":10} numeri ogni 10°; {"step":30,"minor":10} numeri ogni 30° +
-        #   tacche minori ogni 10°. I numeri ai punti cardinali (0/90/180/270)
-        #   sono saltati: li' ci sono gia' N/E/S/O.
-        if degrees:
-            step=degrees["step"]; minor=degrees.get("minor")
-            col=theme[degrees.get("stroke","grid")]; tcol=theme[degrees.get("fill","text4")]
-            fs=degrees.get("size",9)*k
-            def _pt(rr,az):
-                ar=np.radians(az); return cx-rr*np.sin(ar), cy-rr*np.cos(ar)
-            if minor:
-                for az in range(0,360,minor):
-                    if az%step==0: continue
-                    x1,y1=_pt(rad,az); x2,y2=_pt(rad+3*k,az)
-                    a(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" stroke="{col}" stroke-width="{0.8*k:.2f}" opacity="0.6"/>')
-            for az in range(0,360,step):
-                x1,y1=_pt(rad,az); x2,y2=_pt(rad+6*k,az)
-                a(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" stroke="{col}" stroke-width="{1.0*k:.2f}" opacity="0.85"/>')
-                if az%90==0: continue  # 0/90/180/270: lasciati ai cardinali
-                nx,ny=_pt(rad+15*k,az)
-                a(f'<text x="{nx:.1f}" y="{ny+3*k:.1f}" fill="{tcol}" font-size="{fs:.1f}" text-anchor="middle" opacity="0.9">{az}</text>')
-        # punti cardinali
-        if cardinals:
-            for lab,ang in (('N',0),('E',90),('S',180),('O',270)):
-                rr=rad+22*k; ax=cx-rr*np.sin(np.radians(ang)); ay=cy-rr*np.cos(np.radians(ang))
-                a(f'<text x="{ax:.1f}" y="{ay+6*k:.1f}" fill="{theme["cardinal"]}" font-size="{19*k:.1f}" font-weight="bold" text-anchor="middle">{lab}</text>')
-        return '\n'.join(s)
+                xs,ys=self.project(al[m],zz[m],cx,cy,rad)
+                area=float((xs.max()-xs.min())*(ys.max()-ys.min()))
+                consts.append((area, ab, float(xs.mean()), float(ys.mean())))
+        consts.sort(key=lambda c:-c[0])  # impronta piu' grande prima
+        for rank,(area,ab,mx,my) in enumerate(consts):
+            reqs.append({"text":CONST_IT[ab],"x":mx,"y":my,"anchor":"middle",
+                         "size":12.5*k,"fill":theme["label"],"opacity":0.82,
+                         "pri":100.0+rank,"extra":' letter-spacing="0.5"'})
+        # piazzamento greedy
+        placed=[]; dropped=0; STEP=6*k
+        DIRS=[(0,-1),(1,0),(0,1),(-1,0),(1,-1),(1,1),(-1,1),(-1,-1)]
+        cands=[(0,0)]+[(dx*r*STEP, dy*r*STEP) for r in range(1,6) for dx,dy in DIRS]
+        for req in sorted(reqs, key=lambda r:r["pri"]):
+            w=len(req["text"])*req["size"]*0.55; h=req["size"]
+            def bbox(px,py):
+                return (px-w/2,py-h,px+w/2,py) if req["anchor"]=="middle" else (px,py-h,px+w,py)
+            chosen=None
+            for ox,oy in cands:
+                px,py=req["x"]+ox, req["y"]+oy
+                if (px-cx)**2+(py-cy)**2 > (rad-3)**2: continue  # ancora dentro il disco
+                bb=bbox(px,py)
+                if any(not(bb[2]<=p[0] or bb[0]>=p[2] or bb[3]<=p[1] or bb[1]>=p[3]) for p in placed): continue
+                chosen=(px,py,bb); break
+            if chosen is None:
+                dropped+=1; continue
+            placed.append(chosen[2])
+            px,py=chosen[0],chosen[1]
+            anc=f' text-anchor="{req["anchor"]}"' if req["anchor"]!="start" else ""
+            out.append(f'<text x="{px:.1f}" y="{py:.1f}" fill="{req["fill"]}" '
+                       f'font-size="{req["size"]:.1f}" opacity="{req["opacity"]}"{anc}{req["extra"]}>{req["text"]}</text>')
+        self._last_dropped=dropped
+        return '\n'.join(out)
 
     # ---- dati (contenuto, separato dal disegno) ----
     def sky_data(self, year, month, lat, lon, place,
@@ -429,7 +521,9 @@ class Engine:
                                  cardinals=b.get("cardinals", True),
                                  labels=b.get("labels", True),
                                  marquee=b.get("marquee", True),
-                                 degrees=b.get("degrees"))
+                                 ticks=b.get("ticks"),
+                                 star_names=b.get("star_names"),
+                                 declutter=b.get("declutter", False))
 
     @staticmethod
     def _render_ctx(data):
