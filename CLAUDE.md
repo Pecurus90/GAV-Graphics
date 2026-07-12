@@ -177,9 +177,14 @@ Ordinato per rischio reale.
   "come disegnare" per 5 primitive (background procedurale, disco sigillato,
   forma della fase lunare, colore da `bv2hex`, pallino da `status`) + la
   derivazione di presentazione (`MONTHS_IT`, `[:3]`, `{:.1f}`).
-- **R6 — Font brand assenti.** `brand/fonts/` non contiene `.ttf`; l'SVG forza
-  `Helvetica,Arial,sans-serif` in testa. L'identità tipografica **non** è
-  applicata, benché il codice finga di sì.
+- **R6 — RISOLTO (2026-07-12).** I `.ttf` del brand sono in `brand/fonts/`
+  (Barlow Semi Condensed SemiBold/ExtraBold + Instrument Sans
+  Regular/Medium/SemiBold, con le licenze OFL). **Verificato**, non dedotto:
+  `render._font_dirs()` restituisce la cartella e `resvg` carica i font — la
+  tipografia di `docs/mockups/dashboard.svg` non è più il fallback di sistema.
+  *Resta*: `a4.json` e `post_1080.json` dichiarano ancora
+  `Helvetica,Arial,sans-serif` nel canvas. Cambiarlo **muove i golden**: si fa
+  nel giro deliberato (#6e), insieme alla rimozione di `moon_panel`.
 - **R7 — Codice morto:** `render.py:DISPLAY`, `generate.py:NAKED_EYE`, param
   `obs` inutilizzato in `planet_table`, chiave `'Peg'` duplicata in `CONST_IT`.
   *(`brand/formats.py` era orfano — rimosso in #6a-riordino: il canvas vive nel
