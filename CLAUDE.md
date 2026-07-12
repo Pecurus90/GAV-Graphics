@@ -42,7 +42,7 @@ CLI: python cielo.py --format a4|post [--png]   (compone motore + render, D1)
 |---|---|
 | `engine/generate.py` | Il motore + compositore magro. Geometria/effemeridi → `SkyData` + disco; `generate()` cammina i blocchi di un file di layout. Libreria pura: **nessun CLI, non importa `render`**. |
 | `cielo.py` | Il CLI (D1). Mappa i formati (`a4`/`post`) ai file di layout e **compone** motore + `render` (SVG, e PNG con `--png`). Vive fuori da `engine/`. |
-| `brand/layouts/*.json` | La composizione come dati (canvas + blocchi). `a4.json` e `post_1080.json` esistono; altri formati sono altri file. |
+| `brand/layouts/*.json` | La composizione come dati (canvas + blocchi). Esistono `a4.json`, `post.json` e i tre design social `dashboard.json`/`editorial.json`/`rail.json`; aggiungerne uno = aggiungere un file (il CLI li scopre dalla cartella). |
 | `app/main.py` | Web app FastAPI sottile: `/`, `/preview`, `/download`. |
 | `render.py` | SVG→PNG via resvg. Usato dal CLI (`cielo.py`) **e** dalla web app. |
 | `brand/palettes/*.json` | I temi. **Non** in `themes/` (il README mente). |
@@ -182,9 +182,10 @@ Ordinato per rischio reale.
   Regular/Medium/SemiBold, con le licenze OFL). **Verificato**, non dedotto:
   `render._font_dirs()` restituisce la cartella e `resvg` carica i font — la
   tipografia di `docs/mockups/dashboard.svg` non è più il fallback di sistema.
-  *Resta*: `a4.json` e `post_1080.json` dichiarano ancora
+  *Resta*: `a4.json` e `post.json` dichiarano ancora
   `Helvetica,Arial,sans-serif` nel canvas. Cambiarlo **muove i golden**: si fa
-  nel giro deliberato (#6e), insieme alla rimozione di `moon_panel`.
+  nel giro deliberato (#6e), insieme alla rimozione di `moon_panel`. (I tre
+  design social nuovi dichiarano gia' i font del brand: non hanno golden.)
 - **R7 — Codice morto:** `render.py:DISPLAY`, `generate.py:NAKED_EYE`, param
   `obs` inutilizzato in `planet_table`, chiave `'Peg'` duplicata in `CONST_IT`.
   *(`brand/formats.py` era orfano — rimosso in #6a-riordino: il canvas vive nel

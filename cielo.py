@@ -12,10 +12,11 @@ Uso:
   python cielo.py --year 2026 --month 8 --place Vicenza                       # A4, SVG
   python cielo.py --year 2026 --month 8 --place Vicenza --png                 # A4, SVG + PNG
   python cielo.py --year 2026 --month 8 --format post --png                   # post 1080, SVG + PNG
-  python cielo.py --year 2026 --month 8 --format post --palette notte-blu     # post con altra palette
+  python cielo.py --year 2026 --month 8 --format dashboard --palette notte-blu # design social
 
-La palette si sceglie per NOME (--palette), non per percorso: i nomi validi
-sono i file in brand/palettes/ (osservatorio, notte-blu, petrolio, luce-rossa, ...).
+Formato e palette si scelgono per NOME, non per percorso: i nomi validi sono i
+file in brand/layouts/ (a4, post, dashboard, editorial, rail, ...) e in
+brand/palettes/ (osservatorio, notte-blu, petrolio, luce-rossa, ...).
 """
 import os, json, argparse
 
@@ -26,25 +27,39 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 LAYOUTS_DIR = os.path.join(BASE, "brand", "layouts")
 PALETTES_DIR = os.path.join(BASE, "brand", "palettes")
 
-# Formati pubblicabili: nome -> file di layout + larghezza PNG di default.
-# Il canvas (dimensioni) vive DENTRO ogni file di layout: qui il formato e' solo
-# la scelta del file + la risoluzione PNG sensata per quel prodotto. Aggiungere
-# un formato (es. "storia" 1080x1920) e' UNA riga.
-FORMATS = {
-    "a4":   {"file": "a4.json",        "png_width": 1800},
-    "post": {"file": "post_1080.json", "png_width": 1080},
-}
+# Il vocabolario dei formati E' la cartella brand/layouts/: ogni <nome>.json e'
+# un formato/design. Aggiungere un design domani = lasciar cadere un file, ZERO
+# modifiche qui (stessa filosofia di --palette e della web app). Un layout porta
+# gia' il proprio canvas (w/h/font_family): non serve una mappa che ripeta cosa
+# il file dice di se'. Il canvas puo' dichiarare 'png_width'; se non lo fa, la
+# larghezza PNG si deriva (2x sotto i 1000px, per la qualita' di stampa dell'A4;
+# 1x da 1000px in su, tipico dei social gia' a piena risoluzione).
+def _formati_disponibili():
+    return sorted(f[:-5] for f in os.listdir(LAYOUTS_DIR) if f.endswith(".json"))
 
 
 def _load_layout(fmt):
-    """Mappa un nome di formato al suo file di layout. Errore leggibile (in
-    italiano, non un traceback) se il formato non esiste."""
-    if fmt not in FORMATS:
-        disponibili = ", ".join(sorted(FORMATS))
+    """Risolve un formato per NOME al suo file di layout. Errore leggibile (in
+    italiano, non un traceback) se il nome non esiste."""
+    path = os.path.join(LAYOUTS_DIR, f"{fmt}.json")
+    if not os.path.isfile(path):
+        disponibili = ", ".join(_formati_disponibili())
         raise SystemExit(f"Errore: formato sconosciuto '{fmt}'. "
                          f"Formati disponibili: {disponibili}.")
-    with open(os.path.join(LAYOUTS_DIR, FORMATS[fmt]["file"]), encoding="utf-8") as fh:
+    with open(path, encoding="utf-8") as fh:
         return json.load(fh)
+
+
+def _png_width(layout, override):
+    """Larghezza del PNG: --png-width se dato, altrimenti canvas.png_width se il
+    file lo dichiara, altrimenti derivata dalla larghezza del canvas."""
+    if override:
+        return override
+    cv = layout["canvas"]
+    if cv.get("png_width"):
+        return cv["png_width"]
+    w = cv["w"]
+    return w if w >= 1000 else w * 2
 
 
 def _palettes_disponibili():
@@ -76,7 +91,8 @@ def main():
     p.add_argument('--place', default='Vicenza')
     p.add_argument('--palette', default='osservatorio',
                    help="nome della palette in brand/palettes/ (default: osservatorio)")
-    p.add_argument('--format', default='a4', help="a4 (default) o post")
+    p.add_argument('--format', default='a4',
+                   help="nome del layout in brand/layouts/ (a4, post, dashboard, editorial, rail, ...)")
     p.add_argument('--out', default=None,
                    help="file SVG di uscita (default: out/cielo_<formato>.svg)")
     p.add_argument('--png', action='store_true', help="produce ANCHE il PNG accanto all'SVG")
@@ -100,7 +116,7 @@ def main():
     print("SVG:", svg)
 
     if args.png:
-        width = args.png_width or FORMATS[args.format]["png_width"]
+        width = _png_width(layout, args.png_width)
         png = os.path.splitext(svg)[0] + ".png"
         render.svg_file_to_png(svg, png, width=width)
         print("PNG:", png, f"(larghezza {width}px)")
