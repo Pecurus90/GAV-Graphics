@@ -12,6 +12,8 @@ env/
 # Output generati dal motore / rendering
 *.svg
 *.png
+# out/ e' la cartella dei prodotti del CLI (default di --out): usa-e-getta
+out/
 # ...ma i riferimenti "golden" dei test DEVONO essere tracciati
 !tests/golden/
 !tests/golden/**

@@ -77,7 +77,8 @@ def main():
     p.add_argument('--palette', default='osservatorio',
                    help="nome della palette in brand/palettes/ (default: osservatorio)")
     p.add_argument('--format', default='a4', help="a4 (default) o post")
-    p.add_argument('--out', default=None, help="file SVG di uscita (default: cielo_<formato>.svg)")
+    p.add_argument('--out', default=None,
+                   help="file SVG di uscita (default: out/cielo_<formato>.svg)")
     p.add_argument('--png', action='store_true', help="produce ANCHE il PNG accanto all'SVG")
     p.add_argument('--png-width', type=int, default=None,
                    help="larghezza PNG in px (default sensato per formato)")
@@ -85,7 +86,13 @@ def main():
 
     layout = _load_layout(args.format)
     theme = _load_palette(args.palette)
-    out = args.out or f"cielo_{args.format}.svg"
+    # Default: out/ e' la cartella dei prodotti (usa-e-getta, gitignored). Con
+    # --out l'utente sceglie il proprio percorso. In entrambi i casi assicura
+    # che la cartella esista, altrimenti la scrittura dell'SVG fallirebbe.
+    out = args.out or os.path.join("out", f"cielo_{args.format}.svg")
+    outdir = os.path.dirname(out)
+    if outdir:
+        os.makedirs(outdir, exist_ok=True)
 
     eng = Engine(datadir=os.path.join(BASE, "data"))
     svg = eng.generate(args.year, args.month, args.lat, args.lon, args.place,
