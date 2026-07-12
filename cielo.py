@@ -9,9 +9,13 @@ esattamente come gia' fa la web app (app/main.py). Il motore non importa nulla
 di qui; e' il CLI che tira le fila dei due moduli.
 
 Uso:
-  python cielo.py --year 2026 --month 8 --place Vicenza            # A4, SVG
-  python cielo.py --year 2026 --month 8 --place Vicenza --png      # A4, SVG + PNG
-  python cielo.py --year 2026 --month 8 --format post --png        # post 1080, SVG + PNG
+  python cielo.py --year 2026 --month 8 --place Vicenza                       # A4, SVG
+  python cielo.py --year 2026 --month 8 --place Vicenza --png                 # A4, SVG + PNG
+  python cielo.py --year 2026 --month 8 --format post --png                   # post 1080, SVG + PNG
+  python cielo.py --year 2026 --month 8 --format post --palette notte-blu     # post con altra palette
+
+La palette si sceglie per NOME (--palette), non per percorso: i nomi validi
+sono i file in brand/palettes/ (osservatorio, notte-blu, petrolio, luce-rossa, ...).
 """
 import os, json, argparse
 
@@ -20,6 +24,7 @@ import render
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 LAYOUTS_DIR = os.path.join(BASE, "brand", "layouts")
+PALETTES_DIR = os.path.join(BASE, "brand", "palettes")
 
 # Formati pubblicabili: nome -> file di layout + larghezza PNG di default.
 # Il canvas (dimensioni) vive DENTRO ogni file di layout: qui il formato e' solo
@@ -42,6 +47,26 @@ def _load_layout(fmt):
         return json.load(fh)
 
 
+def _palettes_disponibili():
+    """Il vocabolario delle palette E' la cartella brand/palettes/: ogni file
+    <nome>.json e' una palette. Aggiungere una palette = aggiungere un file,
+    zero modifiche a questo codice (stessa filosofia della web app, che gia'
+    scopre i temi cosi')."""
+    return sorted(f[:-5] for f in os.listdir(PALETTES_DIR) if f.endswith(".json"))
+
+
+def _load_palette(name):
+    """Risolve una palette per NOME (non per percorso). Errore leggibile (in
+    italiano, non un traceback) se il nome non esiste."""
+    path = os.path.join(PALETTES_DIR, f"{name}.json")
+    if not os.path.isfile(path):
+        disponibili = ", ".join(_palettes_disponibili())
+        raise SystemExit(f"Errore: palette sconosciuta '{name}'. "
+                         f"Palette disponibili: {disponibili}.")
+    with open(path, encoding="utf-8") as fh:
+        return json.load(fh)
+
+
 def main():
     p = argparse.ArgumentParser(description="Genera il Cielo del Mese (SVG, e PNG con --png).")
     p.add_argument('--year', type=int, required=True)
@@ -49,7 +74,8 @@ def main():
     p.add_argument('--lat', type=float, default=45.5455)
     p.add_argument('--lon', type=float, default=11.5353)
     p.add_argument('--place', default='Vicenza')
-    p.add_argument('--theme', default=os.path.join(BASE, 'brand', 'palettes', 'osservatorio.json'))
+    p.add_argument('--palette', default='osservatorio',
+                   help="nome della palette in brand/palettes/ (default: osservatorio)")
     p.add_argument('--format', default='a4', help="a4 (default) o post")
     p.add_argument('--out', default=None, help="file SVG di uscita (default: cielo_<formato>.svg)")
     p.add_argument('--png', action='store_true', help="produce ANCHE il PNG accanto all'SVG")
@@ -58,7 +84,7 @@ def main():
     args = p.parse_args()
 
     layout = _load_layout(args.format)
-    theme = json.load(open(args.theme, encoding='utf-8'))
+    theme = _load_palette(args.palette)
     out = args.out or f"cielo_{args.format}.svg"
 
     eng = Engine(datadir=os.path.join(BASE, "data"))
