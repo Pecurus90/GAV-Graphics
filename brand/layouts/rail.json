@@ -55,7 +55,7 @@
      "base": {"fill": "panel", "stroke": "border2", "stroke_width": 0.8},
      "lit_fill": "moon_lit",
      "highlight": {"stroke": "gold", "stroke_width": 1.4, "r_extra": 3},
-     "phase_labels": {"x0": 428, "gap": 149, "y": 802, "fill": "moon_label",
+     "phase_labels": {"y": 802, "fill": "moon_label",
                       "size": 11, "weight": "600", "content": "{day} {name}",
                       "names": {"new": "Nuova", "first": "Pr.Q.",
                                 "full": "Piena", "last": "Ult.Q."}}},

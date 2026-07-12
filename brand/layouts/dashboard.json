@@ -6,16 +6,21 @@
      "starfield": {"seed": 7, "count": 220, "r_min": 0.4, "r_max": 1.6,
                    "op_min": 0.12, "op_max": 0.5, "fill": "bgstar"}},
 
-    {"type": "text", "x": 56, "y": 84, "fill": "gold", "size": 16,
+    {"type": "image", "href": "brand/logo/logo-emblema.png",
+     "x": 56, "y": 74, "w": 100, "h": 100},
+    {"type": "text", "x": 180, "y": 84, "fill": "gold", "size": 16,
      "weight": "600", "letter_spacing": 3.6, "content": "GRUPPO ASTROFILI VICENTINI"},
-    {"type": "text", "x": 54, "y": 150, "fill": "text", "size": 56,
+    {"type": "text", "x": 178, "y": 150, "fill": "text", "size": 56,
      "weight": "800", "letter_spacing": 0.5, "content": "IL CIELO DI {month_upper} {year}"},
-    {"type": "text", "x": 56, "y": 184, "fill": "text3", "size": 15,
+    {"type": "text", "x": 180, "y": 184, "fill": "text3", "size": 15,
      "content": "Cielo visibile dal Nord Italia · {place} · valido ~15 {month_name}, ore {hour}:00"},
     {"type": "line", "x1": 56, "y1": 206, "x2": 1024, "y2": 206,
      "stroke": "divider", "stroke_width": 1},
 
-    {"type": "disc", "cx": 340, "cy": 520, "rad": 270, "labels": true},
+    {"type": "disc", "cx": 340, "cy": 520, "rad": 270, "marquee": false,
+     "labels": ["UMa", "UMi", "Cas", "Cep", "Dra", "Cyg", "Lyr", "Aql", "Her",
+                "CrB", "Boo", "Sco", "Sgr", "Peg", "And", "Per", "Aur", "Ori",
+                "Tau", "Gem", "Leo", "CMa"]},
 
     {"type": "panel", "x": 690, "y": 234, "w": 334, "h": 266, "rx": 16,
      "fill": "panel", "stroke": "border2", "stroke_width": 1},
@@ -60,7 +65,7 @@
      "lit_fill": "moon_lit",
      "highlight": {"stroke": "gold", "stroke_width": 1.6, "r_extra": 3.5},
      "day_number": {"dy": 26.5, "fill": "text2", "size": 11, "fill_highlight": "gold"},
-     "phase_labels": {"x0": 60, "gap": 242, "y": 924, "fill": "moon_label",
+     "phase_labels": {"y": 924, "fill": "moon_label",
                       "size": 12, "weight": "600", "content": "{day} {name}",
                       "names": {"new": "Luna Nuova", "first": "Primo Q.",
                                 "full": "Luna Piena", "last": "Ultimo Q."}}},
@@ -75,9 +80,6 @@
      "content": "Gruppo Astrofili Vicentini"},
     {"type": "icon", "name": "email", "x": 512, "y": 1021, "size": 16, "fill": "text3"},
     {"type": "text", "x": 536, "y": 1034, "fill": "text3", "size": 13, "weight": "500",
-     "content": "info@astrofilivicentini.it"},
-
-    {"type": "image", "href": "brand/logo/logo-emblema.png",
-     "x": 924, "y": 36, "w": 108, "h": 108}
+     "content": "info@astrofilivicentini.it"}
   ]
 }
