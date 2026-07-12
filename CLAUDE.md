@@ -136,7 +136,7 @@ descrive lo fa scollare al primo cambiamento.
     separati, altrimenti un file di layout non ha con cosa riempire i blocchi.
   - **Composizione, tema e contenuto sono file, non codice.** Titolo, posizioni,
     dimensioni, gerarchia tipografica: modificabili senza toccare Python.
-  - `cielo-del-mese_struttura.md` è la spec di design. Non va abbassata al
+  - `docs/cielo-del-mese_struttura.md` è la spec di design. Non va abbassata al
     codice: è il codice che deve salire fino a lei.
   - **Niente browser headless** per comporre (HTML/CSS→PNG): impacchettare
     Chromium nell'`.exe` (D4) è insostenibile. Si resta su SVG + `resvg`.
