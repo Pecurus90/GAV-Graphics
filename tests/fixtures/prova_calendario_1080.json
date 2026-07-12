@@ -1,0 +1,36 @@
+{
+  "_nota": "SCAFFOLDING DI VERIFICA (non un prodotto, non impacchettato): serve solo a rendere visibile la primitiva moon_calendar prima che #6d costruisca i layout veri. Dimostra che la STESSA primitiva regge le due disposizioni dei mockup senza saperlo: una riga da 31 (dashboard/rail, cols=31) e una griglia 4x8 (editorial, cols=8). La disposizione sta tutta qui nel file.",
+  "canvas": {"w": 1080, "h": 1000, "font_family": "Helvetica,Arial,sans-serif"},
+  "blocks": [
+    {"type": "background",
+     "starfield": {"seed": 7, "count": 200, "r_min": 0.3, "r_max": 1.0,
+                   "op_min": 0.12, "op_max": 0.45, "fill": "bgstar"}},
+
+    {"type": "text", "x": 540, "y": 70, "fill": "gold", "size": 30,
+     "weight": "bold", "anchor": "middle", "letter_spacing": 2,
+     "content": "CALENDARIO LUNARE - {month_upper} {year}"},
+    {"type": "text", "x": 540, "y": 100, "fill": "text3", "size": 15,
+     "anchor": "middle",
+     "content": "prova della primitiva moon_calendar - fasi principali cerchiate in oro"},
+
+    {"type": "text", "x": 40, "y": 175, "fill": "text2", "size": 16,
+     "weight": "bold", "letter_spacing": 1,
+     "content": "Disposizione A - riga da 31 (dashboard / rail)"},
+    {"type": "moon_calendar", "cols": 31,
+     "x0": 55, "y0": 235, "col_gap": 32.4, "row_gap": 0, "radius": 13,
+     "base": {"fill": "panel", "stroke": "border2", "stroke_width": 0.8},
+     "lit_fill": "moon_lit",
+     "highlight": {"stroke": "gold", "stroke_width": 1.6, "r_extra": 3},
+     "day_number": {"dy": 27, "fill": "text4", "size": 9, "fill_highlight": "gold"}},
+
+    {"type": "text", "x": 40, "y": 380, "fill": "text2", "size": 16,
+     "weight": "bold", "letter_spacing": 1,
+     "content": "Disposizione B - griglia 4x8 (editorial)"},
+    {"type": "moon_calendar", "cols": 8,
+     "x0": 190, "y0": 470, "col_gap": 128, "row_gap": 140, "radius": 34,
+     "base": {"fill": "panel", "stroke": "border2", "stroke_width": 1},
+     "lit_fill": "moon_lit",
+     "highlight": {"stroke": "gold", "stroke_width": 2, "r_extra": 4},
+     "day_number": {"dy": 55, "fill": "text3", "size": 14, "fill_highlight": "gold"}}
+  ]
+}
