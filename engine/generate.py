@@ -513,14 +513,22 @@ class Engine:
 
     def _render_swatches(self, b, theme):
         """Campioni di colore della legenda. Il colore viene da bv2hex(ramp,bv):
-        calcolo, resta qui; il file da' i bv, le etichette e le posizioni."""
-        ramp=theme["star_ramp"]; lab=b["label"]
+        calcolo, resta qui; il file da' i bv, le etichette e le posizioni.
+        `label2` (opzionale) e' una SECONDA etichetta per campione (es. la
+        temperatura): se il blocco la definisce e l'item ha `label2`, viene
+        disegnata anch'essa. Assente -> comportamento identico a prima (A4)."""
+        ramp=theme["star_ramp"]; lab=b["label"]; lab2=b.get("label2")
         out=[]; lx=b["x0"]
         for it in b["items"]:
             out.append(f'<circle cx="{lx}" cy="{b["cy"]}" r="{b["r"]}" fill="{bv2hex(ramp, it["bv"])}"/>')
             tb={"x":lx+lab["dx"],"y":b["cy"]+lab["dy"],"fill":lab["fill"],
                 "size":lab["size"],"content":it["label"]}
             out.append(self._render_text(tb, theme, {}))
+            if lab2 and "label2" in it:
+                tb2={"x":lx+lab2["dx"],"y":b["cy"]+lab2["dy"],"fill":lab2["fill"],
+                     "size":lab2["size"],"content":it["label2"]}
+                if lab2.get("weight"): tb2["weight"]=lab2["weight"]
+                out.append(self._render_text(tb2, theme, {}))
             lx+=b["step"]
         return '\n'.join(out)
 
