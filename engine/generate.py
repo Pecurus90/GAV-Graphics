@@ -440,15 +440,23 @@ class Engine:
         keep=b.get("statuses")
         planets=data.planets if keep is None else [p for p in data.planets if p.status in keep]
         for i,pl in enumerate(planets):
+            # note_dir: presentazione derivata = nota + direzione, con separatore
+            # SOLO se la direzione c'e' (i muted/sotto-orizzonte non lasciano un
+            # ' · ' penzolante). L'A4 usa {note}, non {note_dir}: resta identico.
+            note_dir=pl.note+(" · "+pl.direction if pl.direction else "")
             item={"name":pl.name,"rise":pl.rise,"set":pl.set_,"note":pl.note,
-                  "status":pl.status,"direction":pl.direction,"az":f"{pl.az:.0f}"}
+                  "note_dir":note_dir,"status":pl.status,"direction":pl.direction,
+                  "az":f"{pl.az:.0f}"}
             y=b["y0"]+i*b["step"]
             fill=theme["status"][pl.status] if dot.get("fill_status") else theme[dot["fill"]]
             out.append(f'<circle cx="{b["x0"]+dot["dx"]}" cy="{y+dot["dy"]}" r="{dot["r"]}" fill="{fill}"/>')
             for part in ("name","times","note"):
+                if part not in b:  # un design puo' omettere una parte (es. rail
+                    continue        # senza nota, editorial senza orari)
                 p=b[part]
                 tb={"x":b["x0"]+p["dx"],"y":y+p.get("dy",0),"fill":p["fill"],
                     "size":p["size"],"weight":p.get("weight"),"content":p["content"]}
+                if p.get("anchor"): tb["anchor"]=p["anchor"]
                 out.append(self._render_text(tb, theme, item))
         return '\n'.join(out)
 
