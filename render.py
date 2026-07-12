@@ -15,8 +15,11 @@ import resvg_py
 BASE = pathlib.Path(__file__).parent
 FONTS_DIR = BASE / "brand" / "fonts"
 
-# Famiglia di default usata dai template (risolta dai font in brand/fonts/).
-SANS = "Inter"
+# Famiglia sans-serif di default per resvg (corpo del brand: nomi, orari, note).
+# I font del brand sono Barlow Semi Condensed (testate) + Instrument Sans (corpo,
+# D4): come sans-serif generico si usa Instrument Sans. Finche' i .ttf non sono
+# in brand/fonts/, resvg ripiega comunque sul font di sistema (R6).
+SANS = "Instrument Sans"
 
 
 def _font_dirs():

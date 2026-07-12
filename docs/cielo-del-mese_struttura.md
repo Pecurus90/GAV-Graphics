@@ -52,8 +52,11 @@ Usare i token della palette "Osservatorio" (già forniti). Richiamo dei principa
 
 ## 3. Tipografia
 
-Font unico sans-serif (nel prototipo Helvetica/Arial; per il brand sostituire con
-la coppia scelta). Scala usata:
+Nel prototipo un font unico sans-serif (Helvetica/Arial). Per il brand la coppia
+decisa (D4): **Barlow Semi Condensed** (testate, titoli, etichette dei pannelli,
+cardinali) + **Instrument Sans** (corpo: nomi, orari, note, date, sottotitolo,
+crediti). I `.ttf` non sono ancora nel repo: finché mancano, il rendering ripiega
+sui font di sistema (R6). Scala usata:
 
 | Ruolo | Size | Peso | Colore | Note |
 |---|---|---|---|---|
