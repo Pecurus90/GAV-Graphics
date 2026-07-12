@@ -127,14 +127,21 @@ descrive lo fa scollare al primo cambiamento.
     Galassia = ellisse · ammasso aperto = cerchio tratteggiato · ammasso
     globulare = cerchio con croce · nebulosa diffusa = quadrato · nebulosa
     planetaria = cerchio con quattro punte. Serve una **legenda** dei tipi.
-  - **Curatela obbligatoria.** In un mese ~50 Messier sono sopra l'orizzonte:
-    non entrano. Si sceglie come per stelle e costellazioni — criterio: *quelli
-    che il GAV punta davvero in una serata* (M13, M31, M42, M45, M57, M27…),
-    quindici o venti, non cinquanta.
-  - **Onestà su cosa serve per vederli.** Molti Messier da un cielo suburbano
-    come Vicenza non si vedono a occhio nudo né col binocolo. Va detto, o si
-    manda la gente a cercare il nulla (stesso principio della direzione tolta ai
-    pianeti sotto l'orizzonte).
+  - **Si mostrano TUTTI, si nominano solo i notevoli.** *(Deciso da Marco,
+    2026-07-12: "tutti gli oggetti dell'emisfero nord".)* Togliendo la gran parte
+    delle stelle il disco si svuota e il catalogo intero ci sta. La curatela non
+    è su *quali disegnare* ma su **quali etichettare**.
+    Motivo fisico, non estetico: l'**Ammasso della Vergine** ha 16 galassie
+    Messier (M49, M58-61, M84-91, M98-100, M104) in un fazzoletto di cielo.
+    Sedici *simboli* fitti sono informazione ("qui ci sono un sacco di
+    galassie" — è ciò che fanno gli atlanti veri). Sedici *etichette* in quel
+    fazzoletto sono **impossibili**: l'anti-collisione inizierebbe a scartarne
+    a caso.
+  - **Onestà su cosa serve per vederli.** Quasi nessun Messier si vede a occhio
+    nudo da un cielo suburbano come Vicenza: M13 col binocolo è una macchiolina,
+    M57 vuole un telescopio, le galassie della Vergine vogliono cielo buono e
+    apertura. La mappa deve dire **cosa serve**, non solo dove sono — stesso
+    principio della direzione tolta ai pianeti sotto l'orizzonte.
   - **Il test è gratis:** ogni Messier appartiene a una costellazione nota. M31
     deve cadere in Andromeda, M42 in Orione, M13 in Ercole. Verifica incrociata,
     come per pianeti e Luna.
