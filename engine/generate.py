@@ -74,6 +74,18 @@ class MoonPhase:
 
 
 @dataclass(frozen=True)
+class MoonDay:
+    """L'illuminazione della Luna in UN giorno del mese, all'ora di riferimento
+    del volantino (istante fisso e deterministico, invariante #6). Alimenta il
+    calendario lunare a 28-31 dischetti."""
+    day: int              # numero del giorno (1..28-31)
+    frac: float           # frazione illuminata del disco, 0..1
+    waxing: bool          # True = crescente (falce a destra), False = calante
+    phase_key: str | None # 'new'|'first'|'full'|'last' se una fase PRINCIPALE
+                          # cade quel giorno (incrocio con moon_phases), altrimenti None
+
+
+@dataclass(frozen=True)
 class Planet:
     """Un pianeta con la sua visibilità. `status` ('ok'|'info'|'warn'|'muted')
     pilota il colore del pallino; il resto è testo."""
@@ -94,6 +106,7 @@ class SkyData:
     lon: float
     hour_local: int
     moon_phases: list[MoonPhase]
+    moon_days: list[MoonDay]
     planets: list[Planet]
 
 
@@ -162,6 +175,39 @@ class Engine:
         for t,y in zip(tt,yy):
             loc=t.astimezone(tz)
             out.append((names[y],keys[y],loc.strftime('%d/%m')))
+        return out
+
+    def moon_days(self, year, month, tz, hour_local=23):
+        """Illuminazione della Luna giorno per giorno, per i giorni VERI del mese
+        (28-31). Per ogni giorno: frazione illuminata (0..1), se è crescente o
+        calante, e se una fase principale cade quel giorno.
+
+        Ora di riferimento: la STESSA del volantino (hour_local locale, di default
+        le 23:00 Europe/Rome). Motivo: il volantino è già costruito per l'osservatore
+        della sera a quell'ora (il disco cielo usa lo stesso istante); tenere UN
+        solo riferimento evita un secondo orologio nel motore e mostra la Luna
+        "com'è stasera". L'istante è fisso e derivato dagli argomenti: nessun
+        orologio di sistema (invariante #6). La differenza rispetto a mezzogiorno
+        UTC è astronomicamente trascurabile (l'illuminazione varia <~1% in un
+        giorno vicino ai quarti).
+
+        Crescente/calante dalla differenza di longitudine eclittica Luna-Sole
+        (dlon in (0,180) = crescente): è la stessa grandezza che distingue primo
+        e ultimo quarto in moon_phases, quindi coerente per costruzione."""
+        nm=calendar.monthrange(year,month)[1]
+        # giorno -> chiave della fase principale che ci cade (incrocio con moon_phases,
+        # unica fonte di verità sulle date delle fasi: calendario e pannello concordano)
+        phase_day={int(dt.split('/')[0]):key for _nm,key,dt in self.moon_phases(year,month,tz)}
+        earth=self.eph['earth']; sun=self.eph['sun']; moon=self.eph['moon']
+        out=[]
+        for d in range(1,nm+1):
+            t=self.ts.from_datetime(tz.localize(datetime(year,month,d,hour_local,0)))
+            frac=float(almanac.fraction_illuminated(self.eph,'moon',t))
+            e=earth.at(t)
+            slon=e.observe(sun).apparent().ecliptic_latlon()[1].degrees
+            mlon=e.observe(moon).apparent().ecliptic_latlon()[1].degrees
+            waxing=bool(((mlon-slon)%360.0)<180.0)
+            out.append((d,frac,waxing,phase_day.get(d)))
         return out
 
     def _rise_set(self, target, loc, tz, year, month, day):
@@ -302,10 +348,13 @@ class Engine:
         loc=wgs84.latlon(lat,lon,elevation_m=50)
         phases=[MoonPhase(nm,ph,dt)
                 for nm,ph,dt in self.moon_phases(year,month,tz)]
+        days=[MoonDay(d,frac,wax,pk)
+              for d,frac,wax,pk in self.moon_days(year,month,tz,hour_local)]
         planets=[Planet(nm,rise,set_,note,st)
                  for nm,rise,set_,note,st in self.planet_table(year,month,tz,loc)]
         return SkyData(year=year, month=month, place=place, lat=lat, lon=lon,
-                       hour_local=hour_local, moon_phases=phases, planets=planets)
+                       hour_local=hour_local, moon_phases=phases, moon_days=days,
+                       planets=planets)
 
     # ---- compositore: primitive di blocco (leggono il layout, D7) ----
     def _render_disc(self, b, theme, lst, lat_rad):
@@ -385,6 +434,61 @@ class Engine:
                 out.append(self._render_text(tb, theme, {"label":mp.label,"date":mp.date}))
         return '\n'.join(out)
 
+    @staticmethod
+    def _moon_shape_svg(cx, cy, r, frac, waxing, lit, base):
+        """Forma CONTINUA della Luna a frazione illuminata `frac` (0..1), col
+        metodo del terminatore-ellisse (lo stesso dei mockup del designer):
+          - un SEMIDISCO sul lembo illuminato (crescente = destra, sweep 1;
+            calante = sinistra, sweep 0);
+          - un'ELLISSE il cui semiasse orizzontale rx = r·|1-2·frac| è il
+            terminatore proiettato. Riempita `lit` se gibbosa (frac>0.5, aggiunge
+            luce oltre il centro) o `base` se falce (frac<0.5, scava la luce).
+        A frac=0.5 rx=0: resta il semidisco netto. A frac→0 l'ellisse scura
+        copre tutto (novilunio); a frac→1 l'ellisse chiara riempie (plenilunio).
+
+        NUOVO codice, di proposito NON condiviso con _render_moon_panel (che
+        disegna le 4 fasi discrete con path ad arco): unificarli ora muoverebbe
+        la stringa del golden. La duplicazione è voluta e temporanea — vedi report."""
+        sweep=1 if waxing else 0
+        half=(f'<path d="M{cx:.2f},{cy-r:.2f} A{r:.2f},{r:.2f} 0 0 {sweep} '
+              f'{cx:.2f},{cy+r:.2f} Z" fill="{lit}"/>')
+        rx=r*abs(1.0-2.0*frac)
+        fill=lit if frac>0.5 else base
+        ell=f'<ellipse cx="{cx:.2f}" cy="{cy:.2f}" rx="{rx:.2f}" ry="{r:.2f}" fill="{fill}"/>'
+        return half+'\n'+ell
+
+    def _render_moon_calendar(self, b, theme, data):
+        """Calendario lunare: un dischetto per ogni giorno del mese, con la forma
+        CONTINUA della fase reale. Il FILE possiede cosa/dove/quale-dato: griglia
+        (`cols` = dischetti per riga), passi (`col_gap`/`row_gap`), raggio, se
+        mostrare il numero del giorno (`day_number`), se evidenziare le fasi
+        principali (`highlight`). Il CODICE possiede il "come disegnare" la forma.
+
+        Regge sia una riga da 31 (cols=31) sia una griglia N×M (es. 4×8, cols=8)
+        SENZA saperlo: la disposizione è tutta nel file, la primitiva calcola
+        riga = i//cols, colonna = i%cols."""
+        out=[]
+        x0,y0,r,cols=b["x0"],b["y0"],b["radius"],b["cols"]
+        cgap,rgap=b["col_gap"],b["row_gap"]
+        base=b["base"]; basefill=theme[base["fill"]]; lit=theme[b["lit_fill"]]
+        daynum=b.get("day_number"); hi=b.get("highlight")
+        for i,md in enumerate(data.moon_days):
+            cx=x0+(i%cols)*cgap; cy=y0+(i//cols)*rgap
+            out.append(f'<circle cx="{cx:.2f}" cy="{cy:.2f}" r="{r}" fill="{basefill}"/>')
+            out.append(self._moon_shape_svg(cx,cy,r,md.frac,md.waxing,lit,basefill))
+            out.append(f'<circle cx="{cx:.2f}" cy="{cy:.2f}" r="{r}" fill="none" '
+                       f'stroke="{theme[base["stroke"]]}" stroke-width="{base["stroke_width"]}"/>')
+            if hi and md.phase_key:
+                out.append(f'<circle cx="{cx:.2f}" cy="{cy:.2f}" r="{r+hi["r_extra"]}" '
+                           f'fill="none" stroke="{theme[hi["stroke"]]}" stroke-width="{hi["stroke_width"]}"/>')
+            if daynum:
+                fill=(daynum["fill_highlight"] if hi and md.phase_key and "fill_highlight" in daynum
+                      else daynum["fill"])
+                tb={"x":f"{cx:.2f}","y":f"{cy+daynum['dy']:.2f}","fill":fill,
+                    "size":daynum["size"],"anchor":"middle","content":"{day}"}
+                out.append(self._render_text(tb, theme, {"day":md.day}))
+        return '\n'.join(out)
+
     def _render_swatches(self, b, theme):
         """Campioni di colore della legenda. Il colore viene da bv2hex(ramp,bv):
         calcolo, resta qui; il file da' i bv, le etichette e le posizioni."""
@@ -417,6 +521,7 @@ class Engine:
         if t=="text":         return self._render_text(b, theme, ctx)
         if t=="line":         return self._render_line(b, theme)
         if t=="moon_panel":   return self._render_moon_panel(b, theme, data)
+        if t=="moon_calendar":return self._render_moon_calendar(b, theme, data)
         if t=="planet_panel": return self._render_planet_panel(b, theme, data)
         if t=="swatches":     return self._render_swatches(b, theme)
         raise ValueError(f"tipo di blocco sconosciuto nel layout: {t!r}")
