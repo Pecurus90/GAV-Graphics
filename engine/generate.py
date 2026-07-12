@@ -62,6 +62,17 @@ STARS = {
  "Deneb":(310.358,45.280,0.09,1.25), "Regolo":(152.093,11.967,-0.09,1.35),
  "Castore":(113.649,31.888,0.03,1.58), "Deneb Kaitos":(10.897,-17.987,1.02,2.04),
  "Polare":(37.954,89.264,0.60,1.98),
+ # Aggiunte #6m: stelle che un DIVULGATORE indica davvero (spesso non le piu'
+ # brillanti), per dare un nome alle costellazioni della whitelist che ne erano
+ # prive. Vedi report per la ragione di ciascuna.
+ "Mizar":(200.981,54.921,0.06,2.04),          # Orsa Maggiore: la doppia a occhio nudo
+ "Schedar":(10.127,56.537,1.17,2.24),         # Cassiopea: l'ancora della W
+ "Thuban":(211.097,64.376,-0.05,3.65),        # Dragone: la Polare dei faraoni
+ "Alphecca":(233.672,26.715,-0.02,2.22),      # Corona Boreale: il gioiello
+ "Kaus Australis":(276.043,-34.385,-0.03,1.85), # Sagittario: l'ancora della teiera
+ "Mirach":(17.433,35.621,1.58,2.05),          # Andromeda: il salto verso M31
+ "Algol":(47.042,40.956,-0.05,2.12),          # Perseo: la stella-demone variabile
+ "Enif":(326.046,9.875,1.53,2.40),            # Pegaso: il naso, indica M15
 }
 
 # pianeti: etichetta -> chiave ephemeris
@@ -473,7 +484,7 @@ class Engine:
                          "size":12.5*k,"fill":theme["label"],"opacity":0.82,
                          "pri":100.0+rank,"extra":' letter-spacing="0.5"'})
         # piazzamento greedy
-        placed=[]; dropped=0; STEP=6*k
+        placed=[]; dropped=0; dropped_labels=[]; STEP=6*k
         DIRS=[(0,-1),(1,0),(0,1),(-1,0),(1,-1),(1,1),(-1,1),(-1,-1)]
         cands=[(0,0)]+[(dx*r*STEP, dy*r*STEP) for r in range(1,6) for dx,dy in DIRS]
         for req in sorted(reqs, key=lambda r:r["pri"]):
@@ -488,13 +499,13 @@ class Engine:
                 if any(not(bb[2]<=p[0] or bb[0]>=p[2] or bb[3]<=p[1] or bb[1]>=p[3]) for p in placed): continue
                 chosen=(px,py,bb); break
             if chosen is None:
-                dropped+=1; continue
+                dropped+=1; dropped_labels.append(req["text"]); continue
             placed.append(chosen[2])
             px,py=chosen[0],chosen[1]
             anc=f' text-anchor="{req["anchor"]}"' if req["anchor"]!="start" else ""
             out.append(f'<text x="{px:.1f}" y="{py:.1f}" fill="{req["fill"]}" '
                        f'font-size="{req["size"]:.1f}" opacity="{req["opacity"]}"{anc}{req["extra"]}>{req["text"]}</text>')
-        self._last_dropped=dropped
+        self._last_dropped=dropped; self._last_dropped_labels=dropped_labels
         return '\n'.join(out)
 
     # ---- dati (contenuto, separato dal disegno) ----

@@ -70,6 +70,18 @@ def test_corona_tacche_senza_numeri(eng, root):
     assert tacca_numeri == [], f"la corona non deve avere numeri: {tacca_numeri}"
 
 
+def test_star_names_dei_layout_sono_nel_catalogo(root):
+    """Ogni stella citata in un layout deve esistere nel catalogo STARS: un
+    refuso ('Mizzar') qui salta subito, invece di sparire in silenzio dal disco."""
+    import glob
+    from engine.generate import STARS
+    for lp in glob.glob(os.path.join(root, "brand", "layouts", "*.json")):
+        layout = json.load(open(lp, encoding="utf-8"))
+        for b in layout.get("blocks", []):
+            for nm in b.get("star_names", []):
+                assert nm in STARS, f"{os.path.basename(lp)}: stella '{nm}' non nel catalogo STARS"
+
+
 def test_anticollisione_deterministica(eng, root):
     """Stessa data ⇒ stesso disco (invariante #6): l'anti-collisione non usa
     caso ne' ordine instabile."""

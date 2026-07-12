@@ -24,7 +24,9 @@
                 "Tau", "Gem", "Leo", "CMa"],
      "star_names": ["Sirio", "Vega", "Altair", "Deneb", "Arturo", "Capella",
                     "Rigel", "Betelgeuse", "Aldebaran", "Pollux", "Regolo",
-                    "Antares", "Spica", "Fomalhaut", "Polare"]},
+                    "Antares", "Spica", "Fomalhaut", "Polare",
+                    "Mizar", "Schedar", "Thuban", "Alphecca", "Kaus Australis",
+                    "Mirach", "Algol", "Enif"]},
 
     {"type": "panel", "x": 690, "y": 234, "w": 334, "h": 266, "rx": 16,
      "fill": "panel", "stroke": "border2", "stroke_width": 1},
