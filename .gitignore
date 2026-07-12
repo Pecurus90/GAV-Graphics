@@ -20,6 +20,9 @@ out/
 # ...e i mockup del designer sono RIFERIMENTI di design, non artefatti di build
 !docs/mockups/
 !docs/mockups/**
+# ...e il logo e' un ASSET che il motore legge a runtime (va anche nell'.exe, D4)
+!brand/logo/
+!brand/logo/**
 
 # Config locale di Claude Code (permessi macchina-specifici)
 .claude/settings.local.json
