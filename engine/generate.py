@@ -300,7 +300,8 @@ class Engine:
 </defs>'''
 
     def sky_disc_svg(self, cx, cy, rad, lst, lat_rad, theme, ramp=None,
-                     cardinals=True, labels=True, marquee=True, clip_id='dclip'):
+                     cardinals=True, labels=True, marquee=True, degrees=None,
+                     clip_id='dclip'):
         """Disegna SOLO il disco cielo (cornice + stelle + costellazioni) di
         centro (cx,cy) e raggio rad, a QUALSIASI misura. Restituisce il
         frammento SVG (stringa). Le costanti visive scalano con k=rad/R, quindi
@@ -346,16 +347,43 @@ class Engine:
                 a(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{7*k:.1f}" fill="{col}" opacity="0.30" filter="url(#softglow)"/>')
                 a(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{2.6*k:.1f}" fill="{col}"/>')
                 a(f'<text x="{x+7*k:.1f}" y="{y-5*k:.1f}" fill="{theme["text"]}" font-size="{11.5*k:.1f}" opacity="0.95">{nm}</text>')
-        # etichette costellazioni
+        # etichette costellazioni. `labels` True = tutte (A4); False/[] = nessuna;
+        # una LISTA di sigle = solo quelle (sfoltimento per il social, deciso nel
+        # file: composizione, non codice, D7).
         if labels:
+            label_set = None if labels is True else set(labels)
             for f in self.clines:
                 ab=f['id']
                 if ab not in CONST_IT: continue
+                if label_set is not None and ab not in label_set: continue
                 allp=np.array([p for line in f['geometry']['coordinates'] for p in line])
                 al,zz=self.altaz(allp[:,0],allp[:,1],lst,lat_rad); m=al>3
                 if m.sum()<2: continue
                 x,y=self.project(al[m],zz[m],cx,cy,rad)
                 a(f'<text x="{x.mean():.1f}" y="{y.mean():.1f}" fill="{theme["label"]}" font-size="{12.5*k:.1f}" opacity="0.82" text-anchor="middle" letter-spacing="0.5">{CONST_IT[ab]}</text>')
+        # corona dei gradi di azimut (default SPENTA: l'A4 non la usa -> golden
+        # invariato). Geometria del disco (D7): stessa proiezione dei cardinali
+        # (N=0 in alto, E=90 a sinistra). `degrees` e' un dict:
+        #   {"step":10} numeri ogni 10°; {"step":30,"minor":10} numeri ogni 30° +
+        #   tacche minori ogni 10°. I numeri ai punti cardinali (0/90/180/270)
+        #   sono saltati: li' ci sono gia' N/E/S/O.
+        if degrees:
+            step=degrees["step"]; minor=degrees.get("minor")
+            col=theme[degrees.get("stroke","grid")]; tcol=theme[degrees.get("fill","text4")]
+            fs=degrees.get("size",9)*k
+            def _pt(rr,az):
+                ar=np.radians(az); return cx-rr*np.sin(ar), cy-rr*np.cos(ar)
+            if minor:
+                for az in range(0,360,minor):
+                    if az%step==0: continue
+                    x1,y1=_pt(rad,az); x2,y2=_pt(rad+3*k,az)
+                    a(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" stroke="{col}" stroke-width="{0.8*k:.2f}" opacity="0.6"/>')
+            for az in range(0,360,step):
+                x1,y1=_pt(rad,az); x2,y2=_pt(rad+6*k,az)
+                a(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" stroke="{col}" stroke-width="{1.0*k:.2f}" opacity="0.85"/>')
+                if az%90==0: continue  # 0/90/180/270: lasciati ai cardinali
+                nx,ny=_pt(rad+15*k,az)
+                a(f'<text x="{nx:.1f}" y="{ny+3*k:.1f}" fill="{tcol}" font-size="{fs:.1f}" text-anchor="middle" opacity="0.9">{az}</text>')
         # punti cardinali
         if cardinals:
             for lab,ang in (('N',0),('E',90),('S',180),('O',270)):
@@ -391,7 +419,8 @@ class Engine:
         return self.sky_disc_svg(b["cx"], b["cy"], b["rad"], lst, lat_rad, theme,
                                  cardinals=b.get("cardinals", True),
                                  labels=b.get("labels", True),
-                                 marquee=b.get("marquee", True))
+                                 marquee=b.get("marquee", True),
+                                 degrees=b.get("degrees"))
 
     @staticmethod
     def _render_ctx(data):
@@ -568,17 +597,19 @@ class Engine:
                 tb={"x":f"{cx:.2f}","y":f"{cy+daynum['dy']:.2f}","fill":fill,
                     "size":daynum["size"],"anchor":"middle","content":"{day}"}
                 out.append(self._render_text(tb, theme, {"day":md.day}))
-        # riga opzionale di etichette delle fasi principali (giorno + nome),
-        # spaziate uniformemente sotto il calendario (dashboard/rail). Il file
-        # da' posizione, passo e la mappa chiave->nome breve; il dato da' quali
-        # giorni e in che ordine (i giorni con phase_key, gia' incrociati con
-        # moon_phases).
+        # riga opzionale di etichette delle fasi principali (giorno + nome). Il
+        # file da' altezza, colore e la mappa chiave->nome; il dato da' quali
+        # giorni (quelli con phase_key, gia' incrociati con moon_phases).
+        # Ogni etichetta e' ANCORATA alla COLONNA del suo giorno nel calendario
+        # (centrata sotto il dischetto), non a colonne fisse: cosi' regge 3, 4 o
+        # 5 fasi (mesi con due lune nuove) senza mai finire fuori tela.
         pl=b.get("phase_labels")
         if pl:
             names=pl["names"]
-            for j,md in enumerate(m for m in data.moon_days if m.phase_key):
-                tb={"x":pl["x0"]+j*pl["gap"],"y":pl["y"],"fill":pl["fill"],
-                    "size":pl["size"],"weight":pl.get("weight"),"content":pl["content"]}
+            for md in (m for m in data.moon_days if m.phase_key):
+                cx=x0+((md.day-1)%cols)*cgap
+                tb={"x":f"{cx:.2f}","y":pl["y"],"fill":pl["fill"],"size":pl["size"],
+                    "weight":pl.get("weight"),"anchor":"middle","content":pl["content"]}
                 out.append(self._render_text(tb, theme, {"day":md.day,"name":names[md.phase_key]}))
         return '\n'.join(out)
 

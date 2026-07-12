@@ -20,6 +20,9 @@ Catturano gli errori NOSTRI (ora di riferimento, verso crescente/calante,
 incrocio con le date delle fasi, sfasamento di un giorno).
 """
 import calendar
+import json
+import os
+import re
 from datetime import datetime
 
 import numpy as np
@@ -136,6 +139,36 @@ def test_non_vacuita_sfasamento_di_un_giorno(eng):
     assert peggiore >= TOL_ELONG, (
         "il cross-check NON ha visto lo sfasamento di un giorno: sarebbe vacuo"
     )
+
+
+def test_cinque_fasi_non_escono_dalla_tela(eng, root, tmp_path):
+    """Mesi con 5 fasi principali (due lune nuove/piene) esistono: maggio 2026
+    ne ha 5. Le etichette, ancorate alla COLONNA del giorno, devono restare TUTTE
+    dentro la tela (il bug vecchio, a colonne fisse, ne spingeva la quinta fuori)."""
+    # 1) maggio 2026 ha davvero 5 fasi principali
+    assert len(eng.moon_phases(2026, 5, TZ)) == 5, "maggio 2026 dovrebbe avere 5 fasi"
+
+    # 2) rende un calendario a riga da 31 con le etichette delle fasi
+    W = 1080
+    layout = {"canvas": {"w": W, "h": 200, "font_family": "Arial"}, "blocks": [{
+        "type": "moon_calendar", "cols": 31,
+        "x0": 71.6, "y0": 60, "col_gap": 31.22, "row_gap": 0, "radius": 10.5,
+        "base": {"fill": "panel", "stroke": "border2", "stroke_width": 0.8},
+        "lit_fill": "moon_lit",
+        "phase_labels": {"y": 120, "fill": "moon_label", "size": 12,
+                         "content": "{day} {name}",
+                         "names": {"new": "Luna Nuova", "first": "Primo Q.",
+                                   "full": "Luna Piena", "last": "Ultimo Q."}}}]}
+    theme = json.load(open(os.path.join(root, "brand", "palettes", "osservatorio.json"), encoding="utf-8"))
+    out = str(tmp_path / "maggio.svg")
+    eng.generate(2026, 5, 45.5455, 11.5353, "Vicenza", theme, out, layout=layout)
+    svg = open(out, encoding="utf-8").read()
+
+    # 3) ci sono 5 etichette di fase, e ogni x sta dentro [0, W]
+    etichette = re.findall(r'<text x="([\d.]+)"[^>]*>\d+ (?:Luna|Primo|Ultimo)', svg)
+    assert len(etichette) == 5, f"attese 5 etichette di fase, trovate {len(etichette)}"
+    for x in map(float, etichette):
+        assert 0 <= x <= W, f"etichetta di fase fuori tela: x={x} (tela {W})"
 
 
 def test_non_vacuita_verso_invertito(eng):
