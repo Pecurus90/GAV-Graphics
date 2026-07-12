@@ -25,6 +25,9 @@ from skyfield import almanac
 MONTHS_IT = ["", "gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno",
              "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"]
 
+# rosa a 8 settori in italiano (azimut 0=Nord, 90=Est, orario): indice = round(az/45)%8
+DIREZIONI_IT = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ovest", "Ovest", "Nord-Ovest"]
+
 # nomi italiani costellazioni principali da etichettare
 CONST_IT = {'Aql':'Aquila','Boo':'Boote','CrB':'Corona Boreale','Cas':'Cassiopea',
  'Cep':'Cefeo','Cyg':'Cigno','Del':'Delfino','Dra':'Dragone','Her':'Ercole',
@@ -92,8 +95,11 @@ class Planet:
     name: str     # es. 'Venere'
     rise: str     # alzata '%H:%M' o '--'
     set_: str     # tramonto '%H:%M' o '--'
-    note: str     # nota testuale di visibilità
+    note: str     # nota testuale di visibilità (NON toccare: la legge l'A4)
     status: str   # 'ok'|'info'|'warn'|'muted'
+    az: float     # azimut (gradi, 0=Nord, 90=Est) all'istante di massima altezza
+    direction: str  # direzione dove guardare, es. 'a Sud-Est' / 'basso a Est' /
+                  # '' se non osservabile. Campo NUOVO: l'A4 non lo usa.
 
 
 @dataclass(frozen=True)
@@ -237,13 +243,13 @@ class Engine:
             app_s=(earth+loc).at(tmid).observe(sun).apparent()
             app_p=(earth+loc).at(tmid).observe(tgt).apparent()
             elong=app_s.separation_from(app_p).degrees
-            # best night altitude and when
-            best_alt=-90; best_h=None
+            # best night altitude and when (+ azimut a quell'istante)
+            best_alt=-90; best_h=None; best_az=0.0
             for h in hours:
                 dd=day+(1 if h<12 else 0)
                 tt=self.ts.from_datetime(tz.localize(datetime(year,month,dd,h,0)))
-                alt=(earth+loc).at(tt).observe(tgt).apparent().altaz()[0].degrees
-                if alt>best_alt: best_alt=alt; best_h=h
+                aa=(earth+loc).at(tt).observe(tgt).apparent().altaz()
+                if aa[0].degrees>best_alt: best_alt=aa[0].degrees; best_h=h; best_az=aa[1].degrees
             # classify
             if elong<15:
                 status='muted'; note='Non osservabile, vicino al Sole'
@@ -257,11 +263,26 @@ class Engine:
                       'a inizio notte' if best_h==23 else
                       'a notte fonda' if best_h in (0,1,2) else 'verso l\'alba')
                 note=f'Visibile {when}'
-            rows.append((label,rise or '--',set_ or '--',note,status))
+            direction=self._planet_direction(best_az, best_alt, status)
+            rows.append((label,rise or '--',set_ or '--',note,status,best_az,direction))
         # ordine: osservabili prima
         order={'ok':0,'info':1,'warn':2,'muted':3}
         rows.sort(key=lambda r:order[r[4]])
         return rows
+
+    @staticmethod
+    def _planet_direction(az, alt, status):
+        """Direzione cardinale (8 settori, italiano) verso cui guardare quando il
+        pianeta e' MEGLIO PIAZZATO, cioe' alla massima altezza della notte: e' il
+        compagno naturale del best_alt gia' calcolato per la visibilita', e da'
+        la direzione "dove punto lo sguardo quando conviene". Qualificatore
+        'basso' sotto 20 gradi (sotto questa quota estinzione e ostacoli
+        all'orizzonte pesano). Per i non osservabili (muted) niente direzione:
+        la nota dice gia' 'vicino al Sole'."""
+        if status=='muted':
+            return ''
+        settore=DIREZIONI_IT[round(az/45.0)%8]
+        return f'basso a {settore}' if alt<20.0 else f'a {settore}'
 
     # ---- render: componenti riutilizzabili ----
     @staticmethod
@@ -350,8 +371,8 @@ class Engine:
                 for nm,ph,dt in self.moon_phases(year,month,tz)]
         days=[MoonDay(d,frac,wax,pk)
               for d,frac,wax,pk in self.moon_days(year,month,tz,hour_local)]
-        planets=[Planet(nm,rise,set_,note,st)
-                 for nm,rise,set_,note,st in self.planet_table(year,month,tz,loc)]
+        planets=[Planet(nm,rise,set_,note,st,az,dirn)
+                 for nm,rise,set_,note,st,az,dirn in self.planet_table(year,month,tz,loc)]
         return SkyData(year=year, month=month, place=place, lat=lat, lon=lon,
                        hour_local=hour_local, moon_phases=phases, moon_days=days,
                        planets=planets)
@@ -400,7 +421,8 @@ class Engine:
         keep=b.get("statuses")
         planets=data.planets if keep is None else [p for p in data.planets if p.status in keep]
         for i,pl in enumerate(planets):
-            item={"name":pl.name,"rise":pl.rise,"set":pl.set_,"note":pl.note,"status":pl.status}
+            item={"name":pl.name,"rise":pl.rise,"set":pl.set_,"note":pl.note,
+                  "status":pl.status,"direction":pl.direction,"az":f"{pl.az:.0f}"}
             y=b["y0"]+i*b["step"]
             fill=theme["status"][pl.status] if dot.get("fill_status") else theme[dot["fill"]]
             out.append(f'<circle cx="{b["x0"]+dot["dx"]}" cy="{y+dot["dy"]}" r="{dot["r"]}" fill="{fill}"/>')
