@@ -15,6 +15,9 @@ env/
 # ...ma i riferimenti "golden" dei test DEVONO essere tracciati
 !tests/golden/
 !tests/golden/**
+# ...e i mockup del designer sono RIFERIMENTI di design, non artefatti di build
+!brand/mockups/
+!brand/mockups/**
 
 # Config locale di Claude Code (permessi macchina-specifici)
 .claude/settings.local.json
