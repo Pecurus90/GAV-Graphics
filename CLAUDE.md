@@ -157,11 +157,26 @@ descrive lo fa scollare al primo cambiamento.
     - Colonne: *simbolo · M31 — Galassia di Andromeda · galassia · in Andromeda ·
       binocolo*.
   - **L'Ammasso della Vergine è UNA voce, non sedici.** M49, M58-61, M84-91,
-    M98-100, M104 stanno in un fazzoletto di cielo. Sedici *simboli* fitti sono
+    M98-100 stanno in un fazzoletto di cielo. Sedici *simboli* fitti sono
     informazione ("qui ci sono un sacco di galassie" — è ciò che fanno gli atlanti
     veri); sedici *etichette* sono **impossibili** (l'anti-collisione ne
     scarterebbe a caso). Sulla mappa **una sola etichetta** appoggiata al
     grappolo; in tabella **una sola riga** che li elenca.
+    *(Corretto 2026-07-13: **M104 NON fa parte del gruppo.** È a dec −11,6°,
+    ~24° a sud del nucleo dell'ammasso: sta nella costellazione della Vergine,
+    non nell'ammasso. Ed è un gioiello a sé — il Sombrero — che collassato fra i
+    sedici sarebbe sepolto.)*
+    Il gruppo ha **notevolezza T3**, per coerenza col patto mappa↔tabella: se il
+    grappolo è etichettato sulla mappa ma non compare in tabella, il lettore vede
+    un nodo fitto di simboli con un nome e **nessuna spiegazione sotto**.
+  - **L'ORDINE della tabella è il MERITO, non l'altezza.** *(Deciso 2026-07-13,
+    dopo misura.)* Il filtro resta l'altezza (>30°); l'**ordine** usa un campo
+    `notevolezza` (0-3) **curato nel catalogo**. Misurato: ordinare per altezza
+    metterebbe in testa a marzo M108/M109/M106 — galassie di 10ª magnitudine —
+    mentre col merito la testa è M81/M82/M51/M63/M64/M97/M44/M3, i gioielli di
+    primavera. La regola mensile resta **automatica**; il merito è una
+    **proprietà curata dell'oggetto** (decisa una volta), non una **lista curata**
+    (decisa ogni mese) — è la distinzione che salva D9.
   - **"Cosa serve per vederlo": due categorie (binocolo / telescopio), e NON si
     calcolano dalla magnitudine.** *(Le due categorie le propone Marco; il vincolo
     è dell'architetto.)* La magnitudine misura la luce **totale**: un oggetto
