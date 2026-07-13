@@ -20,7 +20,10 @@
    "nebulosa diffusa": "quadrato",
    "nebulosa planetaria": "cerchio con quattro punte"
   },
-  "visione": "stima iniziale da magnitudine (soglia V<=7.0 => binocolo). Campo DATO sovrascrivibile: la magnitudine mente sugli oggetti a bassa brillanza superficiale (M33 in testa). visione_rivedere=true segnala i candidati da correggere a mano."
+  "visione": "stima iniziale da magnitudine (soglia V<=7.0 => binocolo). Campo DATO sovrascrivibile: la magnitudine mente sugli oggetti a bassa brillanza superficiale (M33 in testa). visione_rivedere=true segnala i candidati da correggere a mano.",
+  "notevolezza": "Merito editoriale 0-3 (3=gioiello). E' il campo con cui la TABELLA ordina: il filtro e' l'altezza (>30 gradi), l'ordine e' il merito. Curato una volta come DATO (non la magnitudine, che mente; non la brillanza superficiale, che boccia M31 a occhio nudo). Il GAV lo affina.",
+  "gruppo": "Oggetti che collassano in UNA riga/etichetta. \"vergine\" = Ammasso della Vergine (16 galassie in un fazzoletto): sulla mappa 16 simboli, in tabella e su etichetta una voce sola.",
+  "tabella_regola": "filtro alt>30 gradi -> collassa i gruppi -> ordina per (notevolezza desc, altezza desc) -> taglia ai primi N. N vive nel FILE di layout, non nel codice."
  },
  "oggetti": [
   {
@@ -47,7 +50,8 @@
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
    "visione_rivedere": false,
-   "note": "Resto di supernova: la convenzione degli atlanti non ha un simbolo dedicato; reso come nebulosa diffusa (il Granchio appare come una macchia diffusa)."
+   "note": "Resto di supernova: la convenzione degli atlanti non ha un simbolo dedicato; reso come nebulosa diffusa (il Granchio appare come una macchia diffusa).",
+   "notevolezza": 2
   },
   {
    "M": 2,
@@ -72,7 +76,8 @@
    "costellazione_it": "Acquario",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 3,
@@ -97,7 +102,8 @@
    "costellazione_it": "Cani da Caccia",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 4,
@@ -122,7 +128,8 @@
    "costellazione_it": "Scorpione",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 5,
@@ -147,7 +154,8 @@
    "costellazione_it": "Serpente",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 6,
@@ -172,7 +180,8 @@
    "costellazione_it": "Scorpione",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 7,
@@ -197,7 +206,8 @@
    "costellazione_it": "Scorpione",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 8,
@@ -222,7 +232,8 @@
    "costellazione_it": "Sagittario",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 9,
@@ -247,7 +258,8 @@
    "costellazione_it": "Ofiuco",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 10,
@@ -272,7 +284,8 @@
    "costellazione_it": "Ofiuco",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 11,
@@ -297,7 +310,8 @@
    "costellazione_it": "Scudo",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 12,
@@ -322,7 +336,8 @@
    "costellazione_it": "Ofiuco",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 13,
@@ -347,7 +362,8 @@
    "costellazione_it": "Ercole",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 14,
@@ -372,7 +388,8 @@
    "costellazione_it": "Ofiuco",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 15,
@@ -397,7 +414,8 @@
    "costellazione_it": "Pegaso",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 16,
@@ -422,7 +440,8 @@
    "costellazione_it": "Serpente",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 17,
@@ -447,7 +466,8 @@
    "costellazione_it": "Sagittario",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 18,
@@ -472,7 +492,8 @@
    "costellazione_it": "Sagittario",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 1
   },
   {
    "M": 19,
@@ -497,7 +518,8 @@
    "costellazione_it": "Ofiuco",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 20,
@@ -522,7 +544,8 @@
    "costellazione_it": "Sagittario",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 21,
@@ -547,7 +570,8 @@
    "costellazione_it": "Sagittario",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 1
   },
   {
    "M": 22,
@@ -572,7 +596,8 @@
    "costellazione_it": "Sagittario",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 23,
@@ -597,7 +622,8 @@
    "costellazione_it": "Sagittario",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 24,
@@ -623,7 +649,8 @@
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
    "visione_rivedere": false,
-   "note": "Non e' un oggetto singolo ma una NUBE STELLARE della Via Lattea (una finestra su un campo denso). Nessun simbolo d'atlante la descrive: resa come ammasso aperto per necessita'. Da decidere se disegnarla sulla mappa o tenerla solo in tabella."
+   "note": "Non e' un oggetto singolo ma una NUBE STELLARE della Via Lattea (una finestra su un campo denso). Nessun simbolo d'atlante la descrive: resa come ammasso aperto per necessita'. Da decidere se disegnarla sulla mappa o tenerla solo in tabella.",
+   "notevolezza": 2
   },
   {
    "M": 25,
@@ -648,7 +675,8 @@
    "costellazione_it": "Sagittario",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 26,
@@ -673,7 +701,8 @@
    "costellazione_it": "Scudo",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 1
   },
   {
    "M": 27,
@@ -698,7 +727,8 @@
    "costellazione_it": "Volpetta",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 28,
@@ -723,7 +753,8 @@
    "costellazione_it": "Sagittario",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 29,
@@ -748,7 +779,8 @@
    "costellazione_it": "Cigno",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 1
   },
   {
    "M": 30,
@@ -773,7 +805,8 @@
    "costellazione_it": "Capricorno",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 1
   },
   {
    "M": 31,
@@ -798,7 +831,8 @@
    "costellazione_it": "Andromeda",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": true
+   "visione_rivedere": true,
+   "notevolezza": 3
   },
   {
    "M": 32,
@@ -823,7 +857,8 @@
    "costellazione_it": "Andromeda",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 33,
@@ -846,9 +881,10 @@
    "brillanza_sup": 23.61,
    "costellazione": "Tri",
    "costellazione_it": "Triangolo",
-   "visione": "binocolo",
-   "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": true
+   "visione": "telescopio",
+   "visione_fonte": "corretto-GAV",
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 34,
@@ -873,7 +909,8 @@
    "costellazione_it": "Perseo",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 35,
@@ -898,7 +935,8 @@
    "costellazione_it": "Gemelli",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 36,
@@ -923,7 +961,8 @@
    "costellazione_it": "Auriga",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 37,
@@ -948,7 +987,8 @@
    "costellazione_it": "Auriga",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 38,
@@ -973,7 +1013,8 @@
    "costellazione_it": "Auriga",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 39,
@@ -998,7 +1039,8 @@
    "costellazione_it": "Cigno",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 1
   },
   {
    "M": 40,
@@ -1021,7 +1063,9 @@
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
    "visione_rivedere": false,
-   "note": "Stella doppia (Winnecke 4): un errore storico di Messier, non un oggetto del profondo cielo. Fuori dalle 5 famiglie: sulla mappa e' un punto stellare, non un simbolo d'atlante."
+   "note": "Stella doppia (Winnecke 4): un errore storico di Messier, non un oggetto del profondo cielo. Fuori dalle 5 famiglie: sulla mappa e' un punto stellare, non un simbolo d'atlante.",
+   "notevolezza": 0,
+   "disegna_mappa": false
   },
   {
    "M": 41,
@@ -1046,7 +1090,8 @@
    "costellazione_it": "Cane Maggiore",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 42,
@@ -1071,7 +1116,8 @@
    "costellazione_it": "Orione",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 43,
@@ -1096,7 +1142,8 @@
    "costellazione_it": "Orione",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 44,
@@ -1121,7 +1168,8 @@
    "costellazione_it": "Cancro",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 45,
@@ -1146,7 +1194,8 @@
    "costellazione_it": "Toro",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 46,
@@ -1171,7 +1220,8 @@
    "costellazione_it": "Poppa",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 47,
@@ -1196,7 +1246,8 @@
    "costellazione_it": "Poppa",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 48,
@@ -1221,7 +1272,8 @@
    "costellazione_it": "Idra",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 49,
@@ -1246,7 +1298,9 @@
    "costellazione_it": "Vergine",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2,
+   "gruppo": "vergine"
   },
   {
    "M": 50,
@@ -1271,7 +1325,8 @@
    "costellazione_it": "Unicorno",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 51,
@@ -1296,7 +1351,8 @@
    "costellazione_it": "Cani da Caccia",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 52,
@@ -1321,7 +1377,8 @@
    "costellazione_it": "Cassiopea",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 53,
@@ -1346,7 +1403,8 @@
    "costellazione_it": "Chioma di Berenice",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 54,
@@ -1371,7 +1429,8 @@
    "costellazione_it": "Sagittario",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 1
   },
   {
    "M": 55,
@@ -1396,7 +1455,8 @@
    "costellazione_it": "Sagittario",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 56,
@@ -1421,7 +1481,8 @@
    "costellazione_it": "Lira",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 57,
@@ -1446,7 +1507,8 @@
    "costellazione_it": "Lira",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 58,
@@ -1471,7 +1533,9 @@
    "costellazione_it": "Vergine",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 1,
+   "gruppo": "vergine"
   },
   {
    "M": 59,
@@ -1496,7 +1560,9 @@
    "costellazione_it": "Vergine",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 1,
+   "gruppo": "vergine"
   },
   {
    "M": 60,
@@ -1521,7 +1587,9 @@
    "costellazione_it": "Vergine",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2,
+   "gruppo": "vergine"
   },
   {
    "M": 61,
@@ -1546,7 +1614,9 @@
    "costellazione_it": "Vergine",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 1,
+   "gruppo": "vergine"
   },
   {
    "M": 62,
@@ -1571,7 +1641,8 @@
    "costellazione_it": "Ofiuco",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 63,
@@ -1596,7 +1667,8 @@
    "costellazione_it": "Cani da Caccia",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 64,
@@ -1621,7 +1693,8 @@
    "costellazione_it": "Chioma di Berenice",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 65,
@@ -1646,7 +1719,8 @@
    "costellazione_it": "Leone",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 66,
@@ -1671,7 +1745,8 @@
    "costellazione_it": "Leone",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 67,
@@ -1696,7 +1771,8 @@
    "costellazione_it": "Cancro",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 68,
@@ -1721,7 +1797,8 @@
    "costellazione_it": "Idra",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 69,
@@ -1746,7 +1823,8 @@
    "costellazione_it": "Sagittario",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 1
   },
   {
    "M": 70,
@@ -1771,7 +1849,8 @@
    "costellazione_it": "Sagittario",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 1
   },
   {
    "M": 71,
@@ -1796,7 +1875,8 @@
    "costellazione_it": "Freccia",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 72,
@@ -1821,7 +1901,8 @@
    "costellazione_it": "Acquario",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 1
   },
   {
    "M": 73,
@@ -1844,7 +1925,8 @@
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
    "visione_rivedere": false,
-   "note": "Asterismo di 4 stelle, un tempo creduto ammasso. Reso come ammasso aperto, ma e' un caso dubbio."
+   "note": "Asterismo di 4 stelle, un tempo creduto ammasso. Reso come ammasso aperto, ma e' un caso dubbio.",
+   "notevolezza": 0
   },
   {
    "M": 74,
@@ -1869,7 +1951,8 @@
    "costellazione_it": "Pesci",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 75,
@@ -1894,7 +1977,8 @@
    "costellazione_it": "Sagittario",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 1
   },
   {
    "M": 76,
@@ -1919,7 +2003,8 @@
    "costellazione_it": "Perseo",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 77,
@@ -1944,7 +2029,8 @@
    "costellazione_it": "Balena",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 78,
@@ -1969,7 +2055,8 @@
    "costellazione_it": "Orione",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 79,
@@ -1994,7 +2081,8 @@
    "costellazione_it": "Lepre",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 80,
@@ -2019,7 +2107,8 @@
    "costellazione_it": "Scorpione",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 81,
@@ -2044,7 +2133,8 @@
    "costellazione_it": "Orsa Maggiore",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 82,
@@ -2069,7 +2159,8 @@
    "costellazione_it": "Orsa Maggiore",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 83,
@@ -2094,7 +2185,8 @@
    "costellazione_it": "Idra",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 84,
@@ -2119,7 +2211,9 @@
    "costellazione_it": "Vergine",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2,
+   "gruppo": "vergine"
   },
   {
    "M": 85,
@@ -2144,7 +2238,9 @@
    "costellazione_it": "Chioma di Berenice",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2,
+   "gruppo": "vergine"
   },
   {
    "M": 86,
@@ -2169,7 +2265,9 @@
    "costellazione_it": "Vergine",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2,
+   "gruppo": "vergine"
   },
   {
    "M": 87,
@@ -2194,7 +2292,9 @@
    "costellazione_it": "Vergine",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2,
+   "gruppo": "vergine"
   },
   {
    "M": 88,
@@ -2219,7 +2319,9 @@
    "costellazione_it": "Chioma di Berenice",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2,
+   "gruppo": "vergine"
   },
   {
    "M": 89,
@@ -2244,7 +2346,9 @@
    "costellazione_it": "Vergine",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 1,
+   "gruppo": "vergine"
   },
   {
    "M": 90,
@@ -2269,7 +2373,9 @@
    "costellazione_it": "Vergine",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2,
+   "gruppo": "vergine"
   },
   {
    "M": 91,
@@ -2294,7 +2400,9 @@
    "costellazione_it": "Chioma di Berenice",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 1,
+   "gruppo": "vergine"
   },
   {
    "M": 92,
@@ -2319,7 +2427,8 @@
    "costellazione_it": "Ercole",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 93,
@@ -2344,7 +2453,8 @@
    "costellazione_it": "Poppa",
    "visione": "binocolo",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 94,
@@ -2369,7 +2479,8 @@
    "costellazione_it": "Cani da Caccia",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 95,
@@ -2394,7 +2505,8 @@
    "costellazione_it": "Leone",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 96,
@@ -2419,7 +2531,8 @@
    "costellazione_it": "Leone",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 97,
@@ -2444,7 +2557,8 @@
    "costellazione_it": "Orsa Maggiore",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 98,
@@ -2469,7 +2583,9 @@
    "costellazione_it": "Chioma di Berenice",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 1,
+   "gruppo": "vergine"
   },
   {
    "M": 99,
@@ -2494,7 +2610,9 @@
    "costellazione_it": "Chioma di Berenice",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 1,
+   "gruppo": "vergine"
   },
   {
    "M": 100,
@@ -2519,7 +2637,9 @@
    "costellazione_it": "Chioma di Berenice",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2,
+   "gruppo": "vergine"
   },
   {
    "M": 101,
@@ -2544,7 +2664,8 @@
    "costellazione_it": "Orsa Maggiore",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 102,
@@ -2570,7 +2691,8 @@
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
    "visione_rivedere": false,
-   "note": "Oggetto storicamente disputato. OpenNGC lo tratta come duplicato di M101. La consuetudine amatoriale moderna lo identifica con NGC 5866 (Dragone): incluso qui con quella identificazione perche' le liste Messier canoniche arrivano a 110."
+   "note": "Oggetto storicamente disputato. OpenNGC lo tratta come duplicato di M101. La consuetudine amatoriale moderna lo identifica con NGC 5866 (Dragone): incluso qui con quella identificazione perche' le liste Messier canoniche arrivano a 110.",
+   "notevolezza": 1
   },
   {
    "M": 103,
@@ -2595,7 +2717,8 @@
    "costellazione_it": "Cassiopea",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 104,
@@ -2620,7 +2743,8 @@
    "costellazione_it": "Vergine",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 3
   },
   {
    "M": 105,
@@ -2645,7 +2769,8 @@
    "costellazione_it": "Leone",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 106,
@@ -2670,7 +2795,8 @@
    "costellazione_it": "Cani da Caccia",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 107,
@@ -2695,7 +2821,8 @@
    "costellazione_it": "Ofiuco",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 108,
@@ -2720,7 +2847,8 @@
    "costellazione_it": "Orsa Maggiore",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 109,
@@ -2745,7 +2873,8 @@
    "costellazione_it": "Orsa Maggiore",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   },
   {
    "M": 110,
@@ -2770,7 +2899,8 @@
    "costellazione_it": "Andromeda",
    "visione": "telescopio",
    "visione_fonte": "stima-magnitudine",
-   "visione_rivedere": false
+   "visione_rivedere": false,
+   "notevolezza": 2
   }
  ]
 }
