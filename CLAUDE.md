@@ -118,13 +118,28 @@ descrive lo fa scollare al primo cambiamento.
     è "il programma non funziona", e non hai i log.
   - Prima di rendere pubblico il repo: `LICENSE` (senza, nessuno ha diritto di
     usarlo) e README riallineato alla realtà.
+  - **La provenienza dei dati è nota e verificata** *(2026-07-13, per confronto
+    integrale: stesso hash, non "somiglia")*:
+    | Dato | Fonte | Licenza |
+    |---|---|---|
+    | `data/stars6.json` (5044 stelle) | **d3-celestial**, Olaf Frohn | **BSD-2** |
+    | `data/const_lines.json` (89 cost.) | **d3-celestial**, Olaf Frohn | **BSD-2** |
+    | `data/messier.json` | OpenNGC, Mattia Verga | CC-BY-SA-4.0 *(attribuita)* |
+    | `brand/fonts/*.ttf` | Google Fonts | OFL *(licenze nel repo)* |
+    | `de421.bsp` | JPL/NASA | pubblico dominio |
+    **La BSD-2 obbliga anche la FORMA BINARIA**: la nota di copyright va
+    riprodotta «nella documentazione o negli altri materiali forniti con la
+    distribuzione» — cioè **l'`.exe` di D4 deve portare i crediti con sé** (una
+    schermata "Informazioni", o un file di note accanto all'eseguibile). Non è un
+    cavillo: è la condizione a cui abbiamo il diritto di usare quei dati.
   - **Font del brand (decisi dal designer, 2026-07-12): Barlow Semi Condensed**
     (testata, titoli, etichette, cardinali) **+ Instrument Sans** (corpo: nomi,
     orari, note, date). Entrambi **SIL Open Font License**: ridistribuibili nel
     repo e nell'`.exe`. *Superano* la proposta precedente (Inter / Space
     Grotesk), che resta citata in `render.py` (`SANS = "Inter"`) e in
-    `cielo-del-mese_struttura.md`: **da riallineare**. I `.ttf` non sono ancora
-    nel repo — finché mancano, `resvg` ripiega sui font di sistema (R6).
+    `cielo-del-mese_struttura.md`: **da riallineare**. *(Corretto 2026-07-13:
+    questo punto diceva ancora «i `.ttf` non sono nel repo». Non è più vero — ci
+    sono, ed è verificato: vedi R6.)*
 - **D10 — L'app è un contenitore di strumenti, non un generatore singolo.**
   *(Deciso da Marco, 2026-07-13.)* La UI ha una **barra laterale**: oggi una voce
   attiva (*Cielo del Mese*), domani altre (*Pillole di astronomia*, e ciò che
@@ -169,6 +184,17 @@ descrive lo fa scollare al primo cambiamento.
       piazzati). La regola resta automatica e la tabella non sfonda mai.
     - **L'etichetta sulla mappa ce l'ha solo chi sta in tabella.** Mappa e tabella
       si guardano l'un l'altra: nessun nome sulla mappa senza spiegazione sotto.
+      **E il patto vale nei due sensi** *(precisato 2026-07-13)*: chi sta in
+      tabella **deve** avere il nome sulla mappa, o il socio legge una riga e non
+      trova nulla nel disco. Quindi **un'etichetta non si scarta mai**: se non
+      entra vicino al suo oggetto, si allontana e si collega con una **linea di
+      richiamo** — la stessa tecnica già approvata per l'Ammasso della Vergine,
+      estesa a tutti. *(Deciso da Marco, 2026-07-13.)* Un'etichetta scartata
+      significherebbe che è la tipografia a decidere il contenuto editoriale.
+      **La superficie di collisione include i SIMBOLI**, non solo le altre
+      etichette: è il difetto trovato il 2026-07-13 — `placed_boxes` conteneva
+      solo etichette, quindi un nome non aveva alcun motivo di evitare un
+      simbolo, e ci finiva sopra.
     - Colonne: *simbolo · M31 — Galassia di Andromeda · galassia · in Andromeda ·
       binocolo*.
   - **L'Ammasso della Vergine è UNA voce, non sedici.** M49, M58-61, M84-91,
@@ -192,6 +218,15 @@ descrive lo fa scollare al primo cambiamento.
     primavera. La regola mensile resta **automatica**; il merito è una
     **proprietà curata dell'oggetto** (decisa una volta), non una **lista curata**
     (decisa ogni mese) — è la distinzione che salva D9.
+    **Il 3 dev'essere RARO** *(corretto 2026-07-13, dopo misura sull'output di
+    marzo)*: con **otto** oggetti a `notevolezza: 3` il merito non ordina più
+    niente, il pareggio lo rompe l'altezza, e in testa alla tabella finisce
+    **M97** (Civetta, mag 9.9, solo telescopio) sopra **M44** (Presepe, mag 3.1)
+    e M81. Cioè: **l'altezza travestita da merito** — esattamente ciò che D9
+    voleva escludere. Il 3 lo tengono solo gli oggetti che un divulgatore mette
+    in **prima riga davanti a un principiante**. La prima riga è la vetrina del
+    poster: se promette un telescopio dove poteva promettere un binocolo, ha
+    sbagliato bersaglio. *(Deciso da Marco, 2026-07-13.)*
   - **"Cosa serve per vederlo": due categorie (binocolo / telescopio), e NON si
     calcolano dalla magnitudine.** *(Le due categorie le propone Marco; il vincolo
     è dell'architetto.)* La magnitudine misura la luce **totale**: un oggetto
