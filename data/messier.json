@@ -23,6 +23,16 @@
   "visione": "stima iniziale da magnitudine (soglia V<=7.0 => binocolo). Campo DATO sovrascrivibile: la magnitudine mente sugli oggetti a bassa brillanza superficiale (M33 in testa). visione_rivedere=true segnala i candidati da correggere a mano.",
   "notevolezza": "Merito editoriale 0-3 (3=gioiello). E' il campo con cui la TABELLA ordina: il filtro e' l'altezza (>30 gradi), l'ordine e' il merito. Curato una volta come DATO (non la magnitudine, che mente; non la brillanza superficiale, che boccia M31 a occhio nudo). Il GAV lo affina.",
   "gruppo": "Oggetti che collassano in UNA riga/etichetta. \"vergine\" = Ammasso della Vergine (16 galassie in un fazzoletto): sulla mappa 16 simboli, in tabella e su etichetta una voce sola.",
+  "gruppi": {
+   "vergine": {
+    "nome": "Ammasso della Vergine",
+    "costellazione_it": "Vergine",
+    "visione": "telescopio",
+    "min_membri_sopra30": 3,
+    "merito_display": 3,
+    "_nota": "STRUTTURALE, non competitivo: se >= min_membri_sopra30 membri superano i 30 gradi, il gruppo collassa in UNA voce, prende UNA etichetta (anti-collisa) e occupa un posto GARANTITO in tabella. Gli altri N-1 posti li giocano i singoli. I membri sono gli oggetti col tag gruppo=vergine."
+   }
+  },
   "tabella_regola": "filtro alt>30 gradi -> collassa i gruppi -> ordina per (notevolezza desc, altezza desc) -> taglia ai primi N. N vive nel FILE di layout, non nel codice."
  },
  "oggetti": [

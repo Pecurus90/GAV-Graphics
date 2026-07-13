@@ -833,16 +833,21 @@ class Engine:
     def _load_messier(self):
         """Catalogo Messier (data/messier.json) come DATO del motore, caricato una
         volta e in modo pigro (come le icone): l'A4 non lo tocca mai."""
-        if not hasattr(self, "_messier_cache"):
+        if not hasattr(self, "_messier_doc"):
             with open(f"{self.datadir}/messier.json", encoding="utf-8") as fh:
-                self._messier_cache=json.load(fh)["oggetti"]
-        return self._messier_cache
+                self._messier_doc=json.load(fh)
+        return self._messier_doc["oggetti"]
+
+    def _messier_meta(self):
+        self._load_messier()
+        return self._messier_doc.get("_meta", {})
 
     def messier_context(self, lst, lat_rad, cx, cy, rad, n):
         """Contesto Messier per una data/disco: gli oggetti sopra l'orizzonte con
-        le coordinate sul disco (per i SIMBOLI), la TABELLA selezionata (primi N
-        per merito), e le sigle che meritano un'etichetta sulla mappa (= chi sta
-        in tabella, il patto mappa<->tabella di D9). Puro: dipende solo da lst/lat."""
+        le coordinate sul disco (per i SIMBOLI), i punti delle stelle-figura (che
+        l'anti-collisione delle etichette deve evitare), la TABELLA selezionata,
+        e le sigle che meritano un'etichetta (patto mappa<->tabella, D9). Puro:
+        dipende solo da lst/lat."""
         enriched=[]
         for o in self._load_messier():
             if o.get("disegna_mappa") is False:  # M40 (stella doppia): non si disegna
@@ -852,35 +857,50 @@ class Engine:
             if alt<=0: continue
             x,y=self.project(alt,az,cx,cy,rad)
             enriched.append({**o, "alt":alt, "az":az, "x":float(x), "y":float(y)})
-        table=self._messier_select(enriched, n)
+        # stelle-figura proiettate: OSTACOLI per le etichette (come i simboli)
+        fra,fdec=self._figure_star_points()
+        fig_pts=[]
+        if len(fra):
+            fa,faz=self.altaz(fra,fdec,lst,lat_rad); fx,fy=self.project(fa,faz,cx,cy,rad)
+            fig_pts=[(float(fx[i]),float(fy[i])) for i in range(len(fra)) if fa[i]>0]
+        gruppi=self._messier_meta().get("gruppi", {})
+        table=self._messier_select(enriched, n, gruppi)
         labels=set()
         for r in table:
-            labels.add("__vergine__" if r.get("_group")=="vergine" else r["sigla"])
-        return {"enriched":enriched, "table":table, "label_siglas":labels}
+            labels.add(("__group__"+r["_group"]) if r.get("_group") else r["sigla"])
+        return {"enriched":enriched, "table":table, "label_siglas":labels,
+                "figure_pts":fig_pts}
 
     @staticmethod
-    def _messier_select(enriched, n):
-        """La REGOLA della tabella (D9): filtro altezza > 30 gradi, l'Ammasso della
-        Vergine collassa in UNA voce (baricentro dei membri per la linea di
-        richiamo), ordine per (notevolezza desc, altezza desc), primi N. Il N e'
-        del FILE di layout, non del codice."""
-        cand=[o for o in enriched if o["alt"]>30 and o.get("notevolezza",0)>=1]
-        verg=[o for o in cand if o.get("gruppo")=="vergine"]
-        cand=[o for o in cand if o.get("gruppo")!="vergine"]
-        if verg:
-            cx=sum(o["x"] for o in verg)/len(verg); cy=sum(o["y"] for o in verg)/len(verg)
-            # merito 3: quando i suoi membri sono su (primavera) e' un gioiello
-            # ("un sacco di galassie"), e soprattutto deve stare SEMPRE in tabella
-            # se compare sulla mappa, altrimenti il grappolo resta una macchia senza
-            # etichetta (il patto mappa<->tabella lo vieta). Vedi report.
-            cand.append({"sigla":"Ammasso della Vergine", "_group":"vergine",
-                         "nome_it":"Ammasso della Vergine", "nome_fonte":"curato",
-                         "famiglia":"galassia", "notevolezza":3,
-                         "costellazione_it":"Vergine", "visione":"telescopio",
-                         "alt":max(o["alt"] for o in verg), "x":cx, "y":cy,
-                         "_count":len(verg), "_members":verg})
-        cand.sort(key=lambda o:(-o.get("notevolezza",0), -o["alt"]))
-        return cand[:n]
+    def _messier_select(enriched, n, gruppi):
+        """La REGOLA della tabella (D9). Filtro: altezza > 30 gradi. I GRUPPI
+        (definiti nel catalogo, D7) sono STRUTTURALI, non competitivi: se >=
+        `min_membri_sopra30` membri superano i 30 gradi, il gruppo collassa in UNA
+        voce col posto GARANTITO in tabella (baricentro dei membri per la linea di
+        richiamo) — non gareggia per un posto, ce l'ha. I restanti N-|gruppi|
+        posti se li giocano i SINGOLI, ordinati per (notevolezza, altezza). Se un
+        gruppo NON e' attivo (pochi membri sopra i 30), i suoi membri restano
+        singoli come tutti gli altri. Il N e' del FILE di layout, non del codice."""
+        active={}
+        for key,cfg in gruppi.items():
+            up=[o for o in enriched if o.get("gruppo")==key]           # sopra orizzonte
+            hi=[o for o in up if o["alt"]>30]                          # sopra i 30
+            if len(hi) >= cfg.get("min_membri_sopra30",3):
+                gx=sum(o["x"] for o in up)/len(up); gy=sum(o["y"] for o in up)/len(up)
+                active[key]={"sigla":cfg["nome"], "_group":key, "nome_it":cfg["nome"],
+                    "nome_fonte":"curato", "famiglia":"galassia",
+                    "notevolezza":cfg.get("merito_display",3),
+                    "costellazione_it":cfg.get("costellazione_it",""),
+                    "visione":cfg.get("visione","telescopio"),
+                    "alt":max(o["alt"] for o in hi), "x":gx, "y":gy,
+                    "_count":len(up), "_members":up}
+        singles=[o for o in enriched if o["alt"]>30 and o.get("notevolezza",0)>=1
+                 and o.get("gruppo") not in active]
+        singles.sort(key=lambda o:(-o.get("notevolezza",0), -o["alt"]))
+        groups=list(active.values())
+        rows=groups + singles[: max(0, n-len(groups))]
+        rows.sort(key=lambda o:(-o.get("notevolezza",0), -o["alt"]))  # ordine di stampa
+        return rows
 
     # forme della convenzione degli atlanti (D9): copiate dal mockup del designer.
     # Tutte fill=none, stroke = token colore. `s` = raggio nominale; le proporzioni
@@ -927,52 +947,80 @@ class Engine:
 
     def _render_messier_symbols(self, b, theme, mctx):
         """Simboli di TUTTI i Messier sopra l'orizzonte sul disco (43-87), col
-        simbolo del tipo; etichetta 'Mxx' SOLO a chi sta in tabella (patto D9),
-        con anti-collisione che scarta chi non entra. L'Ammasso della Vergine:
-        grappolo fitto di ellissi + UNA etichetta con linea di richiamo."""
+        simbolo del tipo; etichetta 'Mxx' SOLO a chi sta in tabella (patto D9).
+        L'anti-collisione conosce gli OSTACOLI: i simboli Messier e le stelle
+        delle figure. Chi non trova posto viene scartato (meglio un nome in meno
+        che uno impastato su un'ellisse). L'etichetta del gruppo (Ammasso della
+        Vergine) passa per la STESSA anti-collisione, con linea di richiamo."""
         cx,cy,rad = b["cx"], b["cy"], b["rad"]
         s=b.get("size",4.6); sw=b.get("stroke_width",1.15); col=theme[b.get("fill","gold")]
+        lab_col=theme[b.get("label_fill","gold")]; lsz=b.get("label_size",11)
         out=[]; enriched=mctx["enriched"]; label_siglas=mctx["label_siglas"]
-        # 1) SIMBOLI (tutti). I membri della Vergine piu' piccoli: grappolo fitto.
+        obstacles=[]  # box che le etichette devono evitare (simboli + stelle-figura)
+        # 1) SIMBOLI (tutti). Membri di un gruppo piu' piccoli: grappolo fitto.
         for o in enriched:
-            gruppo = o.get("gruppo")=="vergine"
-            ss = s*0.85 if gruppo else s
-            rot = (o["ra_deg"] % 180.0) - 90.0  # deterministica, per non allineare le ellissi
+            ss = s*0.85 if o.get("gruppo") else s
+            rot = (o["ra_deg"] % 180.0) - 90.0  # deterministica, non allinea le ellissi
             out.append(self._messier_symbol_svg(o["famiglia"], o["x"], o["y"], ss, col, sw, rot))
-        # 2) ETICHETTE dei singoli in tabella (no Vergine: ha la sua), anti-collisione
+            hs=ss*1.25; obstacles.append((o["x"]-hs, o["y"]-hs, o["x"]+hs, o["y"]+hs))
+        for fx,fy in mctx["figure_pts"]:
+            obstacles.append((fx-2.6, fy-2.6, fx+2.6, fy+2.6))
+        # 2) ETICHETTE: richieste dei singoli in tabella + etichetta dei gruppi.
+        #    Priorita' (pri minore = prima): i gruppi per primi (importanti e
+        #    grandi), poi i singoli piu' alti (meglio piazzati).
         reqs=[]
         for o in enriched:
-            if o["sigla"] in label_siglas and o.get("gruppo")!="vergine":
-                reqs.append({"text":o["sigla"], "x":o["x"]+s+3, "y":o["y"]-s+1,
-                             "size":b.get("label_size",11), "alt":o["alt"]})
-        placed_boxes=[]; placed=0; dropped=0
-        # priorita': piu' alto prima (meglio piazzato = piu' probabile tenga il posto)
-        DIRS=[(0,-1),(1,0),(0,1),(-1,0),(1,-1),(1,1),(-1,1),(-1,-1)]; STEP=5
-        cands=[(0,0)]+[(dx*r*STEP, dy*r*STEP) for r in range(1,5) for dx,dy in DIRS]
-        lab_col=theme[b.get("label_fill","gold")]
-        for req in sorted(reqs, key=lambda r:-r["alt"]):
-            w=len(req["text"])*req["size"]*0.6; hh=req["size"]; chosen=None
+            if o["sigla"] in label_siglas and not o.get("gruppo"):
+                reqs.append({"kind":"single", "text":o["sigla"],
+                             "nx":o["x"]+s+3, "ny":o["y"]-s+1,
+                             "w":len(o["sigla"])*lsz*0.62, "h":lsz,
+                             "pri":100.0-o["alt"]})
+        for r in mctx["table"]:
+            if r.get("_group") and ("__group__"+r["_group"]) in label_siglas:
+                gx,gy=r["x"],r["y"]
+                dx,dy=gx-cx,gy-cy; d=(dx*dx+dy*dy)**0.5 or 1.0
+                # ancora naturale: spinta RADIALE verso l'esterno (via dal grappolo)
+                nx,ny=gx+dx/d*46, gy+dy/d*46
+                txt=r["nome_it"]; sub=f'{r["_count"]} galassie · una sola etichetta'
+                reqs.append({"kind":"group", "text":txt, "sub":sub,
+                             "nx":nx, "ny":ny, "w":len(sub)*9.5*0.55, "h":26,
+                             "gx":gx, "gy":gy, "pri":-1.0})
+        # anti-collisione greedy contro OSTACOLI + etichette gia' poste
+        placed_boxes=list(obstacles); placed=0; dropped=0
+        DIRS=[(0,-1),(1,0),(0,1),(-1,0),(1,-1),(1,1),(-1,1),(-1,-1)]; STEP=6
+        cands=[(0,0)]+[(dx*r*STEP, dy*r*STEP) for r in range(1,8) for dx,dy in DIRS]
+        def overlaps(bb):
+            return sum(1 for p in placed_boxes
+                       if not(bb[2]<=p[0] or bb[0]>=p[2] or bb[3]<=p[1] or bb[1]>=p[3]))
+        for req in sorted(reqs, key=lambda r:r["pri"]):
+            w,h=req["w"],req["h"]; chosen=None; best=None
             for ox,oy in cands:
-                px,py=req["x"]+ox, req["y"]+oy
+                px,py=req["nx"]+ox, req["ny"]+oy
                 if (px-cx)**2+(py-cy)**2 > (rad-3)**2: continue
-                bb=(px,py-hh,px+w,py)
-                if any(not(bb[2]<=p[0] or bb[0]>=p[2] or bb[3]<=p[1] or bb[1]>=p[3]) for p in placed_boxes): continue
-                chosen=(px,py,bb); break
+                if req["kind"]=="group":  # box copre le due righe, centrato sull'ancora
+                    bb=(px-w/2, py-11, px+w/2, py+16)
+                else:
+                    bb=(px, py-h, px+w, py)
+                ov=overlaps(bb)
+                if ov==0: chosen=(px,py,bb); break
+                if best is None or ov<best[3]: best=(px,py,bb,ov)
+            # l'etichetta di GRUPPO non si scarta mai (il grappolo non puo' restare
+            # muto): se nessun posto e' libero, prende quello meno sovrapposto.
+            if chosen is None and req["kind"]=="group" and best is not None:
+                chosen=(best[0],best[1],best[2])
             if chosen is None: dropped+=1; continue
             placed_boxes.append(chosen[2]); placed+=1
-            out.append(f'<text x="{chosen[0]:.1f}" y="{chosen[1]:.1f}" fill="{lab_col}" '
-                       f'font-size="{req["size"]}" font-weight="600">{req["text"]}</text>')
-        # 3) Ammasso della Vergine: una sola etichetta con linea di richiamo al grappolo
-        if "__vergine__" in label_siglas:
-            grp=next((r for r in mctx["table"] if r.get("_group")=="vergine"), None)
-            if grp:
-                gx,gy=grp["x"],grp["y"]; lx,ly=b.get("virgo_label", [gx+70, gy+40])
-                out.append(f'<line x1="{gx+8:.1f}" y1="{gy+6:.1f}" x2="{lx-6:.1f}" y2="{ly-10:.1f}" '
-                           f'stroke="{col}" stroke-width="0.9" stroke-opacity="0.75"/>')
-                out.append(f'<text x="{lx:.1f}" y="{ly:.1f}" fill="{col}" font-size="11.5" '
-                           f'font-weight="600">Ammasso della Vergine</text>')
-                out.append(f'<text x="{lx:.1f}" y="{ly+14:.1f}" fill="{theme["text3"]}" '
-                           f'font-size="9.5">{grp["_count"]} galassie · una sola etichetta</text>')
+            px,py=chosen[0],chosen[1]
+            if req["kind"]=="group":
+                out.append(f'<line x1="{req["gx"]:.1f}" y1="{req["gy"]:.1f}" x2="{px:.1f}" y2="{py-4:.1f}" '
+                           f'stroke="{col}" stroke-width="0.9" stroke-opacity="0.7"/>')
+                out.append(f'<text x="{px:.1f}" y="{py:.1f}" text-anchor="middle" fill="{col}" '
+                           f'font-size="11.5" font-weight="600">{req["text"]}</text>')
+                out.append(f'<text x="{px:.1f}" y="{py+14:.1f}" text-anchor="middle" fill="{theme["text3"]}" '
+                           f'font-size="9.5">{req["sub"]}</text>')
+            else:
+                out.append(f'<text x="{px:.1f}" y="{py:.1f}" fill="{lab_col}" '
+                           f'font-size="{lsz}" font-weight="600">{req["text"]}</text>')
         self._last_messier_labels=placed; self._last_messier_dropped=dropped
         return '\n'.join(out)
 
