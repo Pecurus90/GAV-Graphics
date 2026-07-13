@@ -233,6 +233,16 @@ descrive lo fa scollare al primo cambiamento.
     in **prima riga davanti a un principiante**. La prima riga è la vetrina del
     poster: se promette un telescopio dove poteva promettere un binocolo, ha
     sbagliato bersaglio. *(Deciso da Marco, 2026-07-13.)*
+    *(Applicato #7b: da 28 oggetti a tier-3 a **11**. La vetrina di marzo passa da
+    M97 Civetta — mag 9.9, telescopio — a **M44 Presepe**, binocolo.)*
+  - **OSSERVAZIONE, non un'azione — la coda della tabella.** Misurato a marzo: le
+    righe 5-15 sono **undici galassie di fila, quasi tutte da telescopio, sette
+    senza nome proprio** (M108, M109, M106, M94, M105, M96, M95…). È **onesto**:
+    sopra i 30°, in primavera, il cielo di Vicenza è davvero quello. E la regola
+    automatica è ciò che salva D9 dalla lista curata. **Non si tocca.** Se un
+    giorno darà fastidio, il rimedio è nel **dato** (la notevolezza), non nel
+    codice. Scritto qui perché non venga "scoperto" fra due mesi e corretto da
+    qualcuno che non sa che era una scelta.
   - **"Cosa serve per vederlo": due categorie (binocolo / telescopio), e NON si
     calcolano dalla magnitudine.** *(Le due categorie le propone Marco; il vincolo
     è dell'architetto.)* La magnitudine misura la luce **totale**: un oggetto
@@ -288,6 +298,96 @@ descrive lo fa scollare al primo cambiamento.
   Inoltre, per D7, andrà **ristretto al solo disco**: se sorveglia anche la
   composizione, fallirà a ogni ritocco estetico legittimo — e un test che è
   sempre rosso viene ignorato, che è il modo in cui una rete di sicurezza muore.
+- **D12 — Il secondo strumento è NOTO, e questo sblocca il refactor.**
+  *(Marco, 2026-07-13.)* "Pillole di astronomia" non è più un'ipotesi: è un post
+  1080×1080 con **un'immagine caricata dall'utente** (trascinata e posizionata),
+  **un testo**, **3-4 layout** e le palette. Esce un PNG.
+  - La lezione *"non costruire l'astrazione prima del secondo caso"* **non si
+    applica più**: il secondo caso c'è, e si può misurare. Il taglio di
+    `generate.py` (D14) ha finalmente un bersaglio.
+  - **Il rischio tecnico di Pillole è già risolto** — verificato, non dedotto: la
+    primitiva `image` incorpora un raster nell'SVG come **data URI base64**. È
+    quella che disegna il logo del GAV nella testata di *ogni* poster, ed è
+    testata (`test_image_icon.py`). Sopravvive nell'`.exe` perché l'immagine
+    finisce **dentro** l'SVG. L'upload dell'utente è quella primitiva con un href
+    diverso.
+  - Resta da fare, quando ci arriveremo: il **ritaglio** nel riquadro (maschera +
+    offset: l'utente trascina) e i 3-4 file di layout.
+  - **NON si creano cartelle o file di Pillole in anticipo.** Una cartella vuota
+    attira decisioni prese al buio. Si scrive quando si scrive.
+- **D13 — Una palette sola per tutti gli strumenti; ciò che varia è il CONTRATTO.**
+  Una palette ha ~20 chiavi **di marca** (`bg`, `text`, `panel`, `neon`, `gold`,
+  `border`, `status`…) e 2 chiavi che sono **astronomia pura** (`star_ramp`,
+  `planet_colors`). Le prime le vuole qualunque strumento, le seconde solo chi
+  disegna un cielo.
+  Quindi **non** si spezzano le palette in un file per strumento: sarebbe
+  duplicare il marchio, e cambiare l'oro del GAV vorrebbe dire cambiarlo in
+  quattro posti e dimenticarsene uno. Una palette resta **un file**, valida per
+  tutti; **ogni strumento dichiara di quali chiavi ha bisogno**, e `validate.py`
+  (D2) valida contro quella dichiarazione, non contro una lista globale.
+  Necessario, non speculativo: senza, la prima voce "prossimamente" della barra
+  laterale (D10) rompe la validazione.
+- **D14 — Il taglio di `generate.py`, e come si sa che è nel punto giusto.**
+  Misurato (2026-07-13): il codice è **1621 righe**, di cui **1164 in
+  `generate.py`**. Tutto il resto è già snello (`validate.py` 205, `cielo.py`
+  101, `app/main.py` 98, `render.py` 53) e **non va toccato**: il problema "apro
+  un file e devo leggere migliaia di righe" è **un file solo**.
+  Il taglio separa **ciò che Pillole eredita** da **ciò che non erediterà mai**:
+  ```
+  brand/       palette, font, logo, layout                      — condiviso
+  compose/     il compositore (cammina i blocchi), le primitive,
+               render.py, il contratto del tema                 — condiviso
+  strumenti/
+    cielo/     effemeridi, proiezione, disco sigillato, Messier — SOLO cielo
+  app/         la barra laterale
+  ```
+  **Doppio criterio di riuscita** — servono entrambi:
+  - **(a)** i golden restano **identici byte per byte**. Un refactor puro non
+    cambia l'output: se un golden si muove, non hai rifattorizzato — hai cambiato
+    qualcosa senza accorgertene.
+  - **(b)** si riesce a descrivere Pillole **su carta**, senza nominare un solo
+    file di `strumenti/cielo/`. Se (b) non riesce, il taglio è nel punto sbagliato
+    e si rifà. È il modo di **verificare l'astrazione prima di costruirla** — la
+    cosa che non facemmo con `brand/formats.py`, e che ci costò il file.
+
+---
+
+## Roadmap
+
+Ordinata. Il *perché ora* è la parte che conta: senza, l'ordine si perde al primo
+imprevisto.
+
+1. **#7c — Il repo pubblicabile.** *(FATTO, 2026-07-13.)* Storia riscritta
+   (`docs/riferimenti/` e `brand/logo/logo-white.png` purgati: il PDF era peso
+   morto, il logo bianco aveva **provenienza ignota**), `LICENSE` MIT,
+   `CREDITI.md`, `data/stelle_FONTE.md`, README riscritto **eseguendo** ogni
+   comando, `design_handoff_*` in `docs/`, ramo `main`.
+   Il repo GitHub è stato **cancellato e ricreato** per essere certi che i vecchi
+   blob non sopravvivessero da nessuna parte: verificato dal remoto, non dal
+   locale. Repo: `Pecurus90/GAV-Graphics` (privato).
+2. **#7d — I nomi delle costellazioni sulla pagina 2.** *(Marco, 2026-07-13.)*
+   Oggi il socio vede **dove** sono i Messier ma non **in che costellazione** sta
+   guardando — mentre la tabella gliela dice ("Galassia · Cani da Caccia"). Mappa
+   e tabella devono guardarsi, come per le etichette (D9).
+   *Perché prima del refactor:* è lavoro **nel motore com'è**. Farlo dopo il
+   taglio significherebbe scriverlo in un codice appena spostato, con due
+   variabili in ballo: se si rompe qualcosa, non sapresti se è colpa dei nomi o
+   dello spostamento. *Additivo prima, distruttivo dopo.*
+   *Attenzione:* i nomi sono il **terzo strato** di etichette, dopo i simboli
+   Messier e le sigle. L'anti-collisione oggi ne conosce due. La rete di
+   `tests/test_messier_page2.py` va **estesa**, non aggirata: senza, si torna
+   esattamente al difetto del 13/07 (etichette sopra i simboli, e nessun test che
+   lo dica).
+3. **#7e — La pulizia: il taglio di `generate.py`** (vedi **D14**).
+   *Perché ora e non prima:* D3 — *prima la rete, poi l'estrazione*. La rete della
+   pagina 2 adesso esiste (17 test, guasti iniettati, rosso visto).
+4. **#7f — La barra laterale (D10) + il contratto del tema per-strumento (D13).**
+   Una voce attiva (*Cielo del Mese*), una "prossimamente" spenta. **Non** un
+   framework per plugin.
+5. **Pillole di astronomia** (D12), quando Marco vorrà pensarci.
+6. **Il packaging: l'`.exe` in GitHub Actions (D4).** Il pezzo più insidioso:
+   `de421.bsp` e `resvg_py` non si fanno trovare da soli dentro un eseguibile.
+   `CREDITI.md` va impacchettato con l'exe (obbligo BSD-2).
 
 ---
 
