@@ -1,112 +1,107 @@
-# Cielo del Mese — generatore
+# Cielo del Mese — Gruppo Astrofili Vicentini
 
-Genera un volantino del cielo notturno (SVG/PNG/PDF) per un dato **mese, anno e
-località**, con **fasi lunari** e **pianeti** calcolati automaticamente e stelle
-nei loro **colori reali**. I colori del volantino arrivano da un **file di tema**
-intercambiabile, così la palette si cambia senza toccare il codice.
+Genera il volantino **"Cielo del Mese"**: una mappa del cielo notturno per un dato
+**mese, anno e località**, con **fasi lunari**, **pianeti** e **stelle nei loro
+colori reali**, più una seconda pagina di **profondo cielo** (oggetti del catalogo
+di Messier). Output: **SVG** (stampa) e **PNG** (social), generati dallo stesso
+motore. I colori arrivano da una **palette a token**, intercambiabile senza
+toccare il codice.
 
-Sviluppato a partire da un prototipo; questo README serve anche da **briefing per
-Claude Code** (vedi ultima sezione).
+> Fonte di verità del progetto: **`CLAUDE.md`**. Questo README descrive l'uso;
+> le decisioni architetturali e lo stato reale stanno lì.
 
 ---
 
-## Cosa c'è già (funziona)
+## Installazione
 
-- `engine/generate.py` — il **motore**. Proietta un catalogo stellare reale sul
-  cielo di quella data/località, disegna costellazioni (linee neon) e stelle
-  (colore per indice B‑V), calcola fasi lunari e alzata/tramonto dei pianeti,
-  classifica la visibilità e produce un **SVG A4**.
-- `data/` — catalogo stelle (`stars6.json`) e linee costellazioni
-  (`const_lines.json`). L'effemeride planetaria (`de421.bsp`) arriva dal pacchetto
-  `skyfield-data`, nessun download runtime.
-- `themes/osservatorio.json` — la palette come **token**. Per una nuova palette:
-  copia il file, cambia i valori, passala con `--theme`.
-- `app/main.py` — **scheletro** di web app (FastAPI): form → anteprima → download
-  SVG/PNG/PDF.
-
-## Avvio rapido
+Richiede **Python 3.12+**. Le dipendenze sono in `requirements.txt` (l'effemeride
+planetaria `de421.bsp` arriva dal pacchetto `skyfield-data`, nessun download a
+runtime).
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-
-# 1) solo motore, da riga di comando:
-python engine/generate.py --year 2026 --month 8 --place Vicenza \
-    --lat 45.5455 --lon 11.5353 --theme themes/osservatorio.json --out cielo.svg
-
-# 2) web app:
-uvicorn app.main:app --reload --port 8000
-# apri http://localhost:8000
 ```
 
-## Come cambiare palette
+Un ambiente virtuale è opzionale ma consigliato:
 
-Duplica `themes/osservatorio.json`, modifica i colori (i più incisivi: `neon`,
-`bg`, `gold`, `text`, `star_ramp`) e rigenera con `--theme themes/tua.json`.
-L'effetto "neon sfumato" = colore `neon` + glow: nel SVG è un blur gaussiano;
-se porti la grafica sul web usa `filter: drop-shadow(0 0 6px <neon>)`.
-
----
-
-## Limiti noti / scelte oneste
-
-- **Visibilità pianeti = euristica.** La classificazione ok/telescopico/difficile/
-  non-osservabile usa elongazione dal Sole + altezza notturna massima. È
-  ragionevole ma semplificata: niente magnitudine reale, niente crepuscolo
-  preciso. Da rifinire se serve rigore.
-- **Etichette fisse.** I nomi di costellazioni/stelle sono posizionati al
-  centroide/accanto al punto: mese per mese possono **sovrapporsi**. Manca un
-  algoritmo anti-collisione (è il pezzo di ingegneria più corposo per
-  l'automazione).
-- **Orario di riferimento** fisso: giorno 15 del mese, 23:00 locali. Gli orari di
-  alzata/tramonto valgono per quel giorno.
-- **Proiezione** azimutale equidistante (zenit al centro, N in alto, E a sinistra).
-
----
-
-## Architettura (come è pensato)
-
-```
-[dati statici: stelle, costellazioni] + [effemeridi skyfield]
-                     │
-                 engine/generate.py  ──(tema JSON)──►  SVG
-                     │
-        ┌────────────┴────────────┐
-     app/main.py              (futuro) scheduler
-    form web + download       job mensile → cartella/NAS/mail
+```bash
+python -m venv .venv
+# Windows PowerShell:  .\.venv\Scripts\Activate.ps1
+# Linux/macOS:         source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
-- **Motore puro** (nessuna UI dentro): facile da testare e riusare.
-- **Tema disaccoppiato**: la grafica è dati, non codice.
-- **UI sottile** sopra il motore.
-- **Deploy consigliato**: container Docker sul NAS (stesso ambiente del sito
-  dell'associazione).
+## Uso da riga di comando (CLI)
 
----
+Il punto d'ingresso è **`cielo.py`**. Formato e palette si scelgono **per nome**
+(i nomi validi sono i file in `brand/layouts/` e `brand/palettes/`).
 
-## Cosa costruire con Claude Code (briefing)
+```bash
+# A4 in SVG (default)
+python cielo.py --year 2026 --month 8 --place Vicenza
 
-Apri Claude Code **in questa cartella** e parti da qui. Priorità suggerite:
+# A4 in SVG + PNG
+python cielo.py --year 2026 --month 8 --place Vicenza --png
 
-1. **Rifinire la web app** (`app/main.py`): validazione input, scelta formato,
-   anteprima PNG oltre a SVG, gestione errori, pagina più curata col tema.
-2. **Anti-collisione etichette**: spostare i nomi che si sovrappongono (forza di
-   repulsione o griglia occupata). È il miglioramento di qualità più visibile.
-3. **Visibilità pianeti più seria**: usare magnitudine, crepuscolo astronomico,
-   e una nota "dove guardare" (azimut/altezza).
-4. **Multi-formato social**: oltre all'A4, un layout **1080×1080** (Instagram) e
-   **1080×1920** (storia) che riusano lo stesso motore con canvas diverso.
-5. **Automazione**: job mensile (cron/systemd/Docker) che genera il mese
-   successivo e lo salva in una cartella condivisa o lo invia via mail.
-6. **Dockerfile** per il deploy sul NAS.
+# Post social quadrato 1080 (pagina 1) in SVG + PNG
+python cielo.py --year 2026 --month 8 --format post --png
 
-Vincoli da rispettare:
-- Tenere **motore** e **tema** disaccoppiati (la palette non va mai hardcoded).
-- L'orientamento della mappa (N alto, E sinistra) e lo stile neon+glow sono
-  identità del brand: non alterarli senza motivo.
-- Tutti i testi in **italiano**.
+# Pagina 2: profondo cielo (oggetti Messier)
+python cielo.py --year 2026 --month 8 --format profondo --png
 
-> Contesto extra utile da incollare a Claude Code all'avvio: "Questo progetto
-> genera il volantino "Cielo del Mese" per il Gruppo Astrofili Vicentini. Il
-> motore è già funzionante e parametrico. Voglio [obiettivo del momento].
-> Rispetta l'architettura del README."
+# Un design social con una palette diversa
+python cielo.py --year 2026 --month 8 --format dashboard --palette notte-blu --png
+```
+
+L'output finisce in `out/` (cartella usa-e-getta, non versionata).
+
+### Formati disponibili (`--format`)
+
+Scoperti dai file in `brand/layouts/`:
+
+- **`a4`** — il volantino A4 (default).
+- **`post`** — post quadrato 1080×1080 (pagina 1: costellazioni, Luna, pianeti).
+- **`profondo`** — pagina 2 quadrata: profondo cielo, oggetti Messier.
+- **`dashboard`**, **`editorial`**, **`rail`** — tre design social alternativi.
+
+### Palette disponibili (`--palette`, default `osservatorio`)
+
+Scoperte dai file in `brand/palettes/`:
+
+- **`osservatorio`** (default), **`notte-blu`**, **`petrolio`**, **`luce-rossa`**.
+
+## Web app
+
+Web app FastAPI sottile (form → anteprima → download):
+
+```bash
+python -m uvicorn app.main:app --reload --port 8000
+# poi apri http://localhost:8000
+```
+
+## Test
+
+```bash
+python -m pytest -q
+```
+
+## Licenza
+
+- **Il codice è MIT** (vedi `LICENSE`).
+- **I dati hanno licenze proprie** — non è la stessa cosa, ed è l'errore tipico
+  da non fare:
+  - `data/stars6.json`, `data/const_lines.json` → **BSD 2-Clause** (d3-celestial,
+    Olaf Frohn) — vedi `data/stelle_FONTE.md`;
+  - `data/messier.json` → **CC-BY-SA-4.0** (OpenNGC, Mattia Verga) — vedi
+    `data/messier_FONTE.md`;
+  - `brand/fonts/*.ttf` → **SIL Open Font License 1.1**.
+
+  Tutti i crediti in **`CREDITI.md`**.
+
+## Nota sulla distribuzione (D4)
+
+La distribuzione prevista è un **`.exe`** in una Release di GitHub. L'eseguibile
+**non firmato** farà scattare **SmartScreen** su Windows ("PC protetto"):
+è normale, si procede da *Ulteriori informazioni → Esegui comunque*, oppure il
+GAV acquista un certificato di firma. Il packaging (e l'inclusione di `CREDITI.md`
+accanto all'`.exe`, richiesta dalle licenze BSD-2/OFL) è lavoro del giro D4.
