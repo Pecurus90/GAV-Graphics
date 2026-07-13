@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cielo del Mese — Generatore · Gruppo Astrofili Vicentini</title>
+<style>
+/* ============================================================
+   FONT — locali, offline. I .ttf del brand (OFL) vanno nella
+   cartella  fonts/  accanto a questo file. Nomi come da
+   engine/fonts/README.txt. Nessun Google Fonts, nessun CDN.
+   ============================================================ */
+@font-face{font-family:'Barlow Semi Condensed';src:url('fonts/BarlowSemiCondensed-SemiBold.ttf') format('truetype');font-weight:600;font-display:swap;}
+@font-face{font-family:'Barlow Semi Condensed';src:url('fonts/BarlowSemiCondensed-ExtraBold.ttf') format('truetype');font-weight:800;font-display:swap;}
+@font-face{font-family:'Instrument Sans';src:url('fonts/InstrumentSans-Regular.ttf') format('truetype');font-weight:400;font-display:swap;}
+@font-face{font-family:'Instrument Sans';src:url('fonts/InstrumentSans-Medium.ttf') format('truetype');font-weight:500;font-display:swap;}
+@font-face{font-family:'Instrument Sans';src:url('fonts/InstrumentSans-SemiBold.ttf') format('truetype');font-weight:600;font-display:swap;}
+
+:root{
+  --notte:#05070f; --blunotte:#0a1222; --bluprof:#12203a;
+  --superficie:#0e1626; --superficie2:#131d31;
+  --bordo:rgba(150,170,215,.14); --bordo-forte:rgba(150,170,215,.26);
+  --oro:#e4ac4a; --oro-chiaro:#f0c274; --petrolio:#004f6d;
+  --neon:#45c8ff;
+  --t1:#eef2fb; --t2:#b9c4dc; --t3:#8e9bb8; --t4:#6a768f;
+  --warn:#f0b45a; --danger:#f08a6a; --ok:#6fe0a0;
+  --display:'Barlow Semi Condensed','Arial Narrow',system-ui,sans-serif;
+  --testo:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  font-family:var(--testo);
+  color:var(--t1);
+  background:radial-gradient(135% 75% at 50% -12%, #12203a 0%, #0a1222 42%, #05070f 100%);
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:rgba(228,172,74,.28);}
+
+/* barra titolo finta (finestra del browser aperta dall'.exe) */
+.titlebar{
+  height:38px;display:flex;align-items:center;gap:9px;padding:0 16px;
+  background:rgba(5,7,15,.55);border-bottom:1px solid var(--bordo);
+  font-family:var(--display);font-weight:600;font-size:12.5px;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--t4);
+}
+.titlebar .dot{width:11px;height:11px;border-radius:50%;background:#2a344b;}
+.titlebar .dot:first-child{background:#c96a52;}
+.titlebar .dot:nth-child(2){background:#d8a24a;}
+.titlebar .dot:nth-child(3){background:#5a8f6a;}
+.titlebar .name{margin-left:12px;}
+
+.app{display:flex;height:calc(100% - 38px);}
+
+/* ===================== BARRA LATERALE (strumenti) ===================== */
+.nav{
+  width:224px;flex:0 0 224px;height:100%;display:flex;flex-direction:column;
+  padding:22px 16px 20px;gap:6px;
+  background:linear-gradient(180deg, rgba(5,7,15,.6), rgba(5,7,15,.28));
+  border-right:1px solid var(--bordo);
+}
+.nav .nav-brand{display:flex;align-items:center;gap:12px;padding:2px 8px 20px;}
+.nav .nav-brand img{width:40px;height:40px;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5));}
+.nav .nav-brand .nb-txt{font-family:var(--display);font-weight:800;font-size:16px;line-height:1.02;color:var(--t1);letter-spacing:.01em;}
+.nav .nav-brand .nb-sub{font-family:var(--display);font-weight:600;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--t4);margin-top:3px;}
+.nav .nav-cap{font-family:var(--display);font-weight:600;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--t4);padding:0 10px 8px;}
+.nav-item{
+  display:flex;align-items:center;gap:13px;width:100%;text-align:left;
+  background:none;border:1px solid transparent;border-radius:13px;
+  padding:14px 13px;cursor:pointer;transition:.14s;color:var(--t2);font-family:var(--testo);
+}
+.nav-item .ic{flex:0 0 26px;width:26px;height:26px;color:var(--t3);transition:.14s;}
+.nav-item .nm{font-size:16px;font-weight:600;line-height:1.15;}
+.nav-item .badge{font-family:var(--display);font-weight:600;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--t4);margin-top:3px;display:block;}
+.nav-item:hover{background:rgba(150,170,215,.07);border-color:var(--bordo);}
+.nav-item.on{background:linear-gradient(180deg,rgba(228,172,74,.14),rgba(228,172,74,.04));border-color:rgba(228,172,74,.4);color:var(--t1);box-shadow:0 8px 22px rgba(0,0,0,.28);}
+.nav-item.on .ic{color:var(--oro);}
+.nav-item.on .nm{color:var(--t1);}
+.nav-item.soon{cursor:not-allowed;}
+.nav-item.soon:hover{background:none;border-color:transparent;}
+.nav-item.soon .nm,.nav-item.soon .ic{opacity:.5;}
+.nav-foot{margin-top:auto;padding:14px 10px 0;border-top:1px solid var(--bordo);font-size:11.5px;color:var(--t4);line-height:1.5;}
+
+/* ===================== PANNELLO CONTROLLI ===================== */
+.panel{
+  width:404px;flex:0 0 404px;height:100%;overflow-y:auto;
+  padding:26px 26px 30px;
+  background:linear-gradient(180deg, rgba(19,29,49,.55), rgba(10,18,34,.35));
+  border-right:1px solid var(--bordo);
+}
+.panel::-webkit-scrollbar{width:9px;}
+.panel::-webkit-scrollbar-thumb{background:#1c2740;border-radius:9px;}
+
+.brand{display:flex;align-items:center;gap:14px;margin-bottom:6px;}
+.brand img{width:46px;height:46px;filter:drop-shadow(0 4px 14px rgba(0,0,0,.5));}
+.brand .eyebrow{font-family:var(--display);font-weight:600;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--oro);}
+.brand h1{font-family:var(--display);font-weight:800;font-size:27px;line-height:.98;color:var(--t1);}
+.brand-sub{font-size:12.5px;color:var(--t4);margin:4px 0 26px;line-height:1.5;}
+
+.section{margin-bottom:26px;}
+.sec-head{display:flex;align-items:center;gap:11px;margin-bottom:14px;}
+.sec-head .lbl{font-family:var(--display);font-weight:600;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#a9b8d6;white-space:nowrap;}
+.sec-head .line{flex:1;height:1px;background:linear-gradient(90deg,rgba(228,172,74,.5),transparent);}
+
+/* stepper mese / anno */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.field-lbl{font-size:12px;color:var(--t3);margin-bottom:7px;font-weight:500;}
+.stepper{display:flex;align-items:stretch;background:var(--superficie);border:1px solid var(--bordo);border-radius:12px;overflow:hidden;}
+.stepper button{
+  width:46px;flex:0 0 46px;border:none;background:transparent;color:var(--t2);
+  font-size:22px;line-height:1;cursor:pointer;transition:.13s;font-family:var(--testo);
+}
+.stepper button:hover{background:rgba(228,172,74,.13);color:var(--oro-chiaro);}
+.stepper button:active{background:rgba(228,172,74,.22);}
+.stepper input{
+  flex:1;width:100%;min-width:0;border:none;background:transparent;text-align:center;
+  color:var(--t1);font-family:var(--display);font-weight:800;font-size:23px;
+  font-variant-numeric:tabular-nums;-moz-appearance:textfield;padding:14px 0;
+}
+.stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.stepper input:focus{outline:none;}
+.stepper.bad{border-color:rgba(240,138,106,.7);box-shadow:0 0 0 3px rgba(240,138,106,.14);}
+.sel-field{
+  width:100%;background:var(--superficie);border:1px solid var(--bordo);border-radius:12px;
+  color:var(--t1);font-family:var(--display);font-weight:800;font-size:21px;letter-spacing:.01em;
+  padding:14px 42px 14px 16px;cursor:pointer;transition:.13s;
+  -webkit-appearance:none;-moz-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238e9bb8' stroke-width='2.4' stroke-linecap='round'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat:no-repeat;background-position:right 15px center;
+}
+.sel-field:focus{outline:none;border-color:rgba(228,172,74,.6);box-shadow:0 0 0 3px rgba(228,172,74,.12);}
+.sel-field option{background:#0e1626;color:var(--t1);font-size:15px;}
+.when-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;}
+
+/* località */
+.txt{
+  width:100%;background:var(--superficie);border:1px solid var(--bordo);border-radius:12px;
+  color:var(--t1);font-family:var(--testo);font-size:16px;font-weight:500;padding:13px 15px;transition:.13s;
+}
+.txt::placeholder{color:var(--t4);}
+.txt:focus{outline:none;border-color:rgba(228,172,74,.6);box-shadow:0 0 0 3px rgba(228,172,74,.12);}
+.coord-toggle{
+  display:inline-flex;align-items:center;gap:7px;margin-top:12px;background:none;border:none;
+  color:var(--t3);font-family:var(--testo);font-size:13px;font-weight:500;cursor:pointer;transition:.13s;
+}
+.coord-toggle:hover{color:var(--oro-chiaro);}
+.coord-toggle .chev{transition:transform .18s;display:inline-block;}
+.coord-toggle.open .chev{transform:rotate(90deg);}
+.coord-wrap{max-height:0;overflow:hidden;transition:max-height .22s ease;}
+.coord-wrap.open{max-height:120px;}
+.coord-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+
+/* thumbnails formato */
+.formats{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.fmt{
+  position:relative;text-align:left;background:var(--superficie);border:1.5px solid var(--bordo);
+  border-radius:14px;padding:12px 13px 11px;cursor:pointer;transition:.15s;overflow:hidden;
+}
+.fmt:hover{border-color:var(--bordo-forte);background:var(--superficie2);}
+.fmt.sel{border-color:var(--oro);background:linear-gradient(180deg,rgba(228,172,74,.09),rgba(228,172,74,.02));box-shadow:0 0 0 3px rgba(228,172,74,.12),0 10px 26px rgba(0,0,0,.35);}
+.fmt .thumb{width:100%;height:60px;display:flex;align-items:center;justify-content:center;margin-bottom:9px;}
+.fmt .fname{font-family:var(--display);font-weight:800;font-size:15px;color:var(--t1);letter-spacing:.01em;}
+.fmt .ftag{font-size:11px;color:var(--t3);margin-top:1px;line-height:1.3;}
+.fmt .tick{position:absolute;top:9px;right:9px;width:19px;height:19px;border-radius:50%;background:var(--oro);color:#05070f;display:none;align-items:center;justify-content:center;font-size:12px;font-weight:800;}
+.fmt.sel .tick{display:flex;}
+.fmt.wide{grid-column:1 / -1;}
+.fmt.wide .thumb{height:66px;}
+
+/* palette chips */
+.palettes{display:flex;flex-direction:column;gap:10px;}
+.pal{
+  position:relative;text-align:left;border:1.5px solid var(--bordo);border-radius:14px;
+  padding:10px;cursor:pointer;transition:.15s;overflow:hidden;background:var(--superficie);
+  display:flex;align-items:center;gap:14px;
+}
+.pal:hover{border-color:var(--bordo-forte);background:var(--superficie2);}
+.pal.sel{border-color:var(--oro);box-shadow:0 0 0 3px rgba(228,172,74,.12),0 10px 26px rgba(0,0,0,.35);}
+.pal .swatch{width:106px;flex:0 0 106px;height:62px;border-radius:10px;position:relative;overflow:hidden;border:1px solid rgba(0,0,0,.45);}
+.pal .disc{position:absolute;left:36px;top:50%;transform:translate(-50%,-50%);width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.18);box-shadow:inset 0 0 14px rgba(0,0,0,.45);}
+.pal .neon{position:absolute;right:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;border-radius:50%;}
+.pal .stars{position:absolute;inset:0;}
+.pal .stars i{position:absolute;width:2px;height:2px;border-radius:50%;background:rgba(255,255,255,.82);}
+.pal .meta{flex:1;min-width:0;}
+.pal .pname{font-family:var(--display);font-weight:800;font-size:16.5px;color:var(--t1);}
+.pal .ptag{font-size:12px;color:var(--t3);margin-top:2px;line-height:1.35;}
+.pal .nv{display:inline-flex;align-items:center;gap:5px;margin-top:7px;font-size:10.5px;color:#e7b9a6;background:rgba(240,138,106,.1);border:1px solid rgba(240,138,106,.24);border-radius:99px;padding:2px 9px;font-weight:600;}
+.pal .tick{position:absolute;top:8px;right:8px;width:18px;height:18px;border-radius:50%;background:var(--oro);color:#05070f;display:none;align-items:center;justify-content:center;font-size:11px;font-weight:800;z-index:2;}
+.pal.sel .tick{display:flex;}
+
+/* bottone genera */
+.genera{
+  width:100%;margin-top:6px;background:var(--oro);color:#05070f;border:none;border-radius:13px;
+  font-family:var(--display);font-weight:800;font-size:19px;letter-spacing:.02em;
+  padding:16px;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:10px;
+  box-shadow:0 12px 30px rgba(228,172,74,.22);
+}
+.genera:hover{background:var(--oro-chiaro);box-shadow:0 14px 34px rgba(228,172,74,.3);}
+.genera:active{transform:translateY(1px);}
+.genera:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;}
+
+/* ===================== PALCO ANTEPRIMA ===================== */
+.stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;padding:38px;min-width:0;}
+.stage::before{content:"";position:absolute;top:-120px;right:-120px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(69,200,255,.09),transparent 70%);pointer-events:none;}
+
+.state{position:absolute;inset:38px;display:none;align-items:center;justify-content:center;flex-direction:column;}
+.state.active{display:flex;}
+
+/* frame poster */
+.poster-frame{
+  height:min(100%,760px);aspect-ratio:1/1;border-radius:20px;overflow:hidden;
+  box-shadow:0 30px 70px rgba(0,0,0,.6);border:1px solid var(--bordo);position:relative;background:#05070f;
+}
+.poster-frame.a4{aspect-ratio:1/1.414;height:min(100%,760px);}
+.poster-frame img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;}
+
+/* --- INIZIALE --- */
+.ph-frame{
+  height:min(100%,560px);aspect-ratio:1/1;border-radius:20px;border:1.5px dashed var(--bordo-forte);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:40px;
+  background:radial-gradient(120% 90% at 50% 20%, rgba(18,32,58,.5), rgba(5,7,15,.2));
+}
+.ph-icon{width:88px;height:88px;opacity:.85;}
+.ph-title{font-family:var(--display);font-weight:800;font-size:24px;color:var(--t2);text-align:center;}
+.ph-text{font-size:14.5px;color:var(--t4);text-align:center;max-width:340px;line-height:1.6;}
+.ph-arrow{margin-top:4px;font-size:13px;color:var(--oro);font-weight:600;display:flex;align-items:center;gap:8px;}
+
+/* --- GENERAZIONE --- */
+.gen-card{display:flex;flex-direction:column;align-items:center;gap:26px;text-align:center;max-width:400px;}
+.orbit{width:120px;height:120px;position:relative;}
+.orbit .core{position:absolute;inset:0;margin:auto;width:20px;height:20px;border-radius:50%;background:var(--oro);box-shadow:0 0 26px rgba(228,172,74,.7);}
+.orbit .ring{position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(150,170,215,.18);}
+.orbit .ring.r2{inset:22px;}
+.orbit .sat{position:absolute;top:50%;left:50%;width:120px;height:120px;margin:-60px 0 0 -60px;animation:spin 1.5s linear infinite;}
+.orbit .sat.s2{width:76px;height:76px;margin:-38px 0 0 -38px;animation-duration:2.4s;animation-direction:reverse;}
+.orbit .sat b{position:absolute;top:-4px;left:50%;margin-left:-4px;width:8px;height:8px;border-radius:50%;background:var(--neon);box-shadow:0 0 12px var(--neon);}
+.orbit .sat.s2 b{background:#d3deff;box-shadow:0 0 10px #d3deff;width:6px;height:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.gen-title{font-family:var(--display);font-weight:800;font-size:26px;color:var(--t1);}
+
+/* quattro fasi reali del motore */
+.phases{display:flex;flex-direction:column;gap:2px;width:330px;text-align:left;}
+.phase{display:flex;align-items:center;gap:14px;padding:11px 4px;transition:.2s;}
+.phase .dot{
+  flex:0 0 26px;width:26px;height:26px;border-radius:50%;position:relative;
+  border:1.6px solid var(--bordo-forte);background:var(--superficie);
+  display:flex;align-items:center;justify-content:center;transition:.2s;
+}
+.phase .dot .num{font-family:var(--display);font-weight:800;font-size:13px;color:var(--t4);}
+.phase .dot .chk{display:none;color:#05070f;font-size:14px;font-weight:800;}
+.phase .dot .spin{display:none;width:15px;height:15px;border-radius:50%;border:2px solid rgba(228,172,74,.3);border-top-color:var(--oro);animation:spin .7s linear infinite;}
+.phase .nm{font-size:15.5px;font-weight:500;color:var(--t4);transition:.2s;line-height:1.3;}
+.phase.done .dot{background:var(--oro);border-color:var(--oro);}
+.phase.done .dot .num{display:none;}
+.phase.done .dot .chk{display:block;}
+.phase.done .nm{color:var(--t2);}
+.phase.active .dot{border-color:var(--oro);background:rgba(228,172,74,.1);box-shadow:0 0 0 4px rgba(228,172,74,.1);}
+.phase.active .dot .num{display:none;}
+.phase.active .dot .spin{display:block;}
+.phase.active .nm{color:var(--t1);font-weight:600;}
+
+/* --- ANTEPRIMA PRONTA --- */
+.preview-wrap{display:flex;flex-direction:column;align-items:center;gap:20px;height:100%;justify-content:center;}
+.cap-bar{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;gap:8px;}
+.cap{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--t2);font-weight:500;background:rgba(19,29,49,.7);border:1px solid var(--bordo);border-radius:99px;padding:6px 13px;}
+.cap b{color:var(--t1);font-weight:600;}
+.cap .sw{width:11px;height:11px;border-radius:50%;}
+.save-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center;}
+.btn{font-family:var(--testo);font-weight:600;font-size:15px;border-radius:12px;padding:13px 22px;cursor:pointer;transition:.14s;display:inline-flex;align-items:center;gap:9px;border:1.5px solid transparent;}
+.btn-gold{background:var(--oro);color:#05070f;box-shadow:0 10px 24px rgba(228,172,74,.2);}
+.btn-gold:hover{background:var(--oro-chiaro);}
+.btn-ghost{background:rgba(19,29,49,.6);border-color:var(--bordo-forte);color:var(--t2);}
+.btn-ghost:hover{border-color:var(--oro);color:var(--t1);}
+.btn-text{background:none;border:none;color:var(--t3);font-family:var(--testo);font-weight:500;font-size:13.5px;cursor:pointer;padding:8px;transition:.13s;}
+.btn-text:hover{color:var(--oro-chiaro);}
+.btn small{font-weight:400;opacity:.7;font-size:12px;}
+
+/* --- ERRORE --- */
+.err-card{
+  max-width:460px;background:linear-gradient(180deg,rgba(46,20,16,.7),rgba(24,10,10,.55));
+  border:1px solid rgba(240,138,106,.4);border-radius:20px;padding:34px 36px;text-align:center;
+  box-shadow:0 24px 60px rgba(0,0,0,.5);
+}
+.err-icon{width:58px;height:58px;border-radius:50%;background:rgba(240,138,106,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
+.err-title{font-family:var(--display);font-weight:800;font-size:24px;color:#f7d9cc;margin-bottom:12px;}
+.err-msg{font-size:16.5px;color:#f6c6b3;line-height:1.5;font-weight:500;background:rgba(240,138,106,.09);border:1px solid rgba(240,138,106,.22);border-radius:12px;padding:15px 18px;margin-bottom:18px;}
+.err-hint{font-size:13.5px;color:var(--t3);line-height:1.55;margin-bottom:22px;}
+.err-card .btn-gold{background:#f0a074;}
+.err-card .btn-gold:hover{background:#f4b48c;}
+
+/* toast salvataggio */
+.toast{
+  position:absolute;bottom:70px;left:50%;transform:translateX(-50%) translateY(16px);
+  background:rgba(10,18,34,.94);border:1px solid rgba(111,224,160,.4);border-radius:12px;
+  padding:13px 18px;display:flex;align-items:center;gap:11px;font-size:13.5px;color:var(--t1);
+  box-shadow:0 16px 40px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:.25s;z-index:20;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast .chk{width:22px;height:22px;border-radius:50%;background:rgba(111,224,160,.18);color:var(--ok);display:flex;align-items:center;justify-content:center;font-weight:800;flex:0 0 auto;}
+.toast .path{color:var(--t3);font-family:var(--display);font-weight:600;letter-spacing:.02em;}
+
+/* switcher stati (solo revisione) */
+.state-switch{
+  position:absolute;bottom:16px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:4px;background:rgba(5,7,15,.7);border:1px solid var(--bordo);
+  border-radius:99px;padding:5px 6px 5px 14px;z-index:15;backdrop-filter:blur(6px);
+}
+.state-switch .lab{font-size:10.5px;color:var(--t4);letter-spacing:.1em;text-transform:uppercase;margin-right:6px;font-family:var(--display);font-weight:600;}
+.state-switch button{
+  background:none;border:none;color:var(--t3);font-family:var(--testo);font-size:12px;font-weight:500;
+  padding:6px 12px;border-radius:99px;cursor:pointer;transition:.13s;
+}
+.state-switch button:hover{color:var(--t1);}
+.state-switch button.on{background:rgba(228,172,74,.16);color:var(--oro-chiaro);}
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+  <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+  <span class="name">Cielo del Mese — Generatore poster · Gruppo Astrofili Vicentini</span>
+</div>
+
+<div class="app">
+  <!-- ============ BARRA LATERALE ============ -->
+  <nav class="nav">
+    <div class="nav-brand">
+      <img src="assets/logo-emblem.png" alt="GAV">
+      <div>
+        <div class="nb-txt">GAV</div>
+        <div class="nb-sub">Astrofili Vicentini</div>
+      </div>
+    </div>
+    <div class="nav-cap">Strumenti</div>
+    <button type="button" class="nav-item on" aria-current="page">
+      <svg class="ic" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 3a9 9 0 0 0 0 18" stroke="currentColor" stroke-width="1.6"/><circle cx="15.5" cy="8" r="1.3" fill="currentColor"/><circle cx="9" cy="14.5" r="1" fill="currentColor"/></svg>
+      <span><span class="nm">Cielo del Mese</span></span>
+    </button>
+    <button type="button" class="nav-item soon" disabled aria-disabled="true" title="Prossimamente">
+      <svg class="ic" viewBox="0 0 24 24" fill="none"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="1.6"/></svg>
+      <span><span class="nm">Pillole di astronomia</span><span class="badge">Prossimamente</span></span>
+    </button>
+    <div class="nav-foot">Altri strumenti arriveranno qui.</div>
+  </nav>
+
+  <!-- ============ PANNELLO ============ -->
+  <aside class="panel">
+    <div class="brand">
+      <img src="assets/logo-emblem.png" alt="GAV">
+      <div>
+        <div class="eyebrow">Gruppo Astrofili Vicentini</div>
+        <h1>Cielo del Mese</h1>
+      </div>
+    </div>
+    <div class="brand-sub">Crea il poster del cielo del mese da pubblicare e stampare. Scegli quando, dove e come lo vuoi — poi genera l'anteprima.</div>
+
+    <!-- QUANDO -->
+    <div class="section">
+      <div class="sec-head"><span class="lbl">Quando</span><span class="line"></span></div>
+      <div class="field-lbl">Mese</div>
+      <select class="sel-field" id="in-mese" aria-label="Mese">
+        <option value="1">01 · Gennaio</option>
+        <option value="2">02 · Febbraio</option>
+        <option value="3">03 · Marzo</option>
+        <option value="4">04 · Aprile</option>
+        <option value="5">05 · Maggio</option>
+        <option value="6">06 · Giugno</option>
+        <option value="7">07 · Luglio</option>
+        <option value="8" selected>08 · Agosto</option>
+        <option value="9">09 · Settembre</option>
+        <option value="10">10 · Ottobre</option>
+        <option value="11">11 · Novembre</option>
+        <option value="12">12 · Dicembre</option>
+      </select>
+      <div class="when-grid">
+        <div>
+          <div class="field-lbl">Anno</div>
+          <div class="stepper" id="st-anno">
+            <button type="button" data-step="anno" data-d="-1" aria-label="Anno precedente">−</button>
+            <input id="in-anno" type="text" inputmode="numeric" value="2026" aria-label="Anno">
+            <button type="button" data-step="anno" data-d="1" aria-label="Anno successivo">+</button>
+          </div>
+        </div>
+        <div>
+          <div class="field-lbl">Ora</div>
+          <div class="stepper" id="st-ora">
+            <button type="button" data-step="ora" data-d="-1" aria-label="Mezz'ora prima">−</button>
+            <input id="in-ora" type="text" value="23:00" readonly aria-label="Ora">
+            <button type="button" data-step="ora" data-d="1" aria-label="Mezz'ora dopo">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOVE -->
+    <div class="section">
+      <div class="sec-head"><span class="lbl">Dove</span><span class="line"></span></div>
+      <div class="field-lbl">Località</div>
+      <input class="txt" id="in-loc" type="text" value="Vicenza" placeholder="Es. Vicenza">
+      <button type="button" class="coord-toggle" id="coord-btn"><span class="chev">›</span> Inserisci coordinate precise</button>
+      <div class="coord-wrap" id="coord-wrap">
+        <div class="coord-grid">
+          <div>
+            <div class="field-lbl">Latitudine</div>
+            <input class="txt" id="in-lat" type="text" inputmode="decimal" value="45.5455">
+          </div>
+          <div>
+            <div class="field-lbl">Longitudine</div>
+            <input class="txt" id="in-lon" type="text" inputmode="decimal" value="11.5354">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORMATO -->
+    <div class="section">
+      <div class="sec-head"><span class="lbl">Formato</span><span class="line"></span></div>
+      <div class="formats" id="formats">
+        <button type="button" class="fmt sel" data-fmt="dashboard" data-name="Dashboard" data-ar="sq">
+          <span class="tick">✓</span>
+          <span class="thumb">
+            <svg width="82" height="58" viewBox="0 0 82 58"><rect x="1" y="1" width="80" height="56" rx="5" fill="#0c1526" stroke="#2a3a5a"/><circle cx="24" cy="27" r="15" fill="none" stroke="#45c8ff" stroke-width="1.4" opacity=".8"/><circle cx="24" cy="27" r="7.5" fill="none" stroke="#2a4a7a" stroke-width="1"/><rect x="47" y="12" width="27" height="8" rx="2" fill="#16233d"/><rect x="47" y="24" width="27" height="8" rx="2" fill="#16233d"/><rect x="47" y="36" width="27" height="8" rx="2" fill="#16233d"/><circle cx="12" cy="49" r="1.6" fill="#3a4d70"/><circle cx="20" cy="49" r="1.6" fill="#3a4d70"/><circle cx="28" cy="49" r="1.6" fill="#e4ac4a"/><circle cx="36" cy="49" r="1.6" fill="#3a4d70"/></svg>
+          </span>
+          <span class="meta"><span class="fname">Dashboard</span><div class="ftag">Quadrato · mappa + pannelli</div></span>
+        </button>
+        <button type="button" class="fmt" data-fmt="editorial" data-name="Editoriale" data-ar="sq">
+          <span class="tick">✓</span>
+          <span class="thumb">
+            <svg width="82" height="58" viewBox="0 0 82 58"><rect x="1" y="1" width="80" height="56" rx="5" fill="#0c1526" stroke="#2a3a5a"/><circle cx="30" cy="28" r="20" fill="none" stroke="#45c8ff" stroke-width="1.4" opacity=".8"/><circle cx="30" cy="28" r="10" fill="none" stroke="#2a4a7a" stroke-width="1"/><rect x="56" y="16" width="20" height="4" rx="2" fill="#e4ac4a"/><rect x="56" y="24" width="20" height="3" rx="1.5" fill="#16233d"/><rect x="56" y="30" width="20" height="3" rx="1.5" fill="#16233d"/><rect x="56" y="36" width="14" height="3" rx="1.5" fill="#16233d"/></svg>
+          </span>
+          <span class="meta"><span class="fname">Editoriale</span><div class="ftag">Quadrato · mappa grande</div></span>
+        </button>
+        <button type="button" class="fmt" data-fmt="rail" data-name="Colonna" data-ar="sq">
+          <span class="tick">✓</span>
+          <span class="thumb">
+            <svg width="82" height="58" viewBox="0 0 82 58"><rect x="1" y="1" width="80" height="56" rx="5" fill="#0c1526" stroke="#2a3a5a"/><circle cx="27" cy="29" r="19" fill="none" stroke="#45c8ff" stroke-width="1.4" opacity=".8"/><circle cx="27" cy="29" r="9.5" fill="none" stroke="#2a4a7a" stroke-width="1"/><rect x="54" y="10" width="22" height="38" rx="3" fill="#111c33"/><rect x="58" y="15" width="14" height="3" rx="1.5" fill="#e4ac4a"/><rect x="58" y="22" width="14" height="2.5" rx="1.2" fill="#26344f"/><rect x="58" y="28" width="14" height="2.5" rx="1.2" fill="#26344f"/><rect x="58" y="34" width="14" height="2.5" rx="1.2" fill="#26344f"/><rect x="58" y="40" width="10" height="2.5" rx="1.2" fill="#26344f"/></svg>
+          </span>
+          <span class="meta"><span class="fname">Colonna</span><div class="ftag">Quadrato · mappa + lista</div></span>
+        </button>
+        <button type="button" class="fmt" data-fmt="post" data-name="Post" data-ar="sq">
+          <span class="tick">✓</span>
+          <span class="thumb">
+            <svg width="82" height="58" viewBox="0 0 82 58"><rect x="1" y="1" width="80" height="56" rx="5" fill="#0c1526" stroke="#2a3a5a"/><rect x="16" y="9" width="34" height="4" rx="2" fill="#e4ac4a"/><circle cx="41" cy="34" r="17" fill="none" stroke="#45c8ff" stroke-width="1.4" opacity=".8"/><circle cx="41" cy="34" r="8.5" fill="none" stroke="#2a4a7a" stroke-width="1"/></svg>
+          </span>
+          <span class="meta"><span class="fname">Post</span><div class="ftag">Quadrato · semplice</div></span>
+        </button>
+        <button type="button" class="fmt wide" data-fmt="a4" data-name="Volantino A4" data-ar="a4">
+          <span class="tick">✓</span>
+          <span class="thumb">
+            <svg width="44" height="58" viewBox="0 0 44 58"><rect x="1" y="1" width="42" height="56" rx="4" fill="#0c1526" stroke="#2a3a5a"/><rect x="9" y="7" width="26" height="3.5" rx="1.7" fill="#e4ac4a"/><circle cx="22" cy="27" r="14" fill="none" stroke="#45c8ff" stroke-width="1.3" opacity=".8"/><circle cx="22" cy="27" r="7" fill="none" stroke="#2a4a7a" stroke-width="1"/><rect x="9" y="46" width="26" height="2.5" rx="1.2" fill="#26344f"/><rect x="9" y="51" width="18" height="2.5" rx="1.2" fill="#26344f"/></svg>
+          </span>
+          <span class="meta"><span class="fname">Volantino A4</span><div class="ftag">Verticale · per la stampa e la bacheca</div></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- PALETTE -->
+    <div class="section">
+      <div class="sec-head"><span class="lbl">Palette</span><span class="line"></span></div>
+      <div class="palettes" id="palettes">
+        <button type="button" class="pal sel" data-pal="osservatorio" data-name="Osservatorio" data-dot="#6db8ff">
+          <span class="tick">✓</span>
+          <span class="swatch" style="background:linear-gradient(160deg,#14243f,#0a1424 55%,#05070f);">
+            <span class="stars"></span><span class="disc"></span><span class="neon" style="background:#6db8ff;box-shadow:0 0 12px #6db8ff;"></span>
+          </span>
+          <span class="meta"><div class="pname">Osservatorio</div><div class="ptag">Il classico · blu notte + oro</div></span>
+        </button>
+        <button type="button" class="pal" data-pal="notte-blu" data-name="Notte Blu" data-dot="#45c8ff">
+          <span class="tick">✓</span>
+          <span class="swatch" style="background:linear-gradient(160deg,#12305a,#0a1c3a 55%,#050b18);">
+            <span class="stars"></span><span class="disc"></span><span class="neon" style="background:#45c8ff;box-shadow:0 0 12px #45c8ff;"></span>
+          </span>
+          <span class="meta"><div class="pname">Notte Blu</div><div class="ptag">Blu profondo · neon azzurro vivo</div></span>
+        </button>
+        <button type="button" class="pal" data-pal="petrolio" data-name="Petrolio" data-dot="#39e0d0">
+          <span class="tick">✓</span>
+          <span class="swatch" style="background:linear-gradient(160deg,#0a5e7e,#023649 55%,#011e2b);">
+            <span class="stars"></span><span class="disc"></span><span class="neon" style="background:#39e0d0;box-shadow:0 0 12px #39e0d0;"></span>
+          </span>
+          <span class="meta"><div class="pname">Petrolio</div><div class="ptag">Teal del marchio · neon ciano</div></span>
+        </button>
+        <button type="button" class="pal" data-pal="luce-rossa" data-name="Luce Rossa" data-dot="#ff5a52">
+          <span class="tick">✓</span>
+          <span class="swatch" style="background:linear-gradient(160deg,#2a0e12,#160608 55%,#0a0304);">
+            <span class="stars"></span><span class="disc"></span><span class="neon" style="background:#ff5a52;box-shadow:0 0 12px #ff5a52;"></span>
+          </span>
+          <span class="meta"><div class="pname">Luce Rossa</div><div class="ptag">Notte rossa · non rovina la visione al buio</div><span class="nv">◑ si guarda stando al telescopio</span></span>
+        </button>
+      </div>
+    </div>
+
+    <button class="genera" id="genera">Genera anteprima</button>
+  </aside>
+
+  <!-- ============ PALCO ============ -->
+  <main class="stage" id="stage">
+
+    <!-- 1 · INIZIALE -->
+    <div class="state active" id="s-initial">
+      <div class="ph-frame" id="ph-frame">
+        <svg class="ph-icon" viewBox="0 0 96 96" fill="none">
+          <circle cx="48" cy="48" r="30" stroke="#3a4d70" stroke-width="1.4" stroke-dasharray="3 5"/>
+          <path d="M20 66 L58 30 a6 6 0 0 1 8 8 L30 76 a6 6 0 0 1 -10 -10 Z" stroke="#8e9bb8" stroke-width="2" fill="rgba(69,200,255,.06)"/>
+          <circle cx="62" cy="34" r="3.4" fill="#e4ac4a"/>
+          <circle cx="74" cy="20" r="1.6" fill="#8e9bb8"/><circle cx="26" cy="28" r="1.6" fill="#8e9bb8"/><circle cx="80" cy="52" r="1.4" fill="#8e9bb8"/>
+        </svg>
+        <div class="ph-title">L'anteprima comparirà qui</div>
+        <div class="ph-text">Scegli mese, luogo, formato e palette nel pannello a sinistra, poi premi <b style="color:#c6d0e4">Genera anteprima</b>.</div>
+        <div class="ph-arrow">← Comincia da “Quando”</div>
+      </div>
+    </div>
+
+    <!-- 2 · GENERAZIONE -->
+    <div class="state" id="s-generating">
+      <div class="gen-card">
+        <div class="orbit">
+          <div class="ring"></div><div class="ring r2"></div>
+          <div class="sat"><b></b></div>
+          <div class="sat s2"><b></b></div>
+          <div class="core"></div>
+        </div>
+        <div class="gen-title">Sto disegnando il cielo…</div>
+        <div class="phases" id="phases">
+          <div class="phase" data-ph="0"><span class="dot"><span class="num">1</span><span class="chk">✓</span><span class="spin"></span></span><span class="nm">Calcolo dove sono stasera i pianeti e la Luna</span></div>
+          <div class="phase" data-ph="1"><span class="dot"><span class="num">2</span><span class="chk">✓</span><span class="spin"></span></span><span class="nm">Metto cinquemila stelle sulla mappa</span></div>
+          <div class="phase" data-ph="2"><span class="dot"><span class="num">3</span><span class="chk">✓</span><span class="spin"></span></span><span class="nm">Compongo il poster</span></div>
+          <div class="phase" data-ph="3"><span class="dot"><span class="num">4</span><span class="chk">✓</span><span class="spin"></span></span><span class="nm">Disegno l'immagine finale</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 · ANTEPRIMA PRONTA -->
+    <div class="state" id="s-preview">
+      <div class="preview-wrap">
+        <div class="cap-bar">
+          <span class="cap"><span id="cap-when"><b>Agosto 2026</b></span></span>
+          <span class="cap">📍 <b id="cap-loc">Vicenza</b></span>
+          <span class="cap"><b id="cap-fmt">Dashboard</b></span>
+          <span class="cap"><span class="sw" id="cap-sw" style="background:#6db8ff;"></span><b id="cap-pal">Osservatorio</b></span>
+        </div>
+        <div class="poster-frame" id="poster-frame">
+          <img src="assets/preview-sample.png" alt="Anteprima poster">
+        </div>
+        <div class="save-row">
+          <button class="btn btn-gold" id="save-png">Salva PNG <small>per i social</small></button>
+          <button class="btn btn-ghost" id="save-svg">Salva SVG <small>per la stampa</small></button>
+          <button class="btn-text" id="regen">↻ Rigenera</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 · ERRORE -->
+    <div class="state" id="s-error">
+      <div class="err-card">
+        <div class="err-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 8v5" stroke="#f08a6a" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="17" r="1.4" fill="#f08a6a"/><circle cx="12" cy="12" r="10" stroke="#f08a6a" stroke-width="1.6" opacity=".5"/></svg>
+        </div>
+        <div class="err-title">Controlla un dato</div>
+        <div class="err-msg" id="err-msg">Mese fuori intervallo: 13. Ammessi 1–12.</div>
+        <div class="err-hint" id="err-hint">Correggi il valore evidenziato nel pannello a sinistra e premi di nuovo Genera anteprima.</div>
+        <button class="btn btn-gold" id="err-back">Torna alle impostazioni</button>
+      </div>
+    </div>
+
+    <!-- toast salvataggio -->
+    <div class="toast" id="toast"><span class="chk">✓</span><span>File salvato <span class="path" id="toast-path"></span></span></div>
+
+    <!-- switcher stati (solo per la revisione del design) -->
+    <div class="state-switch" id="switch">
+      <span class="lab">Stati</span>
+      <button data-go="initial" class="on">Iniziale</button>
+      <button data-go="generating">Generazione</button>
+      <button data-go="preview">Anteprima</button>
+      <button data-go="error">Errore</button>
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var MESI = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+
+  var state = { mese:8, anno:2026, ora:"23:00", loc:"Vicenza", fmt:"dashboard", fmtName:"Dashboard", ar:"sq", pal:"osservatorio", palName:"Osservatorio", dot:"#6db8ff" };
+
+  var $ = function(id){ return document.getElementById(id); };
+  var genTimer=null, toastTimer=null;
+  var oraMin = 23*60; // 23:00, passo 30 min
+  function fmtOra(m){ m=((m%1440)+1440)%1440; var h=Math.floor(m/60), mm=m%60; return (h<10?'0':'')+h+':'+(mm<10?'0':'')+mm; }
+
+  /* --- scatter finte stelle nelle swatch delle palette --- */
+  document.querySelectorAll('.pal .stars').forEach(function(box){
+    for(var i=0;i<7;i++){ var s=document.createElement('i'); s.style.left=(8+Math.random()*70)+'%'; s.style.top=(12+Math.random()*70)+'%'; s.style.opacity=(0.4+Math.random()*0.5).toFixed(2); box.appendChild(s); }
+  });
+
+  /* ================= QUANDO ================= */
+  document.querySelectorAll('[data-step]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var which = btn.getAttribute('data-step');
+      var d = parseInt(btn.getAttribute('data-d'),10);
+      if(which==='anno'){
+        var inp=$('in-anno'); var v=parseInt(inp.value,10); if(isNaN(v)) v=2026;
+        v+=d; if(v<1900) v=1900; if(v>2050) v=2050; inp.value=v; clearBad();
+      } else if(which==='ora'){
+        oraMin=((oraMin+d*30)%1440+1440)%1440; $('in-ora').value=fmtOra(oraMin);
+      }
+    });
+  });
+
+  /* ================= DOVE ================= */
+  $('coord-btn').addEventListener('click', function(){
+    this.classList.toggle('open');
+    $('coord-wrap').classList.toggle('open');
+    this.childNodes[1] && (this.lastChild.textContent = this.classList.contains('open') ? ' Nascondi coordinate' : ' Inserisci coordinate precise');
+  });
+
+  /* ================= FORMATO ================= */
+  document.querySelectorAll('.fmt').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.fmt').forEach(function(x){x.classList.remove('sel');});
+      b.classList.add('sel');
+      state.fmt = b.getAttribute('data-fmt');
+      state.fmtName = b.getAttribute('data-name');
+      state.ar = b.getAttribute('data-ar');
+    });
+  });
+
+  /* ================= PALETTE ================= */
+  document.querySelectorAll('.pal').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.pal').forEach(function(x){x.classList.remove('sel');});
+      b.classList.add('sel');
+      state.pal = b.getAttribute('data-pal');
+      state.palName = b.getAttribute('data-name');
+      state.dot = b.getAttribute('data-dot');
+    });
+  });
+
+  /* ================= STATI ================= */
+  var STATES = { initial:'s-initial', generating:'s-generating', preview:'s-preview', error:'s-error' };
+  function show(name){
+    Object.keys(STATES).forEach(function(k){ $(STATES[k]).classList.toggle('active', k===name); });
+    document.querySelectorAll('#switch button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-go')===name); });
+  }
+
+  function clearBad(){ $('st-anno').classList.remove('bad'); }
+
+  /* validazione — messaggi identici a quelli del motore */
+  function validate(){
+    var aRaw = $('in-anno').value.trim();
+    var a = parseInt(aRaw,10);
+    if(aRaw==='' || isNaN(a)) return { field:'anno', msg:'Anno non valido: "'+aRaw+'". Inserisci un numero da 1900 a 2050.' };
+    if(a<1900 || a>2050)      return { field:'anno', msg:'Anno fuori intervallo: '+a+'. Ammessi 1900-2050.' };
+    return null;
+  }
+
+  function fillPreviewMeta(){
+    var m = parseInt($('in-mese').value,10), a = parseInt($('in-anno').value,10);
+    state.mese=m; state.anno=a; state.ora=$('in-ora').value; state.loc = $('in-loc').value.trim() || 'Vicenza';
+    $('cap-when').innerHTML = '<b>'+MESI[m-1]+' '+a+' · '+state.ora+'</b>';
+    $('cap-loc').textContent = state.loc;
+    $('cap-fmt').textContent = state.fmtName;
+    $('cap-pal').textContent = state.palName;
+    $('cap-sw').style.background = state.dot;
+    var frame = $('poster-frame');
+    frame.classList.toggle('a4', state.ar==='a4');
+  }
+
+  var GEN_PHASES = [
+    'Calcolo dove sono stasera i pianeti e la Luna',
+    'Metto cinquemila stelle sulla mappa',
+    'Compongo il poster',
+    "Disegno l'immagine finale"
+  ];
+  function setPhase(i){
+    // i = indice della fase IN CORSO (0..3); le precedenti sono completate.
+    // Nell'.exe questa funzione è chiamata dal motore a ogni fase reale,
+    // non da un timer: la barra dice sempre il vero.
+    document.querySelectorAll('#phases .phase').forEach(function(p,k){
+      p.classList.toggle('done', k<i);
+      p.classList.toggle('active', k===i);
+    });
+  }
+  function allPhasesDone(){
+    document.querySelectorAll('#phases .phase').forEach(function(p){ p.classList.remove('active'); p.classList.add('done'); });
+  }
+  function runGenerate(){
+    show('generating');
+    setPhase(0);
+    var i=0;
+    clearInterval(genTimer);
+    // MOCKUP: qui avanziamo a tempo. Nell'.exe ogni chiamata a setPhase
+    // parte quando il motore ha finito davvero la fase precedente.
+    genTimer = setInterval(function(){
+      i++;
+      if(i<GEN_PHASES.length){ setPhase(i); }
+      else { clearInterval(genTimer); allPhasesDone();
+        setTimeout(function(){ fillPreviewMeta(); show('preview'); setGeneraBusy(false); }, 420); }
+    }, 720);
+  }
+
+  function setGeneraBusy(b){
+    var g=$('genera');
+    g.disabled=b; g.textContent = b ? 'Generazione in corso…' : 'Genera anteprima';
+  }
+
+  $('genera').addEventListener('click', function(){
+    clearBad();
+    var err = validate();
+    if(err){
+      $('err-msg').textContent = err.msg;
+      $('err-hint').textContent = 'L\u2019anno deve stare tra il 1900 e il 2050. Correggilo nel pannello e riprova.';
+      $('st-anno').classList.add('bad');
+      show('error');
+      return;
+    }
+    setGeneraBusy(true);
+    runGenerate();
+  });
+
+  $('regen').addEventListener('click', function(){ runGenerate(); });
+  $('err-back').addEventListener('click', function(){ show('initial'); });
+
+  /* salvataggio (simulato — nell'.exe scrive il file vero) */
+  function toast(path){
+    $('toast-path').textContent = path;
+    $('toast').classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer=setTimeout(function(){ $('toast').classList.remove('show'); }, 2600);
+  }
+  function fileBase(){
+    var m = String(state.mese).padStart(2,'0');
+    var loc = state.loc.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'vicenza';
+    return 'cielo_'+state.anno+'-'+m+'_'+loc+'_'+state.fmt;
+  }
+  $('save-png').addEventListener('click', function(){ toast(fileBase()+'.png'); });
+  $('save-svg').addEventListener('click', function(){ toast(fileBase()+'.svg'); });
+
+  /* switcher (revisione) */
+  document.querySelectorAll('#switch button').forEach(function(b){
+    b.addEventListener('click', function(){
+      var go=b.getAttribute('data-go');
+      clearInterval(genTimer); setGeneraBusy(false);
+      if(go==='preview') fillPreviewMeta();
+      if(go==='generating'){ runGenerate(); return; }
+      if(go==='error'){ $('err-msg').textContent='Mese fuori intervallo: 13. Ammessi 1-12.'; $('err-hint').textContent='Il mese va indicato con un numero da 1 a 12 (1 = Gennaio, 12 = Dicembre). Correggilo nel pannello e riprova.'; }
+      show(go);
+    });
+  });
+
+})();
+</script>
+</body>
+</html>
