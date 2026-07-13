@@ -117,7 +117,13 @@ descrive lo fa scollare al primo cambiamento.
   - **R4 (validazione input) diventa bloccante**: un HTTP 500 sul PC di un socio
     è "il programma non funziona", e non hai i log.
   - Prima di rendere pubblico il repo: `LICENSE` (senza, nessuno ha diritto di
-    usarlo) e README riallineato alla realtà.
+    usarlo) e README riallineato alla realtà. *(Fatto #7c: `LICENSE` MIT,
+    `CREDITI.md`, `data/stelle_FONTE.md`, README riscritto ed eseguito.)*
+  - **`CREDITI.md` va IMPACCHETTATO nell'`.exe`** *(#7c)*: BSD-2 e OFL obbligano
+    la nota di copyright anche in forma binaria (vedi sotto). L'`.exe` deve
+    portarsi `CREDITI.md` accanto e/o in una schermata "Informazioni". È lavoro
+    del giro di packaging (D4), non prima: qui resta scritto perché è il punto
+    che si dimentica e che rende l'`.exe` non distribuibile finché manca.
   - **La provenienza dei dati è nota e verificata** *(2026-07-13, per confronto
     integrale: stesso hash, non "somiglia")*:
     | Dato | Fonte | Licenza |
