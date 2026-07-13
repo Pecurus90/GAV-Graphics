@@ -945,24 +945,35 @@ class Engine:
                 f'<line x1="{x:.1f}" y1="{y:.1f}" x2="{x+9:.1f}" y2="{y-6:.1f}"/>'
                 f'<line x1="{x+7:.1f}" y1="{y-7:.1f}" x2="{x+10:.1f}" y2="{y-4:.1f}"/></g>')
 
+    # un'etichetta non si scarta MAI (D9, deciso da Marco): se non trova posto
+    # libero vicino al suo oggetto, si allontana e si collega con una LINEA DI
+    # RICHIAMO. Oltre questa distanza (px) dall'ancora naturale scatta la linea.
+    # Tarata (misura #7b) perche' un'etichetta appena nudge-ata resti muta —
+    # altrimenti in una zona fitta scattano 8-9 linee = ragnatela; solo le
+    # davvero lontane (~42px) prendono il richiamo.
+    LEADER_GAP = 28.0
+
     def _render_messier_symbols(self, b, theme, mctx):
         """Simboli di TUTTI i Messier sopra l'orizzonte sul disco (43-87), col
         simbolo del tipo; etichetta 'Mxx' SOLO a chi sta in tabella (patto D9).
         L'anti-collisione conosce gli OSTACOLI: i simboli Messier e le stelle
-        delle figure. Chi non trova posto viene scartato (meglio un nome in meno
-        che uno impastato su un'ellisse). L'etichetta del gruppo (Ammasso della
-        Vergine) passa per la STESSA anti-collisione, con linea di richiamo."""
+        delle figure. Un'etichetta NON si scarta mai: se non entra vicino al suo
+        oggetto si allontana finche' trova posto e si collega con una LINEA DI
+        RICHIAMO (lo stesso meccanismo dell'Ammasso della Vergine, esteso a tutti).
+        Espone i box calcolati (`_last_symbol_boxes`, `_last_label_boxes`) e i
+        contatori (`_last_messier_dropped`, `_last_messier_leadered`) per i test."""
         cx,cy,rad = b["cx"], b["cy"], b["rad"]
         s=b.get("size",4.6); sw=b.get("stroke_width",1.15); col=theme[b.get("fill","gold")]
         lab_col=theme[b.get("label_fill","gold")]; lsz=b.get("label_size",11)
         out=[]; enriched=mctx["enriched"]; label_siglas=mctx["label_siglas"]
-        obstacles=[]  # box che le etichette devono evitare (simboli + stelle-figura)
+        symbol_boxes=[]; obstacles=[]  # simboli (ostacoli+test) + stelle-figura (solo ostacoli)
         # 1) SIMBOLI (tutti). Membri di un gruppo piu' piccoli: grappolo fitto.
         for o in enriched:
             ss = s*0.85 if o.get("gruppo") else s
             rot = (o["ra_deg"] % 180.0) - 90.0  # deterministica, non allinea le ellissi
             out.append(self._messier_symbol_svg(o["famiglia"], o["x"], o["y"], ss, col, sw, rot))
-            hs=ss*1.25; obstacles.append((o["x"]-hs, o["y"]-hs, o["x"]+hs, o["y"]+hs))
+            hs=ss*1.25; box=(o["x"]-hs, o["y"]-hs, o["x"]+hs, o["y"]+hs)
+            symbol_boxes.append(box); obstacles.append(box)
         for fx,fy in mctx["figure_pts"]:
             obstacles.append((fx-2.6, fy-2.6, fx+2.6, fy+2.6))
         # 2) ETICHETTE: richieste dei singoli in tabella + etichetta dei gruppi.
@@ -971,49 +982,63 @@ class Engine:
         reqs=[]
         for o in enriched:
             if o["sigla"] in label_siglas and not o.get("gruppo"):
-                reqs.append({"kind":"single", "text":o["sigla"],
-                             "nx":o["x"]+s+3, "ny":o["y"]-s+1,
-                             "w":len(o["sigla"])*lsz*0.62, "h":lsz,
-                             "pri":100.0-o["alt"]})
+                reqs.append({"kind":"single", "key":o["sigla"], "text":o["sigla"],
+                             "sx":o["x"], "sy":o["y"], "nx":o["x"]+s+3, "ny":o["y"]-s+1,
+                             "w":len(o["sigla"])*lsz*0.62, "h":lsz, "pri":100.0-o["alt"]})
         for r in mctx["table"]:
             if r.get("_group") and ("__group__"+r["_group"]) in label_siglas:
                 gx,gy=r["x"],r["y"]
                 dx,dy=gx-cx,gy-cy; d=(dx*dx+dy*dy)**0.5 or 1.0
                 # ancora naturale: spinta RADIALE verso l'esterno (via dal grappolo)
                 nx,ny=gx+dx/d*46, gy+dy/d*46
-                txt=r["nome_it"]; sub=f'{r["_count"]} galassie · una sola etichetta'
-                reqs.append({"kind":"group", "text":txt, "sub":sub,
-                             "nx":nx, "ny":ny, "w":len(sub)*9.5*0.55, "h":26,
-                             "gx":gx, "gy":gy, "pri":-1.0})
+                txt=r["nome_it"]; sub=f'{r["_count"]} galassie'
+                wbox=max(len(txt)*11.5*0.55, len(sub)*9.5*0.55)  # copre la riga piu' larga
+                reqs.append({"kind":"group", "key":"__group__"+r["_group"], "text":txt, "sub":sub,
+                             "sx":gx, "sy":gy, "nx":nx, "ny":ny,
+                             "w":wbox, "h":26, "pri":-1.0})
         # anti-collisione greedy contro OSTACOLI + etichette gia' poste
-        placed_boxes=list(obstacles); placed=0; dropped=0
+        placed_boxes=list(obstacles); label_boxes=[]; leadered=0; dropped=0
         DIRS=[(0,-1),(1,0),(0,1),(-1,0),(1,-1),(1,1),(-1,1),(-1,-1)]; STEP=6
-        cands=[(0,0)]+[(dx*r*STEP, dy*r*STEP) for r in range(1,8) for dx,dy in DIRS]
+        cands=[(0,0)]+[(dx*r*STEP, dy*r*STEP) for r in range(1,15) for dx,dy in DIRS]
         def overlaps(bb):
             return sum(1 for p in placed_boxes
                        if not(bb[2]<=p[0] or bb[0]>=p[2] or bb[3]<=p[1] or bb[1]>=p[3]))
+        def mkbox(px,py,req):
+            if req["kind"]=="group": return (px-req["w"]/2, py-11, px+req["w"]/2, py+16)
+            return (px, py-req["h"], px+req["w"], py)
+        def grid_cands(req):
+            # scansione a griglia di TUTTO il disco: il gruppo ha la linea di
+            # richiamo, quindi puo' stare ovunque sia libero; ordina per vicinanza
+            # all'ancora naturale (il richiamo piu' corto possibile).
+            g=[]
+            for gxp in range(int(cx-rad+10), int(cx+rad-10), 16):
+                for gyp in range(int(cy-rad+10), int(cy+rad-10), 16):
+                    g.append((gxp-req["nx"], gyp-req["ny"]))
+            g.sort(key=lambda o:o[0]*o[0]+o[1]*o[1])
+            return g
         for req in sorted(reqs, key=lambda r:r["pri"]):
-            w,h=req["w"],req["h"]; chosen=None; best=None
-            for ox,oy in cands:
+            chosen=None; best=None
+            search = grid_cands(req) if req["kind"]=="group" else cands
+            for ox,oy in search:
                 px,py=req["nx"]+ox, req["ny"]+oy
                 if (px-cx)**2+(py-cy)**2 > (rad-3)**2: continue
-                if req["kind"]=="group":  # box copre le due righe, centrato sull'ancora
-                    bb=(px-w/2, py-11, px+w/2, py+16)
-                else:
-                    bb=(px, py-h, px+w, py)
-                ov=overlaps(bb)
-                if ov==0: chosen=(px,py,bb); break
-                if best is None or ov<best[3]: best=(px,py,bb,ov)
-            # l'etichetta di GRUPPO non si scarta mai (il grappolo non puo' restare
-            # muto): se nessun posto e' libero, prende quello meno sovrapposto.
-            if chosen is None and req["kind"]=="group" and best is not None:
-                chosen=(best[0],best[1],best[2])
+                bb=mkbox(px,py,req); ov=overlaps(bb)
+                if ov==0: chosen=(px,py,bb,ox,oy); break
+                if best is None or ov<best[4]: best=(px,py,bb,(ox*ox+oy*oy),ov)
+            # non si scarta MAI: se nessun posto e' del tutto libero, si prende il
+            # meno sovrapposto (con linea di richiamo). Lo scarto resta come rete di
+            # sicurezza teorica (best None = nessun candidato dentro il disco).
+            if chosen is None and best is not None:
+                chosen=(best[0],best[1],best[2],0,0)
             if chosen is None: dropped+=1; continue
-            placed_boxes.append(chosen[2]); placed+=1
-            px,py=chosen[0],chosen[1]
-            if req["kind"]=="group":
-                out.append(f'<line x1="{req["gx"]:.1f}" y1="{req["gy"]:.1f}" x2="{px:.1f}" y2="{py-4:.1f}" '
+            px,py,bb,ox,oy=chosen
+            placed_boxes.append(bb); label_boxes.append((bb, req["key"]))
+            need_leader = (req["kind"]=="group") or (ox*ox+oy*oy) > self.LEADER_GAP**2
+            if need_leader:
+                leadered+=1
+                out.append(f'<line x1="{req["sx"]:.1f}" y1="{req["sy"]:.1f}" x2="{px:.1f}" y2="{py-4:.1f}" '
                            f'stroke="{col}" stroke-width="0.9" stroke-opacity="0.7"/>')
+            if req["kind"]=="group":
                 out.append(f'<text x="{px:.1f}" y="{py:.1f}" text-anchor="middle" fill="{col}" '
                            f'font-size="11.5" font-weight="600">{req["text"]}</text>')
                 out.append(f'<text x="{px:.1f}" y="{py+14:.1f}" text-anchor="middle" fill="{theme["text3"]}" '
@@ -1021,7 +1046,9 @@ class Engine:
             else:
                 out.append(f'<text x="{px:.1f}" y="{py:.1f}" fill="{lab_col}" '
                            f'font-size="{lsz}" font-weight="600">{req["text"]}</text>')
-        self._last_messier_labels=placed; self._last_messier_dropped=dropped
+        self._last_messier_labels=len(label_boxes); self._last_messier_dropped=dropped
+        self._last_messier_leadered=leadered
+        self._last_symbol_boxes=symbol_boxes; self._last_label_boxes=label_boxes
         return '\n'.join(out)
 
     def _render_messier_table(self, b, theme, mctx):
@@ -1072,9 +1099,18 @@ class Engine:
                            f'stroke="{theme["divider"]}" stroke-width="0.7" opacity="0.5"/>')
         return '\n'.join(out)
 
+    def _mini_grappolo_svg(self, x, y, s, col, sw):
+        """Il segno del grappolo: tre mini-ellissi quasi sovrapposte (come in
+        tabella). Non e' un simbolo d'atlante ma un COMPOSITO, e va in legenda
+        perche' compare sulla mappa e in tabella (sei segni usati, non cinque)."""
+        return ('<g opacity="0.95">'
+                + self._messier_symbol_svg("galassia", x-2, y-1, s*0.7, col, sw, 20)
+                + self._messier_symbol_svg("galassia", x+2, y+1, s*0.7, col, sw, -15)
+                + self._messier_symbol_svg("galassia", x, y, s*0.6, col, sw, 40) + '</g>')
+
     def _render_messier_legend(self, b, theme):
-        """Legenda: i 5 simboli + nome, e la chiave strumenti. Senza, la mappa e'
-        indecifrabile. Posizioni dal file."""
+        """Legenda: i 5 simboli d'atlante + il segno del grappolo + la chiave
+        strumenti. Senza, la mappa e' indecifrabile. Posizioni dal file."""
         out=[]; y=b["y"]; s=b.get("size",5); sw=b.get("stroke_width",1.15); col=theme[b.get("fill","gold")]
         FAMS=[("galassia","Galassia"),("ammasso aperto","Ammasso aperto"),
               ("ammasso globulare","Ammasso globulare"),("nebulosa diffusa","Nebulosa diffusa"),
@@ -1084,6 +1120,11 @@ class Engine:
             out.append(self._messier_symbol_svg(fam, x, y, s, col, sw, rot))
             out.append(f'<text x="{x+16:.0f}" y="{y+4:.0f}" fill="{theme["text"]}" font-size="12.5" '
                        f'font-weight="500">{label}</text>')
+        grp=b.get("gruppo")
+        if grp:
+            out.append(self._mini_grappolo_svg(grp["x"], y, s, col, sw))
+            out.append(f'<text x="{grp["x"]+16:.0f}" y="{y+4:.0f}" fill="{theme["text"]}" font-size="12.5" '
+                       f'font-weight="500">{grp.get("label","Grappolo di galassie")}</text>')
         key=b["inst_key"]
         out.append(self._instrument_icon_svg("binocolo", key["x"], y-5, theme["text3"]))
         out.append(f'<text x="{key["x"]+16:.0f}" y="{y-1:.0f}" fill="{theme["text2"]}" font-size="12" '

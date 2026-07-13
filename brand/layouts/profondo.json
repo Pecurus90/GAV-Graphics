@@ -40,8 +40,9 @@
     {"type": "line", "x1": 56, "y1": 920, "x2": 1024, "y2": 920,
      "stroke": "divider", "stroke_width": 1},
     {"type": "messier_legend", "y": 942, "size": 5, "stroke_width": 1.15, "fill": "gold",
-     "items": [{"x": 72}, {"x": 230}, {"x": 408}, {"x": 582}, {"x": 742}],
-     "inst_key": {"x": 902}},
+     "items": [{"x": 58}, {"x": 172}, {"x": 312}, {"x": 476}, {"x": 630}],
+     "gruppo": {"x": 800, "label": "Grappolo di galassie"},
+     "inst_key": {"x": 948}},
 
     {"type": "line", "x1": 56, "y1": 1002, "x2": 1024, "y2": 1002,
      "stroke": "divider", "stroke_width": 1},
