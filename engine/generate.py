@@ -169,6 +169,7 @@ def bv2hex(ramp, bv):
 
 class Engine:
     def __init__(self, datadir="data"):
+        self.datadir = datadir
         load = Loader(get_skyfield_data_path())
         self.ts = load.timescale()
         self.eph = load('de421.bsp')
@@ -338,7 +339,8 @@ class Engine:
 
     def sky_disc_svg(self, cx, cy, rad, lst, lat_rad, theme, ramp=None,
                      cardinals=True, labels=True, marquee=True, ticks=None,
-                     star_names=None, declutter=False, clip_id='dclip'):
+                     star_names=None, declutter=False, clip_id='dclip',
+                     figure_stars=False):
         """Disegna SOLO il disco cielo (cornice + stelle + costellazioni) di
         centro (cx,cy) e raggio rad, a QUALSIASI misura. Restituisce il
         frammento SVG (stringa). Le costanti visive scalano con k=rad/R, quindi
@@ -367,13 +369,24 @@ class Engine:
                         a(f'<line x1="{xs[i]:.1f}" y1="{ys[i]:.1f}" x2="{xs[i+1]:.1f}" y2="{ys[i+1]:.1f}"/>')
         a('</g>')
         # stelle
-        alt,az=self.altaz(self.sra,self.sdec,lst,lat_rad); xs,ys=self.project(alt,az,cx,cy,rad)
-        for i in np.argsort(-self.smag):
-            if alt[i]<=0 or self.smag[i]>5.25: continue
-            sr=k*max(0.45,(5.35-self.smag[i])*0.92); col=bv2hex(ramp,self.sbv[i])
-            if self.smag[i]<1.5:
-                a(f'<circle cx="{xs[i]:.1f}" cy="{ys[i]:.1f}" r="{sr*2.2:.1f}" fill="{col}" opacity="0.22" filter="url(#softglow)"/>')
-            a(f'<circle cx="{xs[i]:.1f}" cy="{ys[i]:.1f}" r="{sr:.2f}" fill="{col}"/>')
+        if figure_stars:
+            # PERCORSO PROFONDO CIELO: NON il campo completo, ma solo le stelle che
+            # compongono le FIGURE (i vertici delle linee di costellazione). Svuota
+            # il disco perche' i simboli Messier abbiano spazio (D9). Opt-in dal
+            # layout; spento -> l'A4 e la pagina 1 non cambiano.
+            fra, fdec = self._figure_star_points()
+            alt,az=self.altaz(fra,fdec,lst,lat_rad); xs,ys=self.project(alt,az,cx,cy,rad)
+            for i in range(len(fra)):
+                if alt[i]<=0: continue
+                a(f'<circle cx="{xs[i]:.1f}" cy="{ys[i]:.1f}" r="{2.2*k:.2f}" fill="{theme["text"]}" opacity="0.72"/>')
+        else:
+            alt,az=self.altaz(self.sra,self.sdec,lst,lat_rad); xs,ys=self.project(alt,az,cx,cy,rad)
+            for i in np.argsort(-self.smag):
+                if alt[i]<=0 or self.smag[i]>5.25: continue
+                sr=k*max(0.45,(5.35-self.smag[i])*0.92); col=bv2hex(ramp,self.sbv[i])
+                if self.smag[i]<1.5:
+                    a(f'<circle cx="{xs[i]:.1f}" cy="{ys[i]:.1f}" r="{sr*2.2:.1f}" fill="{col}" opacity="0.22" filter="url(#softglow)"/>')
+                a(f'<circle cx="{xs[i]:.1f}" cy="{ys[i]:.1f}" r="{sr:.2f}" fill="{col}"/>')
         a('</g>')
         # ---- ETICHETTE (stelle-guida + costellazioni) ----
         if not declutter:
@@ -539,7 +552,8 @@ class Engine:
                                  marquee=b.get("marquee", True),
                                  ticks=b.get("ticks"),
                                  star_names=b.get("star_names"),
-                                 declutter=b.get("declutter", False))
+                                 declutter=b.get("declutter", False),
+                                 figure_stars=b.get("figure_stars", False))
 
     @staticmethod
     def _render_ctx(data):
@@ -801,7 +815,237 @@ class Engine:
             out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{rng.uniform(sf["r_min"],sf["r_max"]):.2f}" fill="{col}" opacity="{rng.uniform(sf["op_min"],sf["op_max"]):.2f}"/>')
         return '\n'.join(out)
 
-    def _render_block(self, b, theme, data, ctx, lst, lat_rad, w, h):
+    # ---- PROFONDO CIELO (D9): catalogo Messier, geometria, simboli d'atlante ----
+    def _figure_star_points(self):
+        """Vertici UNICI delle linee di costellazione = le stelle che compongono
+        le FIGURE. Le disegna il disco del profondo cielo al posto del campo
+        completo (D9). Cache: geometria fissa, non dipende dalla data."""
+        if not hasattr(self, "_fig_pts"):
+            pts=set()
+            for f in self.clines:
+                for line in f['geometry']['coordinates']:
+                    for p in line:
+                        pts.add((round(p[0],4), round(p[1],4)))
+            arr=np.array(sorted(pts)) if pts else np.zeros((0,2))
+            self._fig_pts=(arr[:,0], arr[:,1]) if len(arr) else (np.zeros(0), np.zeros(0))
+        return self._fig_pts
+
+    def _load_messier(self):
+        """Catalogo Messier (data/messier.json) come DATO del motore, caricato una
+        volta e in modo pigro (come le icone): l'A4 non lo tocca mai."""
+        if not hasattr(self, "_messier_cache"):
+            with open(f"{self.datadir}/messier.json", encoding="utf-8") as fh:
+                self._messier_cache=json.load(fh)["oggetti"]
+        return self._messier_cache
+
+    def messier_context(self, lst, lat_rad, cx, cy, rad, n):
+        """Contesto Messier per una data/disco: gli oggetti sopra l'orizzonte con
+        le coordinate sul disco (per i SIMBOLI), la TABELLA selezionata (primi N
+        per merito), e le sigle che meritano un'etichetta sulla mappa (= chi sta
+        in tabella, il patto mappa<->tabella di D9). Puro: dipende solo da lst/lat."""
+        enriched=[]
+        for o in self._load_messier():
+            if o.get("disegna_mappa") is False:  # M40 (stella doppia): non si disegna
+                continue
+            alt,az=self.altaz(o["ra_deg"], o["dec_deg"], lst, lat_rad)
+            alt=float(np.asarray(alt).reshape(-1)[0]); az=float(np.asarray(az).reshape(-1)[0])
+            if alt<=0: continue
+            x,y=self.project(alt,az,cx,cy,rad)
+            enriched.append({**o, "alt":alt, "az":az, "x":float(x), "y":float(y)})
+        table=self._messier_select(enriched, n)
+        labels=set()
+        for r in table:
+            labels.add("__vergine__" if r.get("_group")=="vergine" else r["sigla"])
+        return {"enriched":enriched, "table":table, "label_siglas":labels}
+
+    @staticmethod
+    def _messier_select(enriched, n):
+        """La REGOLA della tabella (D9): filtro altezza > 30 gradi, l'Ammasso della
+        Vergine collassa in UNA voce (baricentro dei membri per la linea di
+        richiamo), ordine per (notevolezza desc, altezza desc), primi N. Il N e'
+        del FILE di layout, non del codice."""
+        cand=[o for o in enriched if o["alt"]>30 and o.get("notevolezza",0)>=1]
+        verg=[o for o in cand if o.get("gruppo")=="vergine"]
+        cand=[o for o in cand if o.get("gruppo")!="vergine"]
+        if verg:
+            cx=sum(o["x"] for o in verg)/len(verg); cy=sum(o["y"] for o in verg)/len(verg)
+            # merito 3: quando i suoi membri sono su (primavera) e' un gioiello
+            # ("un sacco di galassie"), e soprattutto deve stare SEMPRE in tabella
+            # se compare sulla mappa, altrimenti il grappolo resta una macchia senza
+            # etichetta (il patto mappa<->tabella lo vieta). Vedi report.
+            cand.append({"sigla":"Ammasso della Vergine", "_group":"vergine",
+                         "nome_it":"Ammasso della Vergine", "nome_fonte":"curato",
+                         "famiglia":"galassia", "notevolezza":3,
+                         "costellazione_it":"Vergine", "visione":"telescopio",
+                         "alt":max(o["alt"] for o in verg), "x":cx, "y":cy,
+                         "_count":len(verg), "_members":verg})
+        cand.sort(key=lambda o:(-o.get("notevolezza",0), -o["alt"]))
+        return cand[:n]
+
+    # forme della convenzione degli atlanti (D9): copiate dal mockup del designer.
+    # Tutte fill=none, stroke = token colore. `s` = raggio nominale; le proporzioni
+    # sono ancorate al mockup (s=4.6 sul disco, s=5 in tabella/legenda).
+    @staticmethod
+    def _messier_symbol_svg(fam, x, y, s, col, sw, rot=0.0):
+        if fam=="galassia":
+            return (f'<ellipse cx="{x:.1f}" cy="{y:.1f}" rx="{s*1.30:.1f}" ry="{s*0.587:.1f}" '
+                    f'fill="none" stroke="{col}" stroke-width="{sw}" transform="rotate({rot:.0f} {x:.1f} {y:.1f})"/>')
+        if fam=="ammasso aperto":
+            return (f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{s:.1f}" fill="none" '
+                    f'stroke="{col}" stroke-width="{sw}" stroke-dasharray="2 2"/>')
+        if fam=="ammasso globulare":
+            e=s*1.24
+            return (f'<g fill="none" stroke="{col}" stroke-width="{sw}">'
+                    f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{s:.1f}"/>'
+                    f'<line x1="{x-e:.1f}" y1="{y:.1f}" x2="{x+e:.1f}" y2="{y:.1f}"/>'
+                    f'<line x1="{x:.1f}" y1="{y-e:.1f}" x2="{x:.1f}" y2="{y+e:.1f}"/></g>')
+        if fam=="nebulosa diffusa":
+            side=s*1.91; h=side/2
+            return (f'<rect x="{x-h:.1f}" y="{y-h:.1f}" width="{side:.1f}" height="{side:.1f}" '
+                    f'rx="0.9" fill="none" stroke="{col}" stroke-width="{sw}"/>')
+        if fam=="nebulosa planetaria":
+            r=s*0.72; o=r+s*0.6
+            return (f'<g fill="none" stroke="{col}" stroke-width="{sw}">'
+                    f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{r:.1f}"/>'
+                    f'<line x1="{x:.1f}" y1="{y-r:.1f}" x2="{x:.1f}" y2="{y-o:.1f}"/>'
+                    f'<line x1="{x:.1f}" y1="{y+r:.1f}" x2="{x:.1f}" y2="{y+o:.1f}"/>'
+                    f'<line x1="{x-r:.1f}" y1="{y:.1f}" x2="{x-o:.1f}" y2="{y:.1f}"/>'
+                    f'<line x1="{x+r:.1f}" y1="{y:.1f}" x2="{x+o:.1f}" y2="{y:.1f}"/></g>')
+        return ''  # famiglie fuori dalle 5 (es. stella doppia): nessun simbolo
+
+    @staticmethod
+    def _instrument_icon_svg(kind, x, y, col, sw=1.3):
+        """Icona strumento (dal mockup): binocolo = due cerchi + ponte; telescopio
+        = tratto obliquo + tacca. Ancorata a (x,y)."""
+        if kind=="binocolo":
+            return (f'<g fill="none" stroke="{col}" stroke-width="{sw}">'
+                    f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3"/><circle cx="{x+8:.1f}" cy="{y:.1f}" r="3"/>'
+                    f'<line x1="{x+3:.1f}" y1="{y-1:.1f}" x2="{x+5:.1f}" y2="{y-1:.1f}"/></g>')
+        return (f'<g fill="none" stroke="{col}" stroke-width="{sw}" stroke-linecap="round">'
+                f'<line x1="{x:.1f}" y1="{y:.1f}" x2="{x+9:.1f}" y2="{y-6:.1f}"/>'
+                f'<line x1="{x+7:.1f}" y1="{y-7:.1f}" x2="{x+10:.1f}" y2="{y-4:.1f}"/></g>')
+
+    def _render_messier_symbols(self, b, theme, mctx):
+        """Simboli di TUTTI i Messier sopra l'orizzonte sul disco (43-87), col
+        simbolo del tipo; etichetta 'Mxx' SOLO a chi sta in tabella (patto D9),
+        con anti-collisione che scarta chi non entra. L'Ammasso della Vergine:
+        grappolo fitto di ellissi + UNA etichetta con linea di richiamo."""
+        cx,cy,rad = b["cx"], b["cy"], b["rad"]
+        s=b.get("size",4.6); sw=b.get("stroke_width",1.15); col=theme[b.get("fill","gold")]
+        out=[]; enriched=mctx["enriched"]; label_siglas=mctx["label_siglas"]
+        # 1) SIMBOLI (tutti). I membri della Vergine piu' piccoli: grappolo fitto.
+        for o in enriched:
+            gruppo = o.get("gruppo")=="vergine"
+            ss = s*0.85 if gruppo else s
+            rot = (o["ra_deg"] % 180.0) - 90.0  # deterministica, per non allineare le ellissi
+            out.append(self._messier_symbol_svg(o["famiglia"], o["x"], o["y"], ss, col, sw, rot))
+        # 2) ETICHETTE dei singoli in tabella (no Vergine: ha la sua), anti-collisione
+        reqs=[]
+        for o in enriched:
+            if o["sigla"] in label_siglas and o.get("gruppo")!="vergine":
+                reqs.append({"text":o["sigla"], "x":o["x"]+s+3, "y":o["y"]-s+1,
+                             "size":b.get("label_size",11), "alt":o["alt"]})
+        placed_boxes=[]; placed=0; dropped=0
+        # priorita': piu' alto prima (meglio piazzato = piu' probabile tenga il posto)
+        DIRS=[(0,-1),(1,0),(0,1),(-1,0),(1,-1),(1,1),(-1,1),(-1,-1)]; STEP=5
+        cands=[(0,0)]+[(dx*r*STEP, dy*r*STEP) for r in range(1,5) for dx,dy in DIRS]
+        lab_col=theme[b.get("label_fill","gold")]
+        for req in sorted(reqs, key=lambda r:-r["alt"]):
+            w=len(req["text"])*req["size"]*0.6; hh=req["size"]; chosen=None
+            for ox,oy in cands:
+                px,py=req["x"]+ox, req["y"]+oy
+                if (px-cx)**2+(py-cy)**2 > (rad-3)**2: continue
+                bb=(px,py-hh,px+w,py)
+                if any(not(bb[2]<=p[0] or bb[0]>=p[2] or bb[3]<=p[1] or bb[1]>=p[3]) for p in placed_boxes): continue
+                chosen=(px,py,bb); break
+            if chosen is None: dropped+=1; continue
+            placed_boxes.append(chosen[2]); placed+=1
+            out.append(f'<text x="{chosen[0]:.1f}" y="{chosen[1]:.1f}" fill="{lab_col}" '
+                       f'font-size="{req["size"]}" font-weight="600">{req["text"]}</text>')
+        # 3) Ammasso della Vergine: una sola etichetta con linea di richiamo al grappolo
+        if "__vergine__" in label_siglas:
+            grp=next((r for r in mctx["table"] if r.get("_group")=="vergine"), None)
+            if grp:
+                gx,gy=grp["x"],grp["y"]; lx,ly=b.get("virgo_label", [gx+70, gy+40])
+                out.append(f'<line x1="{gx+8:.1f}" y1="{gy+6:.1f}" x2="{lx-6:.1f}" y2="{ly-10:.1f}" '
+                           f'stroke="{col}" stroke-width="0.9" stroke-opacity="0.75"/>')
+                out.append(f'<text x="{lx:.1f}" y="{ly:.1f}" fill="{col}" font-size="11.5" '
+                           f'font-weight="600">Ammasso della Vergine</text>')
+                out.append(f'<text x="{lx:.1f}" y="{ly+14:.1f}" fill="{theme["text3"]}" '
+                           f'font-size="9.5">{grp["_count"]} galassie · una sola etichetta</text>')
+        self._last_messier_labels=placed; self._last_messier_dropped=dropped
+        return '\n'.join(out)
+
+    def _render_messier_table(self, b, theme, mctx):
+        """Colonna destra: le righe della tabella (simbolo · Mxx — nome · tipo ·
+        costellazione · strumento). Passo `step`, prima baseline `y0`."""
+        out=[]; x0=b["x0"]; y0=b["y0"]; step=b["step"]
+        symx=b.get("sym_dx",8); namex=b.get("name_dx",30); instx=b.get("inst_dx",398)
+        s=b.get("size",5); sw=b.get("stroke_width",1.15); col=theme[b.get("sym_fill","gold")]
+        for i,r in enumerate(mctx["table"]):
+            y=y0+i*step
+            grp=r.get("_group")=="vergine"
+            # simbolo (per la Vergine: mini-grappolo di 3 ellissi)
+            if grp:
+                out.append('<g opacity="0.95">' +
+                    self._messier_symbol_svg("galassia", x0+symx-2, y-4, s*0.7, col, sw, 20) +
+                    self._messier_symbol_svg("galassia", x0+symx+2, y-2, s*0.7, col, sw, -15) +
+                    self._messier_symbol_svg("galassia", x0+symx, y-3, s*0.6, col, sw, 40) + '</g>')
+            else:
+                rot=-22 if r["famiglia"]=="galassia" else 0
+                out.append(self._messier_symbol_svg(r["famiglia"], x0+symx, y-4, s, col, sw, rot))
+            # nome: "Mxx — Nome" se c'e' un nome curato, altrimenti solo "Mxx"
+            if grp:
+                name=(f'<text x="{x0+namex:.0f}" y="{y:.0f}" fill="{theme["text"]}" font-size="14" '
+                      f'font-weight="600">{r["nome_it"]}</text>')
+            elif r.get("nome_fonte")=="curato":
+                name=(f'<text x="{x0+namex:.0f}" y="{y:.0f}" fill="{theme["text"]}" font-size="14" '
+                      f'font-weight="600"><tspan fill="{col}">{r["sigla"]}</tspan> — {r["nome_it"]}</text>')
+            else:
+                name=(f'<text x="{x0+namex:.0f}" y="{y:.0f}" fill="{theme["text"]}" font-size="14" '
+                      f'font-weight="600"><tspan fill="{col}">{r["sigla"]}</tspan></text>')
+            out.append(name)
+            # riga secondaria: Tipo · Costellazione (per la Vergine: conteggio)
+            if grp:
+                sec=f'{r["_count"]} galassie (Messier) · {r["costellazione_it"]}'
+            else:
+                sec=f'{r["famiglia"][0].upper()+r["famiglia"][1:]} · {r["costellazione_it"]}'
+            out.append(f'<text x="{x0+namex:.0f}" y="{y+16:.0f}" fill="{theme["text3"]}" '
+                       f'font-size="11.5">{sec}</text>')
+            # strumento a destra
+            kind="binocolo" if r["visione"]=="binocolo" else "telescopio"
+            out.append(self._instrument_icon_svg(kind, x0+instx, y-4, theme["text3"]))
+            word="Bino." if kind=="binocolo" else "Tele."
+            out.append(f'<text x="{x0+instx+18:.0f}" y="{y:.0f}" fill="{theme["text2"]}" '
+                       f'font-size="11.5" font-weight="500">{word}</text>')
+            # divisore sottile tra le righe (non dopo l'ultima: respiro verso la legenda)
+            if i < len(mctx["table"])-1:
+                out.append(f'<line x1="{x0}" y1="{y+step-16:.0f}" x2="{b["x1"]}" y2="{y+step-16:.0f}" '
+                           f'stroke="{theme["divider"]}" stroke-width="0.7" opacity="0.5"/>')
+        return '\n'.join(out)
+
+    def _render_messier_legend(self, b, theme):
+        """Legenda: i 5 simboli + nome, e la chiave strumenti. Senza, la mappa e'
+        indecifrabile. Posizioni dal file."""
+        out=[]; y=b["y"]; s=b.get("size",5); sw=b.get("stroke_width",1.15); col=theme[b.get("fill","gold")]
+        FAMS=[("galassia","Galassia"),("ammasso aperto","Ammasso aperto"),
+              ("ammasso globulare","Ammasso globulare"),("nebulosa diffusa","Nebulosa diffusa"),
+              ("nebulosa planetaria","Nebulosa planetaria")]
+        for (fam,label),item in zip(FAMS, b["items"]):
+            x=item["x"]; rot=-22 if fam=="galassia" else 0
+            out.append(self._messier_symbol_svg(fam, x, y, s, col, sw, rot))
+            out.append(f'<text x="{x+16:.0f}" y="{y+4:.0f}" fill="{theme["text"]}" font-size="12.5" '
+                       f'font-weight="500">{label}</text>')
+        key=b["inst_key"]
+        out.append(self._instrument_icon_svg("binocolo", key["x"], y-5, theme["text3"]))
+        out.append(f'<text x="{key["x"]+16:.0f}" y="{y-1:.0f}" fill="{theme["text2"]}" font-size="12" '
+                   f'font-weight="500">Binocolo</text>')
+        out.append(self._instrument_icon_svg("telescopio", key["x"], y+14, theme["text3"]))
+        out.append(f'<text x="{key["x"]+16:.0f}" y="{y+17:.0f}" fill="{theme["text2"]}" font-size="12" '
+                   f'font-weight="500">Telescopio</text>')
+        return '\n'.join(out)
+
+    def _render_block(self, b, theme, data, ctx, lst, lat_rad, w, h, mctx=None):
         """Dispatch di un blocco del layout sulla primitiva giusta."""
         t=b["type"]
         if t=="background":   return self._render_background(b, theme, w, h)
@@ -815,6 +1059,9 @@ class Engine:
         if t=="moon_calendar":return self._render_moon_calendar(b, theme, data)
         if t=="planet_panel": return self._render_planet_panel(b, theme, data)
         if t=="swatches":     return self._render_swatches(b, theme)
+        if t=="messier_symbols": return self._render_messier_symbols(b, theme, mctx)
+        if t=="messier_table":   return self._render_messier_table(b, theme, mctx)
+        if t=="messier_legend":  return self._render_messier_legend(b, theme)
         raise ValueError(f"tipo di blocco sconosciuto nel layout: {t!r}")
 
     # ---- render: volantino A4 (compositore magro: cammina i blocchi) ----
@@ -826,11 +1073,17 @@ class Engine:
         lst, lat_rad, _ = self.sky_context(year,month,lat,lon,hour_local,tzname)
         data=self.sky_data(year,month,lat,lon,place,hour_local,tzname)
         ctx=self._render_ctx(data)
+        # Contesto Messier (D9): calcolato SOLO se il layout lo chiede (sezione
+        # "messier" col disco e il N della tabella). Cosi' l'A4 non carica nulla.
+        mctx=None
+        if "messier" in layout:
+            mc=layout["messier"]
+            mctx=self.messier_context(lst, lat_rad, mc["cx"], mc["cy"], mc["rad"], mc["n"])
         cv=layout['canvas']; cw,ch=cv['w'],cv['h']
         s=[f'<svg xmlns="http://www.w3.org/2000/svg" width="{cw}" height="{ch}" viewBox="0 0 {cw} {ch}" font-family="{cv["font_family"]}">',
            self.defs_svg(theme)]
         for b in layout['blocks']:
-            s.append(self._render_block(b, theme, data, ctx, lst, lat_rad, cw, ch))
+            s.append(self._render_block(b, theme, data, ctx, lst, lat_rad, cw, ch, mctx))
         s.append('</svg>')
         with open(out,'w',encoding='utf-8') as fh:
             fh.write('\n'.join(s))
