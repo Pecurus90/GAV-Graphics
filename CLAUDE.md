@@ -125,6 +125,21 @@ descrive lo fa scollare al primo cambiamento.
     Grotesk), che resta citata in `render.py` (`SANS = "Inter"`) e in
     `cielo-del-mese_struttura.md`: **da riallineare**. I `.ttf` non sono ancora
     nel repo — finché mancano, `resvg` ripiega sui font di sistema (R6).
+- **D10 — L'app è un contenitore di strumenti, non un generatore singolo.**
+  *(Deciso da Marco, 2026-07-13.)* La UI ha una **barra laterale**: oggi una voce
+  attiva (*Cielo del Mese*), domani altre (*Pillole di astronomia*, e ciò che
+  verrà).
+  **Disciplina vincolante:** si costruisce **la barra laterale**, NON
+  un'infrastruttura per plugin. Una voce attiva + una "prossimamente" costano un
+  pomeriggio; un'astrazione generica per strumenti mai progettati è lavoro
+  speculativo su un'ipotesi. Quando il secondo strumento esisterà davvero,
+  sapremo *cosa gli serve* e l'astrazione la scriveremo sui fatti.
+  *(Precedente che lo dimostra: `brand/formats.py`, scritto in anticipo per il
+  layer di composizione, che poi prese tutt'altra strada. È stato cancellato.)*
+- **D11 — La barra di avanzamento dice il vero.** Il motore ha **quattro fasi
+  reali** (effemeridi → proiezione → composizione → rendering PNG): la UI le
+  riporta man mano. *Niente barra finta*: una barra che arriva al 100% e poi resta
+  lì è il modo peggiore di far aspettare qualcuno, e mente al socio.
 - **D9 — La seconda mappa: il profondo cielo (Messier).** *(Decisa 2026-07-12,
   da fare.)* Il post diventa **due pagine**: (1) costellazioni, stelle, Luna e
   pianeti — quella attuale, che resta il default; (2) **profondo cielo**, con
