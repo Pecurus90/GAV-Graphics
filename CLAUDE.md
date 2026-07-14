@@ -358,13 +358,37 @@ descrive lo fa scollare al primo cambiamento.
   dato può ancora cambiare l'output di uno strumento mentre se ne modifica un
   altro, il taglio non ha fatto il suo lavoro.
 
-- **D16 — IL MEZZO È IL TELEFONO.** *(Deciso da Marco, 2026-07-14, guardando
-  agosto.)* La pagina 2 è un **post Instagram**: sul monitor la vedi a 1080 px, ma
-  nel feed di un socio viene disegnata in ~400. Un testo in corpo 10,5 su tela 1080
-  diventa **~4 px sul telefono**: non è testo, è **rumore**.
-  Conseguenza vincolante: **la densità di una pagina social si giudica sul
-  telefono, non sul monitor.** Ciò che non si legge a 400 px non è "informazione in
-  più", è sporcizia che copre l'informazione vera.
+- **D16 — IL MEZZO È IL TELEFONO. E la pagina 2 è una CARTA DA STUDIARE, non un
+  cartello da leggere di sfuggita.** *(Deciso da Marco, 2026-07-14, dopo misura.)*
+  **La misura, prima della decisione** *(corpi del layout ÷ 1080 × 65 mm = la
+  larghezza di un telefono da 6")*:
+  | Elemento | Corpo | Sul telefono |
+  |---|---|---|
+  | Titolo | 50 | **3,0 mm** ✓ |
+  | Righe della tabella | 15 | 0,90 mm |
+  | Sigle Messier (M51…) | 11 | 0,66 mm |
+  | Nomi delle costellazioni | 10,5 | 0,63 mm |
+  | Legenda | 5 | 0,30 mm |
+  Sotto ~1,5 mm un occhio normale, a distanza di braccio, **non legge**. Quindi nel
+  feed **si legge SOLO il titolo**. La tabella — il contenuto editoriale su cui
+  abbiamo speso quattro giri — è invisibile **quanto** i nomi. *(Correzione onesta:
+  la prima stesura di D16 dava la colpa ai nomi delle costellazioni. Era falso: sono
+  innocenti quanto tutto il resto. La misura è arrivata dopo la frase.)*
+  **La decisione:** il post è un **richiamo**; il socio vede il titolo e un disco di
+  cielo che incuriosisce, **apre e fa zoom** per leggere. È la norma per le
+  infografiche dense, ed è coerente col pubblico: un astrofilo che vede "Il cielo di
+  agosto" zooma. **Non si insegue la leggibilità nel feed gonfiando i corpi**: per
+  portare la tabella a 1,5 mm servirebbero corpi quasi doppi, quindi **6-8 righe
+  invece di 15** e metà mappa. Non sarebbe un ritocco tipografico: sarebbe **un
+  altro poster**, con meno contenuto. Se un giorno lo si vorrà, è un lavoro col
+  designer — non un ritocco dell'esecutore.
+  **Conseguenza che resta valida:** ciò che nel feed non si legge **e** che nessuno
+  cerca nemmeno zoomando è comunque **sporcizia**. È il motivo per cui le 44
+  costellazioni minori restano fuori (sotto): non perché illeggibili — lo è tutto —
+  ma perché **nessun principiante le cerca** e affollano i bordi bassi del disco.
+  **Per Pillole (D12) il criterio si ribalta:** è una pagina di testo, non una
+  carta. Lì il feed conta, e i corpi vanno dimensionati per essere letti **senza
+  zoom**.
   Applicazione (nomi delle costellazioni, #7d): si nominano le **35 principali +
   tutte quelle citate in tabella** (il patto D9 resta chiuso). Le **44 minori**
   (Lince, Lucertola, Cavallino, Microscopio, Sestante…) restano **fuori**: nessun
