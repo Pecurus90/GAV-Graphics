@@ -350,6 +350,38 @@ descrive lo fa scollare al primo cambiamento.
     e si rifà. È il modo di **verificare l'astrazione prima di costruirla** — la
     cosa che non facemmo con `brand/formats.py`, e che ci costò il file.
 
+- **D15 — L'`.exe` apre il browser; e cosa manca DAVVERO per averlo.**
+  *(Deciso da Marco, 2026-07-14.)* Doppio clic ⇒ il programma parte in silenzio e
+  **apre il browser** sull'interfaccia dell'app. Niente terminale, niente Python
+  da installare. Il socio non deve sapere cos'è una riga di comando: un `.exe` da
+  CLI che metà dei soci non sa aprire non è "leggero", è **inutile**.
+  Prezzo accettato: l'exe si porta FastAPI/uvicorn, e Windows chiederà il permesso
+  del **firewall** al primo avvio — a un socio poco pratico *sembra un virus*: va
+  spiegato nel README, accanto a SmartScreen.
+  **Cosa manca, misurato sul codice (2026-07-14) — non dedotto:**
+  - **I percorsi sono il punto che si rompe.** Oggi ci sono **quattro basi
+    indipendenti** calcolate da `__file__`: `engine/generate.py:94`
+    (`_BASE = dirname(dirname(abspath(__file__)))` → `brand/layouts`, `brand/icons`,
+    il logo), `cielo.py:27`, `render.py:15`, e i template della web app. Dentro un
+    exe `__file__` non è dove credi (PyInstaller scompatta in una cartella
+    temporanea). Quattro basi = quattro modi diversi di sbagliare. Si sana con
+    **una funzione sola** che sappia se sta girando congelata — non con quattro
+    toppe.
+  - **`de421.bsp` non è un file nostro:** arriva da
+    `skyfield_data.get_skyfield_data_path()` (`generate.py:21,173`), vive dentro un
+    pacchetto installato. Va dichiarato esplicitamente al bundler.
+  - **`resvg_py` è nativo davvero:** `resvg_py.cp312-win_amd64.pyd`, un binario
+    compilato. Va raccolto esplicitamente.
+  - **Da imbarcare:** `brand/` (palette, layout, font, logo, icone), `data/`,
+    `app/templates/`, e **`CREDITI.md`** (obbligo BSD-2, non un optional).
+  - **Build in GitHub Actions**, mai a mano: ambiente sporco = exe irriproducibile.
+  - **Niente di tutto questo dipende da #7e o #7f.** L'`.exe` si potrebbe fare
+    subito; Marco ha scelto di farlo **dopo**, per consegnare ai soci un prodotto
+    con la barra laterale invece di un assaggio. *Rischio residuo accettato
+    consapevolmente:* se `resvg_py` o `de421.bsp` non si lasciassero impacchettare,
+    non sarebbe un bug ma **una scelta architetturale da rifare**, e la si
+    scoprirebbe con due giri di lavoro costruiti sopra.
+
 ---
 
 ## Roadmap
@@ -384,7 +416,7 @@ imprevisto.
 4. **#7f — La barra laterale (D10) + il contratto del tema per-strumento (D13).**
    Una voce attiva (*Cielo del Mese*), una "prossimamente" spenta. **Non** un
    framework per plugin.
-5. **Il packaging: l'`.exe` in GitHub Actions (D4).** *(Anticipato su Pillole —
+5. **Il packaging: l'`.exe` in GitHub Actions (D4 + D15).** *(Anticipato su Pillole —
    deciso da Marco, 2026-07-14: «prima l'exe che funziona e lo condivido, poi
    progettiamo Pillole».)*
    *Perché prima:* è il punto dove questi progetti falliscono — `de421.bsp` e
