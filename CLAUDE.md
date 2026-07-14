@@ -27,27 +27,47 @@ dallo stesso motore. L'A4 resta, non è più il fuoco.
 
 ## Architettura reale (verificata, non dichiarata)
 
+*(Riscritta dopo il taglio #7e, 2026-07-14. Prima c'era un file solo da 1393
+righe: `engine/generate.py`. Non esiste più.)*
+
 ```
 uvicorn ► app/main.py ─┐
-python cielo.py ───────┼─► engine/generate.py ──► data/stars6.json
-                       │   (motore puro: solo SVG) ├─► data/const_lines.json
-                       │                            └─► de421.bsp (skyfield-data)
+python cielo.py ───────┤
+                       ├─► strumenti/cielo/  ──► data/stars6.json, const_lines,
+                       │   (SOLO astronomia)     messier · de421.bsp (skyfield)
+                       │        │
+                       │        └─ eredita ─► compose/compositor.py
+                       │                       (CONDIVISO: cammina i blocchi
+                       │                        del layout, le primitive SVG)
                        └─► render.py ──► resvg_py (SVG→PNG)
-                       (leggono brand/palettes/*.json + brand/layouts/*.json)
 
-CLI: python cielo.py --format a4|post [--png]   (compone motore + render, D1)
+           (tutti leggono brand/palettes/*.json + brand/layouts/*.json)
+
+La freccia "eredita" ha UN SOLO VERSO: compose/ non importa nulla di
+strumenti/ (verificato). È ciò che permetterà a Pillole (D12) di ereditare
+il compositore senza toccare il cielo.
 ```
 
-| File | Ruolo |
-|---|---|
-| `engine/generate.py` | Il motore + compositore magro. Geometria/effemeridi → `SkyData` + disco; `generate()` cammina i blocchi di un file di layout. Libreria pura: **nessun CLI, non importa `render`**. |
-| `cielo.py` | Il CLI (D1). Mappa i formati (`a4`/`post`) ai file di layout e **compone** motore + `render` (SVG, e PNG con `--png`). Vive fuori da `engine/`. |
-| `brand/layouts/*.json` | La composizione come dati (canvas + blocchi). Esistono `a4.json`, `post.json` e i tre design social `dashboard.json`/`editorial.json`/`rail.json`; aggiungerne uno = aggiungere un file (il CLI li scopre dalla cartella). |
-| `app/main.py` | Web app FastAPI sottile: `/`, `/preview`, `/download`. |
-| `render.py` | SVG→PNG via resvg. Usato dal CLI (`cielo.py`) **e** dalla web app. |
-| `validate.py` | Validazione input (R4) + contratto del tema (D2). Condiviso da CLI e web, **non** importato dal motore (invariante #1). Errori in italiano; `InputError`. |
-| `brand/palettes/*.json` | I temi. **Non** in `themes/` (il README mente). |
-| `data/stars6.json` | 5044 stelle GeoJSON, tutte con `mag` e `bv`. |
+| File | Righe | Ruolo |
+|---|---|---|
+| `compose/compositor.py` | 143 | **CONDIVISO.** Il compositore: cammina i blocchi di un file di layout ed è **tool-agnostico** (hook `_render_block_tool` per i blocchi propri di uno strumento). Le primitive: testo, riga, pannello, **immagine (base64)**, icona, sfondo. **È ciò che Pillole eredita.** |
+| `strumenti/cielo/messier.py` | 518 | Il profondo cielo (pagina 2): simboli, tabella, anti-collisione a tre strati, nomi delle costellazioni. Ospita `CONST_IT_MINORI` (vedi il confine, D14). |
+| `strumenti/cielo/disc.py` | 219 | Il disco sigillato (D7). Legge `CONST_IT`, **non** `CONST_IT_MINORI`. |
+| `strumenti/cielo/panels.py` | 193 | Pannelli: luna, pianeti, colori. |
+| `strumenti/cielo/catalog.py` | 193 | Dati + funzioni pure: cataloghi, `SkyData`, `bv2hex`, geometria. Ospita `CONST_IT`. |
+| `strumenti/cielo/ephemeris.py` | 184 | Effemeridi, proiezione. **Il cuore astronomico.** |
+| `strumenti/cielo/engine.py` | 102 | L'assemblaggio: init + `generate()` + dispatch. |
+| `engine/generate.py` | 17 | **Un ponte**, non il motore: re-esporta `Engine`/`bv2hex`/`STARS` perché `cielo.py` e `app/main.py` importavano da lì. Si potrà togliere aggiornando quei due import. |
+| `cielo.py` | 101 | Il CLI (D1). Mappa i formati ai file di layout e **compone** motore + `render`. |
+| `validate.py` | 205 | Validazione input (R4) + contratto del tema (D2). Condiviso da CLI e web, **non** importato dal motore (invariante #1). |
+| `render.py` | 53 | SVG→PNG via resvg. Usato dal CLI **e** dalla web app. |
+| `app/main.py` | 98 | Web app FastAPI sottile: `/`, `/preview`, `/download`. |
+| `brand/layouts/*.json` | — | La composizione come dati. `a4`, `post`, `profondo` (pagina 2), + i tre design social `dashboard`/`editorial`/`rail`. Aggiungerne uno = aggiungere un file. |
+| `brand/palettes/*.json` | — | I temi. **Non** in `themes/`. |
+| `data/stars6.json` | — | 5044 stelle GeoJSON, tutte con `mag` e `bv`. |
+
+**Nessun file supera 520 righe.** Il problema "apro un file e devo leggere
+migliaia di righe" non esiste più.
 
 ---
 
@@ -327,9 +347,30 @@ descrive lo fa scollare al primo cambiamento.
   (D2) valida contro quella dichiarazione, non contro una lista globale.
   Necessario, non speculativo: senza, la prima voce "prossimamente" della barra
   laterale (D10) rompe la validazione.
-- **D14 — Il taglio di `generate.py`, e come si sa che è nel punto giusto.**
-  Misurato (2026-07-13): il codice è **1621 righe**, di cui **1164 in
-  `generate.py`**. Tutto il resto è già snello (`validate.py` 205, `cielo.py`
+- **D14 — Il taglio di `generate.py`. FATTO (#7e, 2026-07-14).**
+  **Riuscito su entrambi i criteri, verificati dall'architetto e non sulla parola:**
+  - **(a) Output identico byte per byte.** I golden non sono stati toccati in
+    nessuno degli 8 commit (verificato sulla storia). E poiché **i golden NON
+    coprono la pagina 2** — buco scoperto dall'esecutore stesso, quando un `import`
+    dimenticato lasciò i golden verdi e fece arrossire 106 test — l'architetto ha
+    **rigenerato la pagina 2 col codice nuovo e confrontata con quella di prima del
+    taglio: stesso hash**, agosto e luglio. Il refactor è puro su *tutto* l'output,
+    non solo su ciò che una rete copriva.
+  - **(b) Pillole descrivibile su carta senza nominare un file di
+    `strumenti/cielo/`:** riuscito. Unico residuo dichiarato: `defs_svg` (in
+    `compose/`) legge ancora il token `theme['disk']` — è una chiave di tema, non
+    una dipendenza di file, e la scioglie **D13**.
+  - **Il confine è STRUTTURALE, non una disciplina.** `CONST_IT` (l'A4) vive in
+    `catalog.py`; `CONST_IT_MINORI` (solo pagina 2) in `messier.py`, che `disc.py`
+    **non importa**. Il bug del 13/07 — allargare un dizionario e far muovere i
+    golden dell'A4 — oggi è **impossibile per costruzione**.
+  - **Metodo:** 8 movimenti, un commit ciascuno, suite verde dopo ognuno; i blocchi
+    grossi spostati con uno slice esatto via script, **non ricopiati a mano** — così
+    una virgola non può cambiare di nascosto.
+  *(Testo originale della decisione, per memoria:)*
+  Misurato (2026-07-13): il codice era **1621 righe**, di cui **1164 in
+  `generate.py`** — *cifra poi rivelatasi stale: al momento del taglio erano
+  **1393**, cresciute coi giri della pagina 2.* Tutto il resto è già snello (`validate.py` 205, `cielo.py`
   101, `app/main.py` 98, `render.py` 53) e **non va toccato**: il problema "apro
   un file e devo leggere migliaia di righe" è **un file solo**.
   Il taglio separa **ciò che Pillole eredita** da **ciò che non erediterà mai**:
@@ -456,9 +497,18 @@ imprevisto.
    `tests/test_messier_page2.py` va **estesa**, non aggirata: senza, si torna
    esattamente al difetto del 13/07 (etichette sopra i simboli, e nessun test che
    lo dica).
-3. **#7e — La pulizia: il taglio di `generate.py`** (vedi **D14**).
-   *Perché ora e non prima:* D3 — *prima la rete, poi l'estrazione*. La rete della
-   pagina 2 adesso esiste (17 test, guasti iniettati, rosso visto).
+2b. **#7d-bis/ter/quater — I nomi delle costellazioni.** *(FATTO.)* Tre giri, e
+   **tre regole dell'architetto cadute sotto la misura dell'esecutore**: il
+   baricentro (sepolto nei propri Messier), le stelle-figura come ostacolo
+   (contraddittoria: i candidati *stanno* sulle stelle), il divieto di uscire dalla
+   figura (impossibile per Freccia e Scudo, più piccole della propria etichetta).
+   La regola giusta è **«mai lontano», non «mai fuori»** — e **mai dentro il
+   vicino** (inviluppo convesso). Default: modo `principali` (D16). 198 test.
+3. **#7e — La pulizia: il taglio di `generate.py`.** *(FATTO, 2026-07-14 — vedi
+   **D14**.)* Da un file di 1393 righe a sette file, il maggiore di 518.
+   `compose/` (condiviso) + `strumenti/cielo/` (solo astronomia), dipendenza a
+   senso unico. Output identico byte per byte, **verificato anche sulla pagina 2**,
+   che i golden non coprono.
 4. **#7f — La barra laterale (D10) + il contratto del tema per-strumento (D13).**
    Una voce attiva (*Cielo del Mese*), una "prossimamente" spenta. **Non** un
    framework per plugin.
@@ -513,10 +563,11 @@ Ordinato per rischio reale.
   `Helvetica,Arial,sans-serif` nel canvas. Cambiarlo **muove i golden**: si fa
   nel giro deliberato (#6e), insieme alla rimozione di `moon_panel`. (I tre
   design social nuovi dichiarano gia' i font del brand: non hanno golden.)
-- **R7 — Codice morto:** `render.py:DISPLAY`, `generate.py:NAKED_EYE`, param
-  `obs` inutilizzato in `planet_table`.
-  *(`brand/formats.py` era orfano — rimosso in #6a-riordino: il canvas vive nel
-  file di layout, come deciso in R5/D7.)*
+- **R7 — RISOLTO (prima di quanto credessimo).** Dichiarava codice morto:
+  `render.py:DISPLAY`, `NAKED_EYE`, il param `obs` di `planet_table`. **Andato a
+  cercarlo in #7e: non esiste più niente di tutto ciò** — era già stato tolto in
+  giri precedenti, e il debito è rimasto scritto per inerzia. *(`brand/formats.py`
+  era orfano — rimosso in #6a-riordino.)*
   *(**Corretto 2026-07-14, #7d:** R7 dichiarava anche una chiave `'Peg'`
   **duplicata** in `CONST_IT`. **Non esiste**: contate con `ast.literal_eval` +
   `Counter`, 35 chiavi, 0 duplicati. Il debito era immaginario, o sanato senza
