@@ -868,23 +868,36 @@ class Engine:
         labels=set()
         for r in table:
             labels.add(("__group__"+r["_group"]) if r.get("_group") else r["sigla"])
-        # baricentri delle FIGURE di costellazione (#7d): il TERZO strato di
-        # etichette. Geometria (serve lst/lat): vive qui, come fig_pts. Un
-        # baricentro per FIGURA (Ser e' due figure distinte -> due baricentri),
-        # dai soli vertici sopra l'orizzonte (alt>3, come le etichette storiche),
-        # e solo se cade dentro il disco. Il NOME e il filtro per modalita' li
-        # decide il blocco (concern di render): qui solo dove.
-        const_centroids=[]
+        # FIGURE di costellazione (#7d/#7d-bis): il TERZO strato di etichette. Un
+        # nome sta DENTRO la sua figura, non sul suo baricentro (che nelle
+        # costellazioni ricche cade sepolto nei loro stessi Messier). I CANDIDATI
+        # di posizione sono percio' punti della figura, in ordine di preferenza:
+        # baricentro (il migliore, se libero), poi i VERTICI, poi i PUNTI MEDI dei
+        # segmenti. Il piazzamento prende il primo libero: mai deriva, mai un
+        # candidato fuori dalla propria costellazione. Un'entrata per FIGURA (Ser
+        # e' due figure -> due etichette "Serpente", corretto). Geometria (serve
+        # lst/lat): vive qui, come fig_pts. Solo vertici sopra l'orizzonte (alt>3).
+        const_figures=[]
         for f in self.clines:
-            allp=np.array([p for line in f['geometry']['coordinates'] for p in line])
-            al,zz=self.altaz(allp[:,0],allp[:,1],lst,lat_rad); msk=al>3
-            if msk.sum()<2: continue
-            xs,ys=self.project(al[msk],zz[msk],cx,cy,rad)
-            mx=float(xs.mean()); my=float(ys.mean())
-            if (mx-cx)**2+(my-cy)**2 > (rad-3)**2: continue
-            const_centroids.append({"ab":f['id'], "x":mx, "y":my})
+            verts=[]; mids=[]
+            for line in f['geometry']['coordinates']:
+                arr=np.array(line)
+                al,zz=self.altaz(arr[:,0],arr[:,1],lst,lat_rad)
+                xs,ys=self.project(al,zz,cx,cy,rad); up=al>3
+                for i in range(len(arr)):
+                    if up[i]: verts.append((float(xs[i]),float(ys[i])))
+                for i in range(len(arr)-1):
+                    if up[i] and up[i+1]:
+                        mids.append((float((xs[i]+xs[i+1])/2.0),float((ys[i]+ys[i+1])/2.0)))
+            if len(verts)<2: continue
+            vx=[p[0] for p in verts]; vy=[p[1] for p in verts]
+            centroid=(sum(vx)/len(vx), sum(vy)/len(vy))
+            vbbox=(min(vx), min(vy), max(vx), max(vy))
+            # ordine di preferenza dei candidati: baricentro, vertici, punti medi
+            const_figures.append({"ab":f['id'], "verts":verts, "vbbox":vbbox,
+                                  "cands":[centroid]+verts+mids})
         return {"enriched":enriched, "table":table, "label_siglas":labels,
-                "figure_pts":fig_pts, "const_centroids":const_centroids}
+                "figure_pts":fig_pts, "const_figures":const_figures}
 
     @staticmethod
     def _messier_select(enriched, n, gruppi):
@@ -1064,29 +1077,40 @@ class Engine:
         self._last_messier_labels=len(label_boxes); self._last_messier_dropped=dropped
         self._last_messier_leadered=leadered
         self._last_symbol_boxes=symbol_boxes; self._last_label_boxes=label_boxes
-        # 3) TERZO STRATO (#7d): NOMI DELLE COSTELLAZIONI. Sfondo semantico, non
-        #    contenuto: priorita' MINIMA (si piazzano DOPO simboli e sigle),
-        #    tipografia subordinata (maiuscoletto spaziato, corpo minore, colore
-        #    tenue da TOKEN), NIENTE linea di richiamo (una costellazione e' una
-        #    regione, non un punto): se non entra, si SCARTA. Ostacoli = tutto il
-        #    gia' posto (simboli + stelle-figura + sigle Messier) + i nomi gia'
-        #    piazzati. Il patto mappa<->tabella (D9) esige che i nomi CITATI in
-        #    tabella non vengano scartati: hanno prima scelta, e gli scarti di
-        #    quelli si MISURANO (self._last_const_dropped_tab), non si aggirano.
+        # 3) TERZO STRATO (#7d, piazzamento rivisto in #7d-bis): NOMI DELLE
+        #    COSTELLAZIONI. Sfondo semantico, non contenuto: priorita' MINIMA (si
+        #    piazzano DOPO simboli e sigle), tipografia subordinata, NIENTE linea
+        #    di richiamo (una costellazione e' una regione), e stanno DENTRO la
+        #    propria figura (candidati = punti della figura, mai deriva).
+        #    OSTACOLI = simboli Messier + sigle Messier (+ i nomi gia' posti), NON
+        #    le stelle della figura: un nome ETICHETTA le sue stesse stelle, e un
+        #    atlante lo scrive attraverso il campo stellare. Trattare le stelle
+        #    della figura come ostacolo per il nome che le nomina e' contraddittorio
+        #    e scartava proprio le costellazioni piu' ricche (misura #7d-bis).
+        #    Il nome puo' sfiorare una stella tenue; MAI un simbolo o una sigla.
+        name_obstacles=list(symbol_boxes)+[bx for bx,_k in label_boxes]
         out.append(self._render_const_names(b, theme, mctx, cx, cy, rad,
-                                            list(placed_boxes)))
+                                            name_obstacles))
         return '\n'.join(out)
 
     def _render_const_names(self, b, theme, mctx, cx, cy, rad, obstacles):
-        """Terzo strato di etichette: i NOMI delle costellazioni (#7d). Modalita'
-        dal FILE (`const_names`): 'no' (default, com'era), 'tabella' (solo le
-        costellazioni citate in tabella, ~8-10) o 'tutte' (tutte le figure sopra
-        l'orizzonte con un nome noto). Il CODICE possiede COME disegnare e
-        piazzare; il FILE possiede QUANTE (R5/D7). Espone i box e i contatori per
-        i test (`_last_const_label_boxes`, `_last_const_dropped`,
-        `_last_const_dropped_tab`)."""
+        """Terzo strato di etichette: i NOMI delle costellazioni (#7d, piazzamento
+        rivisto in #7d-bis). Modalita' dal FILE (`const_names`): 'no' (com'era),
+        'tabella' (solo le citate in tabella) o 'tutte' (default: tutte le figure
+        sopra l'orizzonte con un nome noto).
+
+        Il nome sta DENTRO la sua figura, MAI in deriva: i candidati sono punti
+        della PROPRIA figura (baricentro, poi vertici, poi punti medi dei
+        segmenti), si prende il primo box libero da ostacoli. Niente anelli
+        attorno al baricentro, niente linea di richiamo (una costellazione e' una
+        regione). Un nome che non entra si SCARTA — ma le costellazioni in tabella
+        non devono mai scartarsi (patto D9): i loro scarti si MISURANO
+        (`_last_const_dropped_tab`), non si aggirano.
+
+        Il CODICE possiede COME piazzare; il FILE possiede QUANTE (R5/D7). Espone
+        box e contatori per i test."""
         self._last_const_label_boxes=[]; self._last_const_dropped=[]
-        self._last_const_dropped_tab=[]
+        self._last_const_dropped_tab=[]; self._last_const_placed=[]
         mode=b.get("const_names","no")
         if mode not in ("tabella","tutte"):
             return ''
@@ -1103,27 +1127,24 @@ class Engine:
         tab_abbr=set()
         for r in mctx["table"]:
             tab_abbr.add("Vir" if r.get("_group") else r["costellazione"])
-        # richieste: una per baricentro di figura nominabile (filtrate per modo)
+        # richieste: una per FIGURA nominabile (filtrate per modo)
         reqs=[]
-        for c in mctx.get("const_centroids", []):
-            ab=c["ab"]
+        for fig in mctx.get("const_figures", []):
+            ab=fig["ab"]
             if mode=="tabella" and ab not in tab_abbr: continue
             name=name_map.get(ab)
             if not name: continue
             text=name.upper()
             w=len(text)*csz*0.60 + ctr*max(0,len(text)-1); h=csz
-            reqs.append({"ab":ab,"text":text,"x":c["x"],"y":c["y"],"w":w,"h":h,
-                         "in_tab":ab in tab_abbr})
+            reqs.append({"ab":ab,"text":text,"w":w,"h":h,"in_tab":ab in tab_abbr,
+                         "cands":fig["cands"],"vbbox":fig["vbbox"]})
         # i CITATI in tabella hanno prima scelta (patto D9); a parita', impronta
         # piu' grande prima (piu' difficile da piazzare)
         reqs.sort(key=lambda r:(0 if r["in_tab"] else 1, -r["w"]))
         cobst=list(obstacles); out=[]
-        DIRS=[(0,-1),(1,0),(0,1),(-1,0),(1,-1),(1,1),(-1,1),(-1,-1)]; STEP=5
-        cands=[(0,0)]+[(dx*r*STEP, dy*r*STEP) for r in range(1,7) for dx,dy in DIRS]
         for req in reqs:
             w,h=req["w"],req["h"]; chosen=None
-            for ox,oy in cands:
-                px,py=req["x"]+ox, req["y"]+oy
+            for px,py in req["cands"]:   # primo candidato-figura libero
                 if (px-cx)**2+(py-cy)**2 > (rad-3)**2: continue
                 bb=(px-w/2, py-h/2, px+w/2, py+h/2)
                 if any(not(bb[2]<=p[0] or bb[0]>=p[2] or bb[3]<=p[1] or bb[1]>=p[3]) for p in cobst): continue
@@ -1134,6 +1155,7 @@ class Engine:
                 continue
             px,py,bb=chosen; cobst.append(bb)
             self._last_const_label_boxes.append((bb, req["ab"]))
+            self._last_const_placed.append({"ab":req["ab"],"x":px,"y":py,"vbbox":req["vbbox"]})
             out.append(f'<text x="{px:.1f}" y="{py+h*0.34:.1f}" text-anchor="middle" '
                        f'fill="{cfill}" font-size="{csz}" opacity="{cop}" '
                        f'letter-spacing="{ctr}">{req["text"]}</text>')

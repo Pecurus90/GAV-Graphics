@@ -169,3 +169,26 @@ def test_modo_no_non_disegna_nomi(eng, profondo):
     _render(eng, profondo, 3, const_mode="no")
     assert eng._last_const_label_boxes == []
     assert eng._last_const_dropped == []
+
+
+# ---------------------------------------------------------------------------
+# #7d-bis: il nome sta DENTRO la sua figura, mai in deriva. Questa e' la
+# guardia contro la "soluzione" di un domani che allarga il raggio di ricerca
+# per chiudere gli scarti: farebbe galleggiare i nomi lontano dalle figure.
+# Deve diventare ROSSA se l'ancora esce dal riquadro dei vertici della figura.
+# ---------------------------------------------------------------------------
+@pytest.mark.parametrize("month", MESI)
+@pytest.mark.parametrize("mode", CONST_MODI)
+def test_nome_dentro_la_propria_figura(eng, profondo, month, mode):
+    """Ogni nome piazzato cade DENTRO il riquadro dei vertici (sopra l'orizzonte)
+    della PROPRIA figura. I candidati sono baricentro/vertici/punti medi, tutti
+    dentro quel riquadro: un'ancora fuori vuol dire deriva, ed e' un difetto."""
+    _render(eng, profondo, month, const_mode=mode)
+    placed = eng._last_const_placed
+    assert placed, f"mese {month}/{mode}: nessun nome piazzato"
+    eps = 0.5
+    fuori = [(p["ab"], round(p["x"], 1), round(p["y"], 1), p["vbbox"])
+             for p in placed
+             if not (p["vbbox"][0] - eps <= p["x"] <= p["vbbox"][2] + eps
+                     and p["vbbox"][1] - eps <= p["y"] <= p["vbbox"][3] + eps)]
+    assert not fuori, f"mese {month}/{mode}: nomi in deriva fuori dalla figura: {fuori}"
