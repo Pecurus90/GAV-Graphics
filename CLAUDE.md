@@ -349,7 +349,29 @@ descrive lo fa scollare al primo cambiamento.
     file di `strumenti/cielo/`. Se (b) non riesce, il taglio è nel punto sbagliato
     e si rifà. È il modo di **verificare l'astrazione prima di costruirla** — la
     cosa che non facemmo con `brand/formats.py`, e che ci costò il file.
+  **Un accoppiamento accidentale già trovato, da usare come banco di prova** *(#7d-ter)*:
+  `CONST_IT` è letto **sia dal disco dell'A4 (pagina 1) sia dalla pagina 2**.
+  Estenderlo coi 44 nomi minori **ha fatto muovere i golden dell'A4** — l'A4 si è
+  messo a disegnare 44 etichette in più, senza che nessuno gliel'avesse chiesto.
+  Rimedio tampone: un secondo dizionario (`CONST_IT_MINORI`) letto solo dalla
+  pagina 2. **Il taglio deve rendere esplicito questo confine**: se dopo #7e un
+  dato può ancora cambiare l'output di uno strumento mentre se ne modifica un
+  altro, il taglio non ha fatto il suo lavoro.
 
+- **D16 — IL MEZZO È IL TELEFONO.** *(Deciso da Marco, 2026-07-14, guardando
+  agosto.)* La pagina 2 è un **post Instagram**: sul monitor la vedi a 1080 px, ma
+  nel feed di un socio viene disegnata in ~400. Un testo in corpo 10,5 su tela 1080
+  diventa **~4 px sul telefono**: non è testo, è **rumore**.
+  Conseguenza vincolante: **la densità di una pagina social si giudica sul
+  telefono, non sul monitor.** Ciò che non si legge a 400 px non è "informazione in
+  più", è sporcizia che copre l'informazione vera.
+  Applicazione (nomi delle costellazioni, #7d): si nominano le **35 principali +
+  tutte quelle citate in tabella** (il patto D9 resta chiuso). Le **44 minori**
+  (Lince, Lucertola, Cavallino, Microscopio, Sestante…) restano **fuori**: nessun
+  principiante le cerca, affollano i bordi del disco — dove per giunta il cielo è
+  basso e nessuno osserva — e sul telefono sono illeggibili.
+  Il dizionario dei 44 nomi **resta scritto** (`CONST_IT_MINORI`, fonte UAI): si
+  riaccende con una parola nel file di layout. È un dato, non codice.
 - **D15 — L'`.exe` apre il browser; e cosa manca DAVVERO per averlo.**
   *(Deciso da Marco, 2026-07-14.)* Doppio clic ⇒ il programma parte in silenzio e
   **apre il browser** sull'interfaccia dell'app. Niente terminale, niente Python
