@@ -28,7 +28,10 @@ MONTHS_IT = ["", "gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno",
 # rosa a 8 settori in italiano (azimut 0=Nord, 90=Est, orario): indice = round(az/45)%8
 DIREZIONI_IT = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ovest", "Ovest", "Nord-Ovest"]
 
-# nomi italiani costellazioni principali da etichettare
+# Nomi italiani delle costellazioni PRINCIPALI: sono quelle che l'A4/pagina 1
+# etichetta sul disco. NON allargare questo dizionario: e' sorvegliato dai golden
+# (l'A4 disegna un'etichetta per ogni voce sopra l'orizzonte). Le minori vivono in
+# CONST_IT_MINORI, che solo la pagina 2 ("tutte") legge.
 CONST_IT = {'Aql':'Aquila','Boo':'Boote','CrB':'Corona Boreale','Cas':'Cassiopea',
  'Cep':'Cefeo','Cyg':'Cigno','Del':'Delfino','Dra':'Dragone','Her':'Ercole',
  'Lyr':'Lira','Oph':'Ofiuco','Peg':'Pegaso','Sgr':'Sagittario','Sco':'Scorpione',
@@ -37,6 +40,26 @@ CONST_IT = {'Aql':'Aquila','Boo':'Boote','CrB':'Corona Boreale','Cas':'Cassiopea
  'CVn':'Cani da Caccia','Ori':'Orione','Tau':'Toro','Gem':'Gemelli','Leo':'Leone',
  'Cnc':'Cancro','Per':'Perseo','Aur':'Auriga','CMi':'Cane Minore','CMa':'Cane Maggiore',
  'Cet':'Balena','Psc':'Pesci','Ari':'Ariete'}
+
+# Le costellazioni MINORI: le 44 restanti, aggiunte in #7d-ter (approvate da
+# Marco), cosi' la PAGINA 2 in modo "tutte" puo' nominare ogni figura sopra
+# l'orizzonte. Tenute SEPARATE da CONST_IT apposta: l'A4 non deve cambiare (golden).
+# FONTE dei nomi: Wikipedia in italiano, "Lista delle costellazioni"
+# (https://it.wikipedia.org/wiki/Lista_delle_costellazioni), nomi UAI. Riportati
+# come sulla pagina, con UNA eccezione VOLUTA: Norma -> "Squadra" (NON "Regolo":
+# collide con la stella Regolo/Regulus, gia' in STARS). DATO curato: per cambiarne
+# uno, si cambia una riga.
+CONST_IT_MINORI = {
+ 'Ant':'Macchina Pneumatica','Aps':'Uccello del Paradiso','Ara':'Altare',
+ 'Cae':'Bulino','Cam':'Giraffa','Car':'Carena','Cen':'Centauro','Cha':'Camaleonte',
+ 'Cir':'Compasso','Col':'Colomba','CrA':'Corona Australe','Crt':'Cratere',
+ 'Cru':'Croce del Sud','Crv':'Corvo','Dor':'Dorado','Equ':'Cavallino',
+ 'Eri':'Eridano','For':'Fornace','Gru':'Gru','Hor':'Orologio','Hyi':'Idra Maschio',
+ 'Ind':'Indiano','LMi':'Leone Minore','Lac':'Lucertola','Lup':'Lupo','Lyn':'Lince',
+ 'Men':'Mensa','Mic':'Microscopio','Mus':'Mosca','Nor':'Squadra','Oct':'Ottante',
+ 'Pav':'Pavone','Phe':'Fenice','Pic':'Pittore','PsA':'Pesce Australe','Pyx':'Bussola',
+ 'Ret':'Reticolo','Scl':'Scultore','Sex':'Sestante','Tel':'Telescopio',
+ 'TrA':'Triangolo Australe','Tuc':'Tucano','Vel':'Vele','Vol':'Pesce Volante'}
 
 # stelle guida: nome, RA(deg), Dec(deg), B-V (per colore reale dal tema)
 MARQUEE = [("Vega",279.234,38.784,0.00),("Deneb",310.358,45.280,0.09),
@@ -165,6 +188,39 @@ def bv2hex(ramp, bv):
             a=hex2rgb(ramp[i][1]); b=hex2rgb(ramp[i+1][1])
             return rgb2hex([a[k]+f*(b[k]-a[k]) for k in range(3)])
     return ramp[-1][1]
+
+
+def convex_hull(points):
+    """Inviluppo convesso (monotone chain di Andrew) di una lista di punti (x,y).
+    Serve a definire la REGIONE di una costellazione: il nome di una costellazione
+    non deve MAI cadere dentro la regione di un'ALTRA (#7d-ter). Restituisce i
+    vertici dell'inviluppo in senso orario; <3 punti -> i punti stessi."""
+    pts=sorted(set((float(x),float(y)) for x,y in points))
+    if len(pts)<3: return pts
+    def cross(o,a,b): return (a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0])
+    lower=[]
+    for p in pts:
+        while len(lower)>=2 and cross(lower[-2],lower[-1],p)<=0: lower.pop()
+        lower.append(p)
+    upper=[]
+    for p in reversed(pts):
+        while len(upper)>=2 and cross(upper[-2],upper[-1],p)<=0: upper.pop()
+        upper.append(p)
+    return lower[:-1]+upper[:-1]
+
+
+def point_in_poly(poly, x, y):
+    """True se il punto (x,y) e' dentro il poligono `poly` (ray casting). Bordo
+    contato come fuori e' sufficiente per il nostro uso (regioni, non pixel)."""
+    n=len(poly)
+    if n<3: return False
+    inside=False; j=n-1
+    for i in range(n):
+        xi,yi=poly[i]; xj,yj=poly[j]
+        if ((yi>y)!=(yj>y)) and (x < (xj-xi)*(y-yi)/(yj-yi+1e-12)+xi):
+            inside=not inside
+        j=i
+    return inside
 
 
 class Engine:
@@ -893,11 +949,20 @@ class Engine:
             vx=[p[0] for p in verts]; vy=[p[1] for p in verts]
             centroid=(sum(vx)/len(vx), sum(vy)/len(vy))
             vbbox=(min(vx), min(vy), max(vx), max(vy))
+            diag=((vbbox[2]-vbbox[0])**2+(vbbox[3]-vbbox[1])**2)**0.5
+            hull=convex_hull(verts)
+            hbbox=(min(p[0] for p in hull), min(p[1] for p in hull),
+                   max(p[0] for p in hull), max(p[1] for p in hull))
             # ordine di preferenza dei candidati: baricentro, vertici, punti medi
             const_figures.append({"ab":f['id'], "verts":verts, "vbbox":vbbox,
-                                  "cands":[centroid]+verts+mids})
+                                  "diag":diag, "centroid":centroid, "hull":hull,
+                                  "hbbox":hbbox, "cands":[centroid]+verts+mids})
+        # gli inviluppi di TUTTE le figure (per il vincolo "mai dentro un'altra
+        # costellazione"): (sigla, inviluppo, riquadro dell'inviluppo per pre-filtro)
+        const_hulls=[(fig["ab"], fig["hull"], fig["hbbox"]) for fig in const_figures]
         return {"enriched":enriched, "table":table, "label_siglas":labels,
-                "figure_pts":fig_pts, "const_figures":const_figures}
+                "figure_pts":fig_pts, "const_figures":const_figures,
+                "const_hulls":const_hulls}
 
     @staticmethod
     def _messier_select(enriched, n, gruppi):
@@ -1093,22 +1158,32 @@ class Engine:
                                             name_obstacles))
         return '\n'.join(out)
 
+    # margine di uscita del nome dalla propria figura (#7d-ter): PICCOLO e
+    # proporzionato. Inverso alla dimensione: una figura grande resta stretta
+    # (una costellazione grande non ha scuse per uscire), una minuscola puo'
+    # sporgere di piu' (Freccia, Scudo, Cani da Caccia escono di un passo dal
+    # loro unico Messier). Tarato sui bisogni misurati (#7d-ter): il massimo
+    # richiesto e' ~23px (Cani da Caccia a marzo), i grandi 0.
+    @staticmethod
+    def _const_margin(diag):
+        return max(12.0, min(28.0, 30.0 - 0.10*diag))
+
     def _render_const_names(self, b, theme, mctx, cx, cy, rad, obstacles):
         """Terzo strato di etichette: i NOMI delle costellazioni (#7d, piazzamento
-        rivisto in #7d-bis). Modalita' dal FILE (`const_names`): 'no' (com'era),
-        'tabella' (solo le citate in tabella) o 'tutte' (default: tutte le figure
-        sopra l'orizzonte con un nome noto).
+        #7d-bis, patto chiuso in #7d-ter). Modalita' dal FILE (`const_names`):
+        'no' (com'era), 'tabella' o 'tutte' (default).
 
-        Il nome sta DENTRO la sua figura, MAI in deriva: i candidati sono punti
-        della PROPRIA figura (baricentro, poi vertici, poi punti medi dei
-        segmenti), si prende il primo box libero da ostacoli. Niente anelli
-        attorno al baricentro, niente linea di richiamo (una costellazione e' una
-        regione). Un nome che non entra si SCARTA — ma le costellazioni in tabella
-        non devono mai scartarsi (patto D9): i loro scarti si MISURANO
-        (`_last_const_dropped_tab`), non si aggirano.
+        Il nome sta DENTRO la sua figura, o al massimo la sfiora di un margine
+        PICCOLO e proporzionato (`_const_margin`): mai in deriva. VINCOLO: non
+        deve MAI cadere dentro la figura (inviluppo convesso) di un'ALTRA
+        costellazione — scrivere "Scudo" sopra l'Aquila e' una bugia, peggio di
+        un'assenza. Se l'unico posto e' dentro il vicino, SCARTA. Niente linea di
+        richiamo. Le costellazioni in tabella hanno prima scelta e non devono
+        scartarsi (patto D9): i loro scarti si MISURANO (`_last_const_dropped_tab`).
 
-        Il CODICE possiede COME piazzare; il FILE possiede QUANTE (R5/D7). Espone
-        box e contatori per i test."""
+        Candidati, in ordine: baricentro, vertici, punti medi (dentro la figura),
+        poi anelli attorno al baricentro fino a mezza-figura + margine. Il CODICE
+        possiede COME piazzare; il FILE possiede QUANTE (R5/D7)."""
         self._last_const_label_boxes=[]; self._last_const_dropped=[]
         self._last_const_dropped_tab=[]; self._last_const_placed=[]
         mode=b.get("const_names","no")
@@ -1117,16 +1192,25 @@ class Engine:
         cfill=theme[b.get("const_fill","text4")]
         csz=b.get("const_size",10.5); ctr=b.get("const_tracking",2.2)
         cop=b.get("const_opacity",0.85)
-        # NOMI: la mappa di marca (CONST_IT) + i nomi VERIFICATI del catalogo
-        # (costellazione_it, gia' nel repo: non inventati). I nomi delle
-        # costellazioni CITATE in tabella vengono dalla STESSA fonte della
-        # tabella, cosi' il testo sulla mappa combacia con quello della riga.
-        name_map=dict(CONST_IT)
+        # NOMI: le principali (CONST_IT) + le minori (CONST_IT_MINORI, solo qui:
+        # l'A4 non le vede) + i nomi VERIFICATI del catalogo (costellazione_it,
+        # gia' nel repo). I nomi delle costellazioni CITATE in tabella vengono
+        # dalla STESSA fonte della tabella (il testo combacia).
+        name_map={**CONST_IT, **CONST_IT_MINORI}
         for o in mctx["enriched"]:
             name_map.setdefault(o["costellazione"], o["costellazione_it"])
         tab_abbr=set()
         for r in mctx["table"]:
             tab_abbr.add("Vir" if r.get("_group") else r["costellazione"])
+        hulls=mctx.get("const_hulls", [])
+        def in_other(px, py, ab):
+            for hab, poly, hb in hulls:
+                if hab==ab: continue
+                if px<hb[0] or px>hb[2] or py<hb[1] or py>hb[3]: continue  # pre-filtro
+                if point_in_poly(poly, px, py): return True
+            return False
+        DIRS=[(0,-1),(1,0),(0,1),(-1,0),(1,-1),(1,1),(-1,1),(-1,-1),
+              (2,-1),(2,1),(-2,-1),(-2,1),(1,-2),(1,2),(-1,-2),(-1,2)]
         # richieste: una per FIGURA nominabile (filtrate per modo)
         reqs=[]
         for fig in mctx.get("const_figures", []):
@@ -1136,16 +1220,27 @@ class Engine:
             if not name: continue
             text=name.upper()
             w=len(text)*csz*0.60 + ctr*max(0,len(text)-1); h=csz
-            reqs.append({"ab":ab,"text":text,"w":w,"h":h,"in_tab":ab in tab_abbr,
-                         "cands":fig["cands"],"vbbox":fig["vbbox"]})
+            reqs.append({"ab":ab,"text":text,"w":w,"h":h,"in_tab":ab in tab_abbr,"fig":fig})
         # i CITATI in tabella hanno prima scelta (patto D9); a parita', impronta
         # piu' grande prima (piu' difficile da piazzare)
         reqs.sort(key=lambda r:(0 if r["in_tab"] else 1, -r["w"]))
         cobst=list(obstacles); out=[]
         for req in reqs:
-            w,h=req["w"],req["h"]; chosen=None
-            for px,py in req["cands"]:   # primo candidato-figura libero
+            w,h=req["w"],req["h"]; fig=req["fig"]
+            x0,y0,x1,y1=fig["vbbox"]; M=self._const_margin(fig["diag"])
+            ccx,ccy=fig["centroid"]
+            # candidati: prima i punti interni, poi anelli (bounded dal margine)
+            cands=list(fig["cands"])
+            rr=1; maxr=fig["diag"]/2.0 + M
+            while rr*4.0 <= maxr:
+                cands.extend((ccx+dx*rr*4.0, ccy+dy*rr*4.0) for dx,dy in DIRS)
+                rr+=1
+            chosen=None
+            for px,py in cands:
                 if (px-cx)**2+(py-cy)**2 > (rad-3)**2: continue
+                ox=max(x0-px, 0.0, px-x1); oy=max(y0-py, 0.0, py-y1)
+                if ox>M or oy>M: continue                     # "mai lontano"
+                if in_other(px, py, req["ab"]): continue      # "mai in un'altra figura"
                 bb=(px-w/2, py-h/2, px+w/2, py+h/2)
                 if any(not(bb[2]<=p[0] or bb[0]>=p[2] or bb[3]<=p[1] or bb[1]>=p[3]) for p in cobst): continue
                 chosen=(px,py,bb); break
@@ -1155,7 +1250,8 @@ class Engine:
                 continue
             px,py,bb=chosen; cobst.append(bb)
             self._last_const_label_boxes.append((bb, req["ab"]))
-            self._last_const_placed.append({"ab":req["ab"],"x":px,"y":py,"vbbox":req["vbbox"]})
+            self._last_const_placed.append({"ab":req["ab"],"x":px,"y":py,
+                                            "vbbox":fig["vbbox"],"margin":M})
             out.append(f'<text x="{px:.1f}" y="{py+h*0.34:.1f}" text-anchor="middle" '
                        f'fill="{cfill}" font-size="{csz}" opacity="{cop}" '
                        f'letter-spacing="{ctr}">{req["text"]}</text>')

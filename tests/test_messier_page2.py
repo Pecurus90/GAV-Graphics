@@ -179,16 +179,50 @@ def test_modo_no_non_disegna_nomi(eng, profondo):
 # ---------------------------------------------------------------------------
 @pytest.mark.parametrize("month", MESI)
 @pytest.mark.parametrize("mode", CONST_MODI)
-def test_nome_dentro_la_propria_figura(eng, profondo, month, mode):
-    """Ogni nome piazzato cade DENTRO il riquadro dei vertici (sopra l'orizzonte)
-    della PROPRIA figura. I candidati sono baricentro/vertici/punti medi, tutti
-    dentro quel riquadro: un'ancora fuori vuol dire deriva, ed e' un difetto."""
+def test_nome_non_lontano_dalla_figura(eng, profondo, month, mode):
+    """Anti-deriva (#7d-ter): un nome puo' sfiorare la propria figura di un
+    margine PICCOLO e proporzionato (`margin`), MAI di piu'. L'ancora deve stare
+    nel riquadro dei vertici ESPANSO di quel margine. Diventa rossa se qualcuno
+    "risolve" gli scarti allargando la ricerca: e' la guardia contro la
+    scorciatoia. La soglia e' proporzionata, non fissa (una figura grande resta
+    stretta, una minuscola puo' sporgere)."""
     _render(eng, profondo, month, const_mode=mode)
     placed = eng._last_const_placed
     assert placed, f"mese {month}/{mode}: nessun nome piazzato"
     eps = 0.5
-    fuori = [(p["ab"], round(p["x"], 1), round(p["y"], 1), p["vbbox"])
+    fuori = [(p["ab"], round(p["x"], 1), round(p["y"], 1), round(p["margin"], 1))
              for p in placed
-             if not (p["vbbox"][0] - eps <= p["x"] <= p["vbbox"][2] + eps
-                     and p["vbbox"][1] - eps <= p["y"] <= p["vbbox"][3] + eps)]
-    assert not fuori, f"mese {month}/{mode}: nomi in deriva fuori dalla figura: {fuori}"
+             if not (p["vbbox"][0] - p["margin"] - eps <= p["x"] <= p["vbbox"][2] + p["margin"] + eps
+                     and p["vbbox"][1] - p["margin"] - eps <= p["y"] <= p["vbbox"][3] + p["margin"] + eps)]
+    assert not fuori, f"mese {month}/{mode}: nomi in deriva oltre il margine: {fuori}"
+
+
+@pytest.mark.parametrize("month", MESI)
+@pytest.mark.parametrize("mode", CONST_MODI)
+def test_nome_non_dentro_altra_costellazione(eng, profondo, month, mode):
+    """#7d-ter, vincolo non negoziabile: un nome non cade MAI dentro la figura
+    (inviluppo convesso) di un'ALTRA costellazione. "Scudo" sopra l'Aquila e'
+    una bugia, peggio di un'assenza. Se l'unico posto e' dentro il vicino, il
+    codice SCARTA — quindi qui nessun nome piazzato deve violarlo."""
+    mctx = _render(eng, profondo, month, const_mode=mode)
+    from engine.generate import point_in_poly
+    hulls = mctx["const_hulls"]
+    guasti = []
+    for p in eng._last_const_placed:
+        for hab, poly, hb in hulls:
+            if hab == p["ab"]:
+                continue
+            if hb[0] <= p["x"] <= hb[2] and hb[1] <= p["y"] <= hb[3] and point_in_poly(poly, p["x"], p["y"]):
+                guasti.append((p["ab"], "dentro", hab))
+    assert not guasti, f"mese {month}/{mode}: nomi dentro un'altra costellazione: {guasti}"
+
+
+@pytest.mark.parametrize("month", MESI)
+def test_zero_scarti_costellazioni_in_tabella(eng, profondo, month):
+    """IL NUOVO PATTO (#7d-ter): ZERO scarti fra le costellazioni CITATE in
+    tabella, in modo 'tutte'. Se una riga di tabella nomina una costellazione,
+    quel nome DEVE stare sulla mappa. Mappa e tabella si guardano."""
+    _render(eng, profondo, month, const_mode="tutte")
+    assert eng._last_const_dropped_tab == [], (
+        f"mese {month}: costellazioni in tabella senza nome sulla mappa "
+        f"(patto rotto): {eng._last_const_dropped_tab}")
