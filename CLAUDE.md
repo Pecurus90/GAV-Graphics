@@ -384,10 +384,22 @@ imprevisto.
 4. **#7f — La barra laterale (D10) + il contratto del tema per-strumento (D13).**
    Una voce attiva (*Cielo del Mese*), una "prossimamente" spenta. **Non** un
    framework per plugin.
-5. **Pillole di astronomia** (D12), quando Marco vorrà pensarci.
-6. **Il packaging: l'`.exe` in GitHub Actions (D4).** Il pezzo più insidioso:
-   `de421.bsp` e `resvg_py` non si fanno trovare da soli dentro un eseguibile.
+5. **Il packaging: l'`.exe` in GitHub Actions (D4).** *(Anticipato su Pillole —
+   deciso da Marco, 2026-07-14: «prima l'exe che funziona e lo condivido, poi
+   progettiamo Pillole».)*
+   *Perché prima:* è il punto dove questi progetti falliscono — `de421.bsp` e
+   `resvg_py` **non si fanno trovare da soli** dentro un eseguibile. Se la strada
+   non esistesse, non sarebbe un bug da correggere ma **una scelta architetturale
+   da rifare**: meglio scoprirlo con quattro file da spostare che con uno
+   strumento in più addosso. E un `.exe` in mano ai soci è l'unico modo di sapere
+   davvero cosa manca: Pillole progettata *dopo* si progetta sui fatti.
    `CREDITI.md` va impacchettato con l'exe (obbligo BSD-2).
+   **Mina già innescata:** accendere la CI fa diventare **rosso il golden** (D5) —
+   altro OS, altra numpy, ultima cifra dei `%.2f` diversa — **senza che nulla sia
+   rotto**. Il golden va convertito a **tolleranza numerica** in questo giro, non
+   prima (finché sorveglia il taglio #7e serve esatto).
+6. **Pillole di astronomia** (D12), quando Marco vorrà pensarci — **dopo** aver
+   visto l'`.exe` in mano a un socio.
 
 ---
 
