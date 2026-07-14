@@ -23,6 +23,7 @@ from skyfield import almanac
 
 from compose.compositor import Compositor
 from .messier import MessierMixin
+from .panels import PanelsMixin
 from .catalog import (MONTHS_IT, DIREZIONI_IT, CONST_IT, MARQUEE, STARS, PLANETS,
                       PLANET_SHAPES, CX, CY, R, MoonPhase, MoonDay, Planet,
                       SkyData, hex2rgb, rgb2hex, bv2hex, point_in_poly)
@@ -33,7 +34,7 @@ _BASE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__
 DEFAULT_LAYOUT = os.path.join(_BASE, "brand", "layouts", "a4.json")
 
 
-class Engine(Compositor, MessierMixin):
+class Engine(Compositor, MessierMixin, PanelsMixin):
     def __init__(self, datadir="data"):
         self.datadir = datadir
         load = Loader(get_skyfield_data_path())
@@ -421,185 +422,6 @@ class Engine(Compositor, MessierMixin):
                 "month_abbr": MONTHS_IT[data.month][:3],
                 "place": data.place, "hour": data.hour_local,
                 "lat1": f"{data.lat:.1f}", "lon1": f"{data.lon:.1f}"}
-
-    def _render_planet_panel(self, b, theme, data):
-        """Righe pianeti (ancora x0/y0 + passo step). Il pallino di stato e'
-        l'unico fill guidato dal dato (fill_status). `statuses` (opzionale)
-        filtra quali pianeti mostrare per stato: assente -> tutti (come A4)."""
-        out=[]
-        dot=b["dot"]
-        keep=b.get("statuses")
-        planets=data.planets if keep is None else [p for p in data.planets if p.status in keep]
-        for i,pl in enumerate(planets):
-            # note_dir: presentazione derivata = nota + direzione, con separatore
-            # SOLO se la direzione c'e' (i muted/sotto-orizzonte non lasciano un
-            # ' · ' penzolante). L'A4 usa {note}, non {note_dir}: resta identico.
-            note_dir=pl.note+(" · "+pl.direction if pl.direction else "")
-            item={"name":pl.name,"rise":pl.rise,"set":pl.set_,"note":pl.note,
-                  "note_dir":note_dir,"status":pl.status,"direction":pl.direction,
-                  "az":f"{pl.az:.0f}"}
-            y=b["y0"]+i*b["step"]
-            cx=b["x0"]+dot["dx"]; cy=y+dot["dy"]; rr=dot["r"]
-            row=[]
-            # colore del pallino: il PIANETA (fill_planet, colore reale dal tema),
-            # lo STATO (fill_status, come l'A4) o un token fisso.
-            if dot.get("fill_planet"):
-                dotcol=theme["planet_colors"][pl.name]
-            elif dot.get("fill_status"):
-                dotcol=theme["status"][pl.status]
-            else:
-                dotcol=theme[dot["fill"]]
-            row.append(f'<circle cx="{cx}" cy="{cy}" r="{rr}" fill="{dotcol}"/>')
-            # sagoma dal DATO (solo coi pallini-pianeta): 'ringed' = anelli.
-            if dot.get("fill_planet") and pl.shape=="ringed":
-                rg=dot.get("ring", {})
-                erx=rr*rg.get("rx",1.95); ery=rr*rg.get("ry",0.52); rot=rg.get("rot",-18)
-                row.append(f'<ellipse cx="{cx}" cy="{cy}" rx="{erx:.1f}" ry="{ery:.1f}" '
-                           f'fill="none" stroke="{theme[rg.get("stroke","moon_lit")]}" '
-                           f'stroke-width="{rg.get("width",1.3)}" transform="rotate({rot} {cx} {cy})"/>')
-            # anello di stato (variante B): identita' nel disco + stato attorno.
-            if dot.get("status_ring"):
-                sr=dot["status_ring"]
-                row.append(f'<circle cx="{cx}" cy="{cy}" r="{rr+sr["r_extra"]}" fill="none" '
-                           f'stroke="{theme["status"][pl.status]}" stroke-width="{sr["width"]}"/>')
-            for part in ("name","times","note"):
-                if part not in b:  # un design puo' omettere una parte (es. rail
-                    continue        # senza nota, editorial senza orari)
-                p=b[part]
-                tb={"x":b["x0"]+p["dx"],"y":y+p.get("dy",0),"fill":p["fill"],
-                    "size":p["size"],"weight":p.get("weight"),"content":p["content"]}
-                if p.get("anchor"): tb["anchor"]=p["anchor"]
-                row.append(self._render_text(tb, theme, item))
-            # variante A: i non osservabili si spengono (riga piu' tenue).
-            if b.get("dim_muted") and pl.status=="muted":
-                out.append(f'<g opacity="{b.get("dim_muted_opacity",0.4)}">'+"\n".join(row)+'</g>')
-            else:
-                out.extend(row)
-        return '\n'.join(out)
-
-    def _render_moon_panel(self, b, theme, data):
-        """Dischi delle fasi (fila x0 + passo gap). La forma illuminata dipende
-        da `key` (piena=cerchio, primo/ultimo=semicerchio ad arco): logica di
-        disegno, resta qui."""
-        out=[]
-        x0,cy,gap,mr=b["x0"],b["cy"],b["gap"],b["radius"]
-        base=b["base"]; lit=theme[b["lit_fill"]]
-        for i,mp in enumerate(data.moon_phases[:4]):
-            mx=x0+i*gap
-            out.append(f'<circle cx="{mx}" cy="{cy}" r="{mr}" fill="{theme[base["fill"]]}" stroke="{theme[base["stroke"]]}" stroke-width="{base["stroke_width"]}"/>')
-            if mp.key=='full':
-                out.append(f'<circle cx="{mx}" cy="{cy}" r="{mr}" fill="{lit}"/>')
-            elif mp.key=='first':
-                out.append(f'<path d="M{mx},{cy-mr} A{mr},{mr} 0 0 1 {mx},{cy+mr} Z" fill="{lit}"/>')
-            elif mp.key=='last':
-                out.append(f'<path d="M{mx},{cy-mr} A{mr},{mr} 0 0 0 {mx},{cy+mr} Z" fill="{lit}"/>')
-            for part in ("label","date"):
-                p=b[part]
-                tb={"x":mx,"y":cy+p["dy"],"fill":p["fill"],"size":p["size"],
-                    "anchor":"middle","content":p["content"]}
-                out.append(self._render_text(tb, theme, {"label":mp.label,"date":mp.date}))
-        return '\n'.join(out)
-
-    @staticmethod
-    def _moon_shape_svg(cx, cy, r, frac, waxing, lit, base):
-        """Forma CONTINUA della Luna a frazione illuminata `frac` (0..1), col
-        metodo del terminatore-ellisse (lo stesso dei mockup del designer):
-          - un SEMIDISCO sul lembo illuminato (crescente = destra, sweep 1;
-            calante = sinistra, sweep 0);
-          - un'ELLISSE il cui semiasse orizzontale rx = r·|1-2·frac| è il
-            terminatore proiettato. Riempita `lit` se gibbosa (frac>0.5, aggiunge
-            luce oltre il centro) o `base` se falce (frac<0.5, scava la luce).
-        A frac=0.5 rx=0: resta il semidisco netto. A frac→0 l'ellisse scura
-        copre tutto (novilunio); a frac→1 l'ellisse chiara riempie (plenilunio).
-
-        NUOVO codice, di proposito NON condiviso con _render_moon_panel (che
-        disegna le 4 fasi discrete con path ad arco): unificarli ora muoverebbe
-        la stringa del golden. La duplicazione è voluta e temporanea — vedi report."""
-        sweep=1 if waxing else 0
-        half=(f'<path d="M{cx:.2f},{cy-r:.2f} A{r:.2f},{r:.2f} 0 0 {sweep} '
-              f'{cx:.2f},{cy+r:.2f} Z" fill="{lit}"/>')
-        rx=r*abs(1.0-2.0*frac)
-        fill=lit if frac>0.5 else base
-        ell=f'<ellipse cx="{cx:.2f}" cy="{cy:.2f}" rx="{rx:.2f}" ry="{r:.2f}" fill="{fill}"/>'
-        return half+'\n'+ell
-
-    def _render_moon_calendar(self, b, theme, data):
-        """Calendario lunare: un dischetto per ogni giorno del mese, con la forma
-        CONTINUA della fase reale. Il FILE possiede cosa/dove/quale-dato: griglia
-        (`cols` = dischetti per riga), passi (`col_gap`/`row_gap`), raggio, se
-        mostrare il numero del giorno (`day_number`), se evidenziare le fasi
-        principali (`highlight`). Il CODICE possiede il "come disegnare" la forma.
-
-        Regge sia una riga da 31 (cols=31) sia una griglia N×M (es. 4×8, cols=8)
-        SENZA saperlo: la disposizione è tutta nel file, la primitiva calcola
-        riga = i//cols, colonna = i%cols."""
-        out=[]
-        x0,y0,r,cols=b["x0"],b["y0"],b["radius"],b["cols"]
-        cgap,rgap=b["col_gap"],b["row_gap"]
-        base=b["base"]; basefill=theme[base["fill"]]; lit=theme[b["lit_fill"]]
-        daynum=b.get("day_number"); hi=b.get("highlight")
-        for i,md in enumerate(data.moon_days):
-            cx=x0+(i%cols)*cgap; cy=y0+(i//cols)*rgap
-            out.append(f'<circle cx="{cx:.2f}" cy="{cy:.2f}" r="{r}" fill="{basefill}"/>')
-            out.append(self._moon_shape_svg(cx,cy,r,md.frac,md.waxing,lit,basefill))
-            out.append(f'<circle cx="{cx:.2f}" cy="{cy:.2f}" r="{r}" fill="none" '
-                       f'stroke="{theme[base["stroke"]]}" stroke-width="{base["stroke_width"]}"/>')
-            if hi and md.phase_key:
-                out.append(f'<circle cx="{cx:.2f}" cy="{cy:.2f}" r="{r+hi["r_extra"]}" '
-                           f'fill="none" stroke="{theme[hi["stroke"]]}" stroke-width="{hi["stroke_width"]}"/>')
-            if daynum:
-                fill=(daynum["fill_highlight"] if hi and md.phase_key and "fill_highlight" in daynum
-                      else daynum["fill"])
-                tb={"x":f"{cx:.2f}","y":f"{cy+daynum['dy']:.2f}","fill":fill,
-                    "size":daynum["size"],"anchor":"middle","content":"{day}"}
-                out.append(self._render_text(tb, theme, {"day":md.day}))
-        # riga opzionale di etichette delle fasi principali (giorno + nome). Il
-        # file da' altezza, colore e la mappa chiave->nome; il dato da' quali
-        # giorni (quelli con phase_key, gia' incrociati con moon_phases).
-        # Ogni etichetta e' ANCORATA alla COLONNA del suo giorno nel calendario
-        # (centrata sotto il dischetto), non a colonne fisse: cosi' regge 3, 4 o
-        # 5 fasi (mesi con due lune nuove) senza mai finire fuori tela.
-        pl=b.get("phase_labels")
-        if pl:
-            names=pl["names"]
-            for md in (m for m in data.moon_days if m.phase_key):
-                cx=x0+((md.day-1)%cols)*cgap
-                tb={"x":f"{cx:.2f}","y":pl["y"],"fill":pl["fill"],"size":pl["size"],
-                    "weight":pl.get("weight"),"anchor":"middle","content":pl["content"]}
-                out.append(self._render_text(tb, theme, {"day":md.day,"name":names[md.phase_key]}))
-        return '\n'.join(out)
-
-    def _swatch_label(self, spec, cx, cy, text, theme):
-        """Un'etichetta di campione, con dx/dy dal centro del pallino; opzionali
-        weight e anchor (i design social allineano a destra la temperatura)."""
-        tb={"x":cx+spec["dx"],"y":cy+spec["dy"],"fill":spec["fill"],
-            "size":spec["size"],"content":text}
-        if spec.get("weight"): tb["weight"]=spec["weight"]
-        if spec.get("anchor"): tb["anchor"]=spec["anchor"]
-        return self._render_text(tb, theme, {})
-
-    def _render_swatches(self, b, theme):
-        """Campioni di colore della legenda. Il colore viene da bv2hex(ramp,bv):
-        calcolo, resta qui; il file da' i bv, le etichette e le posizioni.
-        Due disposizioni: FILA orizzontale storica (x0 + i*step, `cy` fisso; e'
-        l'A4) oppure GRIGLIA se il blocco dichiara `cols` (x0/cy origine,
-        `col_step`/`row_step`), come la legenda in colonna dei design social.
-        `label2` (opzionale) e' una seconda etichetta per campione (es. la
-        temperatura). Senza `cols` e senza `label2` -> identico all'A4."""
-        ramp=theme["star_ramp"]; lab=b["label"]; lab2=b.get("label2")
-        cols=b.get("cols")
-        out=[]
-        for i,it in enumerate(b["items"]):
-            if cols:  # griglia (nuova): riga=i//cols, colonna=i%cols
-                cx=b["x0"]+(i%cols)*b.get("col_step",0)
-                cy=b["cy"]+(i//cols)*b.get("row_step",0)
-            else:     # fila orizzontale (storica, A4): x0 + i*step, cy fisso
-                cx=b["x0"]+i*b["step"]; cy=b["cy"]
-            out.append(f'<circle cx="{cx}" cy="{cy}" r="{b["r"]}" fill="{bv2hex(ramp, it["bv"])}"/>')
-            out.append(self._swatch_label(lab, cx, cy, it["label"], theme))
-            if lab2 and "label2" in it:
-                out.append(self._swatch_label(lab2, cx, cy, it["label2"], theme))
-        return '\n'.join(out)
 
     def _render_block_tool(self, b, theme, ctx, w, h, tool_ctx):
         """I tipi di blocco SPECIFICI del Cielo del Mese (disco, luna, pianeti,
