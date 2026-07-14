@@ -27,15 +27,24 @@ class Compositor:
     Nessuna dipendenza dall'astronomia (invariante del taglio D14)."""
 
     # ---- render: componenti riutilizzabili ----
-    @staticmethod
-    def defs_svg(theme):
-        """Gradienti e filtri (glow) condivisi. Vanno messi una volta per SVG."""
-        return f'''<defs>
-<radialGradient id="bg" cx="50%" cy="38%" r="75%"><stop offset="0%" stop-color="{theme['bg'][0]}"/><stop offset="55%" stop-color="{theme['bg'][1]}"/><stop offset="100%" stop-color="{theme['bg'][2]}"/></radialGradient>
-<radialGradient id="disk" cx="50%" cy="46%" r="55%"><stop offset="0%" stop-color="{theme['disk'][0]}"/><stop offset="80%" stop-color="{theme['disk'][1]}"/><stop offset="100%" stop-color="{theme['disk'][2]}"/></radialGradient>
-<filter id="glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-<filter id="softglow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="3.4"/></filter>
-</defs>'''
+    def defs_svg(self, theme, extra_gradients=""):
+        """Gradienti e filtri (glow) di MARCA: lo sfondo `bg` e i due glow. Roba
+        generica, la vuole qualunque strumento. `extra_gradients` e' una stringa
+        di definizioni IN PIU' che uno strumento inserisce (il Cielo del Mese ci
+        mette il gradiente del disco): cosi' compose/ non conosce piu' il token
+        'disk' (era l'ultima venatura di cielo qui, sciolta in #7f). Vanno messi
+        una volta per SVG."""
+        bg = (f'<radialGradient id="bg" cx="50%" cy="38%" r="75%">'
+              f'<stop offset="0%" stop-color="{theme["bg"][0]}"/>'
+              f'<stop offset="55%" stop-color="{theme["bg"][1]}"/>'
+              f'<stop offset="100%" stop-color="{theme["bg"][2]}"/></radialGradient>')
+        glow = ('<filter id="glow" x="-60%" y="-60%" width="220%" height="220%">'
+                '<feGaussianBlur stdDeviation="2.2" result="b"/><feMerge>'
+                '<feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>')
+        soft = ('<filter id="softglow" x="-80%" y="-80%" width="260%" height="260%">'
+                '<feGaussianBlur stdDeviation="3.4"/></filter>')
+        mid = (extra_gradients + "\n") if extra_gradients else ""
+        return f'<defs>\n{bg}\n{mid}{glow}\n{soft}\n</defs>'
 
     def _render_text(self, b, theme, ctx):
         """Primitiva testo. Ordine di attributi canonico (ricavato dall'A4):

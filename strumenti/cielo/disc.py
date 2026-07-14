@@ -18,6 +18,16 @@ from .catalog import CONST_IT, MARQUEE, STARS, bv2hex, R
 
 
 class DiscMixin:
+    @staticmethod
+    def _disk_gradient(theme):
+        """Il gradiente radiale del DISCO cielo (token 'disk'): e' roba di cielo,
+        non di marca, quindi vive qui e non in compose/defs_svg (#7f, D13). Engine
+        lo inserisce nel <defs> tramite il suo override di defs_svg."""
+        return (f'<radialGradient id="disk" cx="50%" cy="46%" r="55%">'
+                f'<stop offset="0%" stop-color="{theme["disk"][0]}"/>'
+                f'<stop offset="80%" stop-color="{theme["disk"][1]}"/>'
+                f'<stop offset="100%" stop-color="{theme["disk"][2]}"/></radialGradient>')
+
     def sky_disc_svg(self, cx, cy, rad, lst, lat_rad, theme, ramp=None,
                      cardinals=True, labels=True, marquee=True, ticks=None,
                      star_names=None, declutter=False, clip_id='dclip',

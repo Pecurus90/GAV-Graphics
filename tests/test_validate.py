@@ -118,3 +118,39 @@ def test_planet_colors_marte_non_rosso(root):
     with pytest.raises(V.InputError) as e:
         V.valida_tema(th, "x.json")
     assert "Marte" in str(e.value)
+
+
+# ---------------------------------------------------------------------------
+# D13 — contratto del tema PER-STRUMENTO. Il secondo strumento (generico) e'
+# SIMULATO con CONTRATTO_MARCA: niente file di Pillole in anticipo.
+# ---------------------------------------------------------------------------
+def test_cielo_rifiuta_palette_senza_star_ramp(root):
+    """Il cuore di D13: una palette senza star_ramp non puo' disegnare il cielo.
+    Il contratto del CIELO la rifiuta, e l'errore nomina lo strumento."""
+    th = _osservatorio(root)
+    del th["star_ramp"]
+    with pytest.raises(V.InputError) as e:
+        V.valida_tema(th, "x.json")  # default = CONTRATTO_CIELO
+    msg = str(e.value)
+    assert "star_ramp" in msg and "Cielo del Mese" in msg
+
+
+def test_strumento_generico_accetta_palette_senza_astronomia(root):
+    """L'altra meta' di D13: uno strumento che NON disegna il cielo non deve
+    rifiutare una palette a cui mancano le chiavi d'astronomia. Stessa palette
+    del test sopra, contratto generico: passa."""
+    th = _osservatorio(root)
+    del th["star_ramp"]
+    del th["planet_colors"]
+    del th["disk"]
+    V.valida_tema(th, "x.json", contratto=V.CONTRATTO_MARCA)  # non deve alzare
+
+
+def test_generico_pretende_comunque_la_marca(root):
+    """Il contratto generico molla l'astronomia, NON la marca: una palette senza
+    una chiave di marca (gold) viene rifiutata anche dallo strumento generico."""
+    th = _osservatorio(root)
+    del th["gold"]
+    with pytest.raises(V.InputError) as e:
+        V.valida_tema(th, "rotta.json", contratto=V.CONTRATTO_MARCA)
+    assert "rotta.json" in str(e.value) and "gold" in str(e.value)

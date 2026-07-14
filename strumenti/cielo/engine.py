@@ -54,6 +54,12 @@ class Engine(Compositor, MessierMixin, PanelsMixin, DiscMixin, EphemerisMixin):
             except: return 0.5
         self.sbv = np.array([_bv(s) for s in self.stars])
 
+    def defs_svg(self, theme, extra_gradients=""):
+        """Il Cielo del Mese aggiunge al <defs> di marca il gradiente del proprio
+        DISCO (#7f, D13): compose/ non conosce piu' il token 'disk'. L'output
+        e' identico a prima (disk fra bg e i glow)."""
+        return super().defs_svg(theme, extra_gradients=self._disk_gradient(theme))
+
     @staticmethod
     def _render_ctx(data):
         """Presentazione DERIVATA da SkyData: stringhe pronte che i template del
