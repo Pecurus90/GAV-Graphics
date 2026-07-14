@@ -483,8 +483,26 @@ Ordinato per rischio reale.
   Messier. **44 costellazioni restano mute** sulla mappa. Non si inventano: si
   propongono e si approvano.
 
+- **R9 — DUBBIO APERTO: nessuno ha mai verificato che l'`.exe` sia possibile.**
+  *(Registrato 2026-07-14, su richiesta di Marco: «quando è ora vediamo, segna il
+  dubbio».)* Sappiamo che `resvg_py` è un **binario nativo** (`.pyd`) e che
+  `de421.bsp` vive dentro un pacchetto installato (vedi D15). **Non sappiamo** che
+  sopravvivano dentro un eseguibile: è dedotto dalla documentazione, non
+  **eseguito**. Se uno dei due non si lasciasse impacchettare, non sarebbe un bug
+  da correggere ma **la tecnica di rendering da rifare** — e a quel punto ci
+  saranno #7e e #7f costruiti sopra.
+  L'architetto ha proposto uno **spike usa-e-getta** (un exe scemo che carica le
+  effemeridi e sputa un PNG, in una cartella temporanea, fuori dal repo) per
+  rispondere alla domanda *prima*. Marco ha deciso di **non anticiparlo**: si
+  affronta al giro del packaging. La proposta resta scritta qui perché la
+  decisione sia una **scelta**, non una dimenticanza.
+
 **Mai verificato:** la correttezza astronomica dell'output. Sappiamo che il
 codice produce un SVG. Non sappiamo che sia giusto.
+*(Da riverificare: esistono ora `tests/test_correctness.py`, `test_planets.py`,
+`test_moon.py`, `test_planet_direction.py`, ancorati a riferimenti esterni.
+Questa riga potrebbe essere debito già pagato di cui il file non si è accorto —
+va letta contro i test veri, non lasciata marcire.)*
 
 ---
 
