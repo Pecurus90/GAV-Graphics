@@ -22,6 +22,21 @@ MONTHS_IT = ["", "gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno",
 # rosa a 8 settori in italiano (azimut 0=Nord, 90=Est, orario): indice = round(az/45)%8
 DIREZIONI_IT = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ovest", "Ovest", "Nord-Ovest"]
 
+# Nomi italiani delle costellazioni PRINCIPALI: sono quelle che l'A4/pagina 1
+# etichetta sul disco (le legge sky_disc_svg, in disc/engine). NON allargare
+# questo dizionario: e' sorvegliato dai golden (l'A4 disegna un'etichetta per
+# ogni voce sopra l'orizzonte). Le MINORI vivono in messier.py (CONST_IT_MINORI),
+# che SOLO la pagina 2 legge: cosi' aggiungere un nome minore non puo' muovere
+# l'output dell'A4 (il confine del banco-di-prova #7d-ter, ora a livello di file).
+CONST_IT = {'Aql':'Aquila','Boo':'Boote','CrB':'Corona Boreale','Cas':'Cassiopea',
+ 'Cep':'Cefeo','Cyg':'Cigno','Del':'Delfino','Dra':'Dragone','Her':'Ercole',
+ 'Lyr':'Lira','Oph':'Ofiuco','Peg':'Pegaso','Sgr':'Sagittario','Sco':'Scorpione',
+ 'Ser':'Serpente','UMa':'Orsa Maggiore','UMi':'Orsa Minore','Vir':'Vergine',
+ 'Lib':'Bilancia','Cap':'Capricorno','And':'Andromeda','Aqr':'Acquario',
+ 'CVn':'Cani da Caccia','Ori':'Orione','Tau':'Toro','Gem':'Gemelli','Leo':'Leone',
+ 'Cnc':'Cancro','Per':'Perseo','Aur':'Auriga','CMi':'Cane Minore','CMa':'Cane Maggiore',
+ 'Cet':'Balena','Psc':'Pesci','Ari':'Ariete'}
+
 # stelle guida: nome, RA(deg), Dec(deg), B-V (per colore reale dal tema)
 MARQUEE = [("Vega",279.234,38.784,0.00),("Deneb",310.358,45.280,0.09),
  ("Altair",297.696,8.868,0.22),("Arturo",213.915,19.182,1.23),
