@@ -105,3 +105,39 @@ class Compositor:
         for x,y in zip(rng.uniform(0,w,sf["count"]),rng.uniform(0,h,sf["count"])):
             out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{rng.uniform(sf["r_min"],sf["r_max"]):.2f}" fill="{col}" opacity="{rng.uniform(sf["op_min"],sf["op_max"]):.2f}"/>')
         return '\n'.join(out)
+
+    # ---- il compositore: cammina i blocchi di un layout (D7) ----
+    def _compose(self, layout, theme, ctx, out, tool_ctx=None):
+        """Cammina i blocchi del layout e assembla l'SVG. Tool-AGNOSTICO: non sa
+        nulla di cielo, effemeridi o Messier. Ogni strumento (oggi il Cielo del
+        Mese; domani Pillole, D12) prepara `ctx` (i testi) e l'eventuale
+        `tool_ctx` (i dati specifici che i suoi blocchi consumano), poi chiama
+        qui. Questa e' la meta' che si eredita. L'output e' identico a prima: la
+        stringa dell'SVG e' composta esattamente come faceva Engine.generate."""
+        cv=layout['canvas']; cw,ch=cv['w'],cv['h']
+        s=[f'<svg xmlns="http://www.w3.org/2000/svg" width="{cw}" height="{ch}" viewBox="0 0 {cw} {ch}" font-family="{cv["font_family"]}">',
+           self.defs_svg(theme)]
+        for b in layout['blocks']:
+            s.append(self._render_block(b, theme, ctx, cw, ch, tool_ctx))
+        s.append('</svg>')
+        with open(out,'w',encoding='utf-8') as fh:
+            fh.write('\n'.join(s))
+        return out
+
+    def _render_block(self, b, theme, ctx, w, h, tool_ctx):
+        """Dispatch di un blocco sulla primitiva giusta. Qui vivono SOLO i tipi
+        generici (quelli che Pillole riuserebbe); i tipi di uno strumento sono
+        gestiti dal suo override di `_render_block_tool`."""
+        t=b["type"]
+        if t=="background":   return self._render_background(b, theme, w, h)
+        if t=="text":         return self._render_text(b, theme, ctx)
+        if t=="line":         return self._render_line(b, theme)
+        if t=="panel":        return self._render_panel(b, theme)
+        if t=="image":        return self._render_image(b)
+        if t=="icon":         return self._render_icon(b, theme)
+        return self._render_block_tool(b, theme, ctx, w, h, tool_ctx)
+
+    def _render_block_tool(self, b, theme, ctx, w, h, tool_ctx):
+        """Hook per i tipi di blocco SPECIFICI di uno strumento. La base non ne
+        conosce: uno strumento lo sovrascrive. Senza override, tipo sconosciuto."""
+        raise ValueError(f"tipo di blocco sconosciuto nel layout: {b['type']!r}")

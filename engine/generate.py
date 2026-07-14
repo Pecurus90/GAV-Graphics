@@ -1268,16 +1268,14 @@ class Engine(Compositor):
                    f'font-weight="500">Telescopio</text>')
         return '\n'.join(out)
 
-    def _render_block(self, b, theme, data, ctx, lst, lat_rad, w, h, mctx=None):
-        """Dispatch di un blocco del layout sulla primitiva giusta."""
+    def _render_block_tool(self, b, theme, ctx, w, h, tool_ctx):
+        """I tipi di blocco SPECIFICI del Cielo del Mese (disco, luna, pianeti,
+        campioni, Messier). Sovrascrive il hook di Compositor: i tipi generici li
+        gestisce gia' la base. `tool_ctx` porta i dati che questi blocchi
+        consumano (SkyData, tempo siderale/latitudine, contesto Messier)."""
         t=b["type"]
-        if t=="background":   return self._render_background(b, theme, w, h)
+        data=tool_ctx["data"]; lst=tool_ctx["lst"]; lat_rad=tool_ctx["lat_rad"]; mctx=tool_ctx["mctx"]
         if t=="disc":         return self._render_disc(b, theme, lst, lat_rad)
-        if t=="text":         return self._render_text(b, theme, ctx)
-        if t=="line":         return self._render_line(b, theme)
-        if t=="panel":        return self._render_panel(b, theme)
-        if t=="image":        return self._render_image(b)
-        if t=="icon":         return self._render_icon(b, theme)
         if t=="moon_panel":   return self._render_moon_panel(b, theme, data)
         if t=="moon_calendar":return self._render_moon_calendar(b, theme, data)
         if t=="planet_panel": return self._render_planet_panel(b, theme, data)
@@ -1287,7 +1285,7 @@ class Engine(Compositor):
         if t=="messier_legend":  return self._render_messier_legend(b, theme)
         raise ValueError(f"tipo di blocco sconosciuto nel layout: {t!r}")
 
-    # ---- render: volantino A4 (compositore magro: cammina i blocchi) ----
+    # ---- render: volantino A4 (prepara i dati del cielo, poi compone) ----
     def generate(self, year, month, lat, lon, place, theme, out,
                  hour_local=23, tzname='Europe/Rome', layout=None):
         if layout is None:
@@ -1302,12 +1300,5 @@ class Engine(Compositor):
         if "messier" in layout:
             mc=layout["messier"]
             mctx=self.messier_context(lst, lat_rad, mc["cx"], mc["cy"], mc["rad"], mc["n"])
-        cv=layout['canvas']; cw,ch=cv['w'],cv['h']
-        s=[f'<svg xmlns="http://www.w3.org/2000/svg" width="{cw}" height="{ch}" viewBox="0 0 {cw} {ch}" font-family="{cv["font_family"]}">',
-           self.defs_svg(theme)]
-        for b in layout['blocks']:
-            s.append(self._render_block(b, theme, data, ctx, lst, lat_rad, cw, ch, mctx))
-        s.append('</svg>')
-        with open(out,'w',encoding='utf-8') as fh:
-            fh.write('\n'.join(s))
-        return out
+        return self._compose(layout, theme, ctx, out,
+                             tool_ctx={"data":data, "lst":lst, "lat_rad":lat_rad, "mctx":mctx})
