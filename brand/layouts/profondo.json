@@ -1,4 +1,5 @@
 {
+  "carosello_pagina2": true,
   "_nota": "PAGINA 2 del carosello social: profondo cielo (catalogo Messier). Sorella della pagina 1: stesso poster scuro, disco neon, testata oro, font del brand. Tradotta dal secondo SVG di design_handoff_pagina2_profondo_cielo. Colori = TOKEN (mai hex). ORIENTAMENTO: i cardinali sono quelli del motore (E a SINISTRA, invariante #3); il mockup li aveva specchiati (E a destra) - vedi report. La sezione 'messier' e' la config astronomica: disco (deve combaciare col blocco 'disc') + N della tabella.",
   "canvas": {"w": 1080, "h": 1080, "font_family": "Barlow Semi Condensed, Instrument Sans, Helvetica, Arial, sans-serif"},
 

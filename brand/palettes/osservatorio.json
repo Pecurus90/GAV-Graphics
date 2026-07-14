@@ -1,5 +1,6 @@
 {
   "name": "Osservatorio",
+  "descrizione": "Il classico · blu notte + oro",
   "bg": ["#0c1330", "#070c1e", "#04060f"],
   "disk": ["#0a1533", "#060c22", "#0a1236"],
   "neon": "#45c8ff",

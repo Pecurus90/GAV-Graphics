@@ -29,18 +29,6 @@ LAYOUTS_DIR = os.path.join(BASE, "brand", "layouts")
 PALETTES_DIR = os.path.join(BASE, "brand", "palettes")
 
 
-def _png_width(layout, override):
-    """Larghezza del PNG: --png-width se dato, altrimenti canvas.png_width se il
-    file lo dichiara, altrimenti derivata dalla larghezza del canvas."""
-    if override:
-        return override
-    cv = layout["canvas"]
-    if cv.get("png_width"):
-        return cv["png_width"]
-    w = cv["w"]
-    return w if w >= 1000 else w * 2
-
-
 def main():
     p = argparse.ArgumentParser(description="Genera il Cielo del Mese (SVG, e PNG con --png).")
     # NB: year/month/lat/lon sono stringhe, non type=int/float: cosi' un valore
@@ -91,7 +79,7 @@ def main():
     print("SVG:", svg)
 
     if args.png:
-        width = _png_width(layout, args.png_width)
+        width = render.png_width(layout, args.png_width)
         png = os.path.splitext(svg)[0] + ".png"
         render.svg_file_to_png(svg, png, width=width)
         print("PNG:", png, f"(larghezza {width}px)")

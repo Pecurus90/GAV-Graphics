@@ -26,6 +26,21 @@ def _font_dirs():
     return [str(FONTS_DIR)] if FONTS_DIR.exists() else []
 
 
+def png_width(layout, override=None):
+    """Larghezza GIUSTA del PNG per un layout: `override` se dato, altrimenti
+    canvas.png_width se il file lo dichiara, altrimenti derivata dalla larghezza
+    del canvas (i post a 1080, l'A4 a 1800). UNA sola verita' su questa misura,
+    condivisa da cielo.py (CLI) e app/main.py (web): un post social NON va
+    rasterizzato alla misura dell'A4."""
+    if override:
+        return override
+    cv = layout["canvas"]
+    if cv.get("png_width"):
+        return cv["png_width"]
+    w = cv["w"]
+    return w if w >= 1000 else w * 2
+
+
 def svg_to_png(svg: str, out_path, width: int | None = None,
                height: int | None = None, zoom: float | None = None) -> str:
     """Rasterizza una stringa SVG in un file PNG.

@@ -1,4 +1,5 @@
 {
+  "scheda": {"nome": "Editoriale", "tag": "Quadrato · mappa grande", "aspect": "sq", "ordine": 2},
   "_nota": "Design 'editorial' (docs/mockups/editorial.svg) come DATI. Testata centrata sopra il disco, disco centrale, due pannelli in basso: calendario lunare 4x8 a sinistra, pianeti + legenda colori a destra. Colori = TOKEN. CORREZIONE #4: nel mockup sottotitolo e disco si sovrapponevano; qui la testata sale e il disco scende/rimpicciolisce (vedi report).",
   "canvas": {"w": 1080, "h": 1080, "font_family": "Barlow Semi Condensed, Instrument Sans, Helvetica, Arial, sans-serif"},
   "blocks": [

@@ -1,4 +1,5 @@
 {
+  "scheda": {"nome": "Post", "tag": "Quadrato · semplice", "aspect": "sq", "ordine": 4},
   "_nota": "Post social quadrato 1080x1080. STESSA identita' dell'A4 (navy, disco neon, testata oro, colori reali delle stelle), tradotta nel quadrato. Prima bozza pensata per essere iterata a mano (D6). Criterio pianeti: solo status 'ok' = visibili a occhio nudo (vedi report). Composta dalle stesse primitive dell'A4; unica estensione usata: planet_panel.statuses.",
   "canvas": {"w": 1080, "h": 1080, "font_family": "Helvetica,Arial,sans-serif"},
   "blocks": [

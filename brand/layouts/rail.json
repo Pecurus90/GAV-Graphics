@@ -1,4 +1,5 @@
 {
+  "scheda": {"nome": "Colonna", "tag": "Quadrato · mappa + lista", "aspect": "sq", "ordine": 3},
   "_nota": "Design 'rail' (docs/mockups/rail.svg) come DATI. Colonna a sinistra (testata su piu' righe, pannello pianeti, pannello colori), disco in alto a destra, calendario lunare a riga da 31 in basso a destra. Colori = TOKEN. Pianeti compatti (solo nome + orari); colori con temperatura. Font del brand (D4).",
   "canvas": {"w": 1080, "h": 1080, "font_family": "Barlow Semi Condensed, Instrument Sans, Helvetica, Arial, sans-serif"},
   "blocks": [

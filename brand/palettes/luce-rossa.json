@@ -1,5 +1,7 @@
 {
   "name": "Luce Rossa",
+  "descrizione": "Notte rossa · non rovina la visione al buio",
+  "nota": "si guarda stando al telescopio",
   "bg": [
     "#2a0e12",
     "#160608",

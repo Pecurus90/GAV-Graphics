@@ -1,4 +1,5 @@
 {
+  "scheda": {"nome": "Volantino A4", "tag": "Verticale · per la stampa e la bacheca", "aspect": "a4", "ordine": 5},
   "_nota": "Layout A4 come DATI (D7). Contiene esattamente i valori cablati oggi in generate(): descrive l'A4, non lo cambia. L'ordine dei blocchi = ordine di disegno. I 'fill'/'stroke' nominano una chiave del tema; i 'content' sono template riempiti dal contesto di render (vedi compositore). Le coordinate rispettano int-vs-float dell'output attuale (es. 450.0 dell'header viene da CX=450.0).",
   "canvas": {"w": 900, "h": 1273, "font_family": "Helvetica,Arial,sans-serif"},
   "blocks": [
