@@ -25,7 +25,7 @@
     {"type": "messier_symbols", "cx": 300, "cy": 572, "rad": 246,
      "size": 4.6, "stroke_width": 1.15, "fill": "gold",
      "label_size": 11, "label_fill": "gold",
-     "const_names": "tutte", "const_fill": "label", "const_size": 10.5,
+     "const_names": "principali", "const_fill": "label", "const_size": 10.5,
      "const_tracking": 2.2, "const_opacity": 0.7},
 
     {"type": "text", "x": 584, "y": 218, "fill": "label", "size": 13,

@@ -1187,7 +1187,7 @@ class Engine:
         self._last_const_label_boxes=[]; self._last_const_dropped=[]
         self._last_const_dropped_tab=[]; self._last_const_placed=[]
         mode=b.get("const_names","no")
-        if mode not in ("tabella","tutte"):
+        if mode not in ("tabella","principali","tutte"):
             return ''
         cfill=theme[b.get("const_fill","text4")]
         csz=b.get("const_size",10.5); ctr=b.get("const_tracking",2.2)
@@ -1202,6 +1202,14 @@ class Engine:
         tab_abbr=set()
         for r in mctx["table"]:
             tab_abbr.add("Vir" if r.get("_group") else r["costellazione"])
+        # QUALI figure nominare, per modo (il patto D9 - le costellazioni in
+        # tabella - resta in TUTTI i modi): 'tabella' = solo quelle in tabella;
+        # 'principali' = le principali (CONST_IT) + quelle in tabella (D16: sul
+        # telefono le minori sui bordi sono rumore, non testo); 'tutte' = ogni
+        # figura con un nome noto.
+        if mode=="tabella":       allowed=set(tab_abbr)
+        elif mode=="principali":  allowed=set(CONST_IT)|tab_abbr
+        else:                     allowed=None  # tutte
         hulls=mctx.get("const_hulls", [])
         def in_other(px, py, ab):
             for hab, poly, hb in hulls:
@@ -1215,7 +1223,7 @@ class Engine:
         reqs=[]
         for fig in mctx.get("const_figures", []):
             ab=fig["ab"]
-            if mode=="tabella" and ab not in tab_abbr: continue
+            if allowed is not None and ab not in allowed: continue
             name=name_map.get(ab)
             if not name: continue
             text=name.upper()

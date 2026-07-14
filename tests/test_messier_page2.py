@@ -107,7 +107,7 @@ def test_gruppo_vergine_strutturale_a_marzo(eng, profondo):
 # minima. La rete: un nome non copre MAI un simbolo, una sigla Messier o un
 # altro nome. Testata nel modo piu' DENSO ('tutte'): se regge li', regge sempre.
 # ---------------------------------------------------------------------------
-CONST_MODI = ["tabella", "tutte"]
+CONST_MODI = ["tabella", "principali", "tutte"]
 
 
 @pytest.mark.parametrize("month", MESI)
@@ -218,11 +218,13 @@ def test_nome_non_dentro_altra_costellazione(eng, profondo, month, mode):
 
 
 @pytest.mark.parametrize("month", MESI)
-def test_zero_scarti_costellazioni_in_tabella(eng, profondo, month):
-    """IL NUOVO PATTO (#7d-ter): ZERO scarti fra le costellazioni CITATE in
-    tabella, in modo 'tutte'. Se una riga di tabella nomina una costellazione,
-    quel nome DEVE stare sulla mappa. Mappa e tabella si guardano."""
-    _render(eng, profondo, month, const_mode="tutte")
+@pytest.mark.parametrize("mode", CONST_MODI)
+def test_zero_scarti_costellazioni_in_tabella(eng, profondo, month, mode):
+    """IL PATTO (#7d-ter): ZERO scarti fra le costellazioni CITATE in tabella.
+    Se una riga di tabella nomina una costellazione, quel nome DEVE stare sulla
+    mappa. Vale in TUTTI i modi ('tabella', 'principali', 'tutte'): se reggesse
+    solo in uno, non sarebbe un patto ma una coincidenza (#7d-quater)."""
+    _render(eng, profondo, month, const_mode=mode)
     assert eng._last_const_dropped_tab == [], (
-        f"mese {month}: costellazioni in tabella senza nome sulla mappa "
+        f"mese {month}/{mode}: costellazioni in tabella senza nome sulla mappa "
         f"(patto rotto): {eng._last_const_dropped_tab}")
