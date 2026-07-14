@@ -37,10 +37,13 @@ def profondo(root):
     return layout, theme, sym_block
 
 
-def _render(eng, profondo, month):
+def _render(eng, profondo, month, const_mode=None):
     """Rende i simboli/etichette di un mese e restituisce il contesto Messier.
-    Gli effetti (box, contatori) restano su `eng._last_*`."""
+    Gli effetti (box, contatori) restano su `eng._last_*`. `const_mode`
+    sovrascrive il modo del terzo strato (nomi costellazioni) del blocco."""
     layout, theme, sym_block = profondo
+    if const_mode is not None:
+        sym_block = {**sym_block, "const_names": const_mode}
     ms = layout["messier"]
     lst, lat_rad, _ = eng.sky_context(2026, month, VLAT, VLON, hour_local=23)
     mctx = eng.messier_context(lst, lat_rad, ms["cx"], ms["cy"], ms["rad"], ms["n"])
@@ -97,3 +100,72 @@ def test_gruppo_vergine_strutturale_a_marzo(eng, profondo):
     mctx = _render(eng, profondo, 3)
     assert any(r.get("_group") == "vergine" for r in mctx["table"])
     assert any(key == "__group__vergine" for (_bx, key) in eng._last_label_boxes)
+
+
+# ---------------------------------------------------------------------------
+# TERZO STRATO (#7d): i NOMI delle costellazioni. Sfondo semantico, priorita'
+# minima. La rete: un nome non copre MAI un simbolo, una sigla Messier o un
+# altro nome. Testata nel modo piu' DENSO ('tutte'): se regge li', regge sempre.
+# ---------------------------------------------------------------------------
+CONST_MODI = ["tabella", "tutte"]
+
+
+@pytest.mark.parametrize("month", MESI)
+@pytest.mark.parametrize("mode", CONST_MODI)
+def test_nome_costellazione_non_copre_simbolo(eng, profondo, month, mode):
+    """Nessun box nome-costellazione interseca un box-simbolo Messier."""
+    _render(eng, profondo, month, const_mode=mode)
+    consts = eng._last_const_label_boxes
+    symbols = eng._last_symbol_boxes
+    assert symbols, "attesi dei simboli Messier"
+    guasti = [(ab, i) for (bx, ab) in consts
+              for i, sb in enumerate(symbols) if _inter(bx, sb)]
+    assert not guasti, f"mese {month}/{mode}: nomi sopra simboli: {guasti}"
+
+
+@pytest.mark.parametrize("month", MESI)
+@pytest.mark.parametrize("mode", CONST_MODI)
+def test_nome_costellazione_non_copre_sigla(eng, profondo, month, mode):
+    """Nessun box nome-costellazione interseca un box-sigla Messier (Mxx).
+    E' la subordinazione tipografica resa MISURABILE: lo sfondo non tocca il
+    contenuto."""
+    _render(eng, profondo, month, const_mode=mode)
+    consts = eng._last_const_label_boxes
+    siglas = eng._last_label_boxes
+    guasti = [(ab, key) for (bx, ab) in consts
+              for (sb, key) in siglas if _inter(bx, sb)]
+    assert not guasti, f"mese {month}/{mode}: nomi sopra sigle: {guasti}"
+
+
+@pytest.mark.parametrize("month", MESI)
+@pytest.mark.parametrize("mode", CONST_MODI)
+def test_nomi_costellazione_non_si_sovrappongono(eng, profondo, month, mode):
+    """Nessun box nome-costellazione interseca un altro nome-costellazione."""
+    _render(eng, profondo, month, const_mode=mode)
+    cb = eng._last_const_label_boxes
+    guasti = [(cb[i][1], cb[j][1]) for i in range(len(cb)) for j in range(i + 1, len(cb))
+              if _inter(cb[i][0], cb[j][0])]
+    assert not guasti, f"mese {month}/{mode}: nomi sovrapposti: {guasti}"
+
+
+@pytest.mark.parametrize("month", MESI)
+@pytest.mark.parametrize("mode", CONST_MODI)
+def test_terzo_strato_non_disturba_messier(eng, profondo, month, mode):
+    """Il terzo strato e' SUBORDINATO: aggiungerlo non tocca ne' gli scarti
+    Messier (D9: sempre 0) ne' il patto sigle<->tabella. E' la garanzia che i
+    nomi si piazzano DOPO, senza rubare il posto a una sigla."""
+    mctx = _render(eng, profondo, month, const_mode=mode)
+    assert eng._last_messier_dropped == 0, \
+        f"mese {month}/{mode}: il terzo strato ha causato {eng._last_messier_dropped} scarti Messier"
+    su_mappa = {key for (_bx, key) in eng._last_label_boxes}
+    in_tabella = {("__group__" + r["_group"]) if r.get("_group") else r["sigla"]
+                  for r in mctx["table"]}
+    assert su_mappa == in_tabella, f"mese {month}/{mode}: patto D9 rotto dal terzo strato"
+
+
+def test_modo_no_non_disegna_nomi(eng, profondo):
+    """Con const_names='no' (default storico) il terzo strato non esiste: nessun
+    box nome. E' la garanzia che 'no' resta possibile (D7: il file decide)."""
+    _render(eng, profondo, 3, const_mode="no")
+    assert eng._last_const_label_boxes == []
+    assert eng._last_const_dropped == []

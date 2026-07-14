@@ -868,8 +868,23 @@ class Engine:
         labels=set()
         for r in table:
             labels.add(("__group__"+r["_group"]) if r.get("_group") else r["sigla"])
+        # baricentri delle FIGURE di costellazione (#7d): il TERZO strato di
+        # etichette. Geometria (serve lst/lat): vive qui, come fig_pts. Un
+        # baricentro per FIGURA (Ser e' due figure distinte -> due baricentri),
+        # dai soli vertici sopra l'orizzonte (alt>3, come le etichette storiche),
+        # e solo se cade dentro il disco. Il NOME e il filtro per modalita' li
+        # decide il blocco (concern di render): qui solo dove.
+        const_centroids=[]
+        for f in self.clines:
+            allp=np.array([p for line in f['geometry']['coordinates'] for p in line])
+            al,zz=self.altaz(allp[:,0],allp[:,1],lst,lat_rad); msk=al>3
+            if msk.sum()<2: continue
+            xs,ys=self.project(al[msk],zz[msk],cx,cy,rad)
+            mx=float(xs.mean()); my=float(ys.mean())
+            if (mx-cx)**2+(my-cy)**2 > (rad-3)**2: continue
+            const_centroids.append({"ab":f['id'], "x":mx, "y":my})
         return {"enriched":enriched, "table":table, "label_siglas":labels,
-                "figure_pts":fig_pts}
+                "figure_pts":fig_pts, "const_centroids":const_centroids}
 
     @staticmethod
     def _messier_select(enriched, n, gruppi):
@@ -1049,6 +1064,79 @@ class Engine:
         self._last_messier_labels=len(label_boxes); self._last_messier_dropped=dropped
         self._last_messier_leadered=leadered
         self._last_symbol_boxes=symbol_boxes; self._last_label_boxes=label_boxes
+        # 3) TERZO STRATO (#7d): NOMI DELLE COSTELLAZIONI. Sfondo semantico, non
+        #    contenuto: priorita' MINIMA (si piazzano DOPO simboli e sigle),
+        #    tipografia subordinata (maiuscoletto spaziato, corpo minore, colore
+        #    tenue da TOKEN), NIENTE linea di richiamo (una costellazione e' una
+        #    regione, non un punto): se non entra, si SCARTA. Ostacoli = tutto il
+        #    gia' posto (simboli + stelle-figura + sigle Messier) + i nomi gia'
+        #    piazzati. Il patto mappa<->tabella (D9) esige che i nomi CITATI in
+        #    tabella non vengano scartati: hanno prima scelta, e gli scarti di
+        #    quelli si MISURANO (self._last_const_dropped_tab), non si aggirano.
+        out.append(self._render_const_names(b, theme, mctx, cx, cy, rad,
+                                            list(placed_boxes)))
+        return '\n'.join(out)
+
+    def _render_const_names(self, b, theme, mctx, cx, cy, rad, obstacles):
+        """Terzo strato di etichette: i NOMI delle costellazioni (#7d). Modalita'
+        dal FILE (`const_names`): 'no' (default, com'era), 'tabella' (solo le
+        costellazioni citate in tabella, ~8-10) o 'tutte' (tutte le figure sopra
+        l'orizzonte con un nome noto). Il CODICE possiede COME disegnare e
+        piazzare; il FILE possiede QUANTE (R5/D7). Espone i box e i contatori per
+        i test (`_last_const_label_boxes`, `_last_const_dropped`,
+        `_last_const_dropped_tab`)."""
+        self._last_const_label_boxes=[]; self._last_const_dropped=[]
+        self._last_const_dropped_tab=[]
+        mode=b.get("const_names","no")
+        if mode not in ("tabella","tutte"):
+            return ''
+        cfill=theme[b.get("const_fill","text4")]
+        csz=b.get("const_size",10.5); ctr=b.get("const_tracking",2.2)
+        cop=b.get("const_opacity",0.85)
+        # NOMI: la mappa di marca (CONST_IT) + i nomi VERIFICATI del catalogo
+        # (costellazione_it, gia' nel repo: non inventati). I nomi delle
+        # costellazioni CITATE in tabella vengono dalla STESSA fonte della
+        # tabella, cosi' il testo sulla mappa combacia con quello della riga.
+        name_map=dict(CONST_IT)
+        for o in mctx["enriched"]:
+            name_map.setdefault(o["costellazione"], o["costellazione_it"])
+        tab_abbr=set()
+        for r in mctx["table"]:
+            tab_abbr.add("Vir" if r.get("_group") else r["costellazione"])
+        # richieste: una per baricentro di figura nominabile (filtrate per modo)
+        reqs=[]
+        for c in mctx.get("const_centroids", []):
+            ab=c["ab"]
+            if mode=="tabella" and ab not in tab_abbr: continue
+            name=name_map.get(ab)
+            if not name: continue
+            text=name.upper()
+            w=len(text)*csz*0.60 + ctr*max(0,len(text)-1); h=csz
+            reqs.append({"ab":ab,"text":text,"x":c["x"],"y":c["y"],"w":w,"h":h,
+                         "in_tab":ab in tab_abbr})
+        # i CITATI in tabella hanno prima scelta (patto D9); a parita', impronta
+        # piu' grande prima (piu' difficile da piazzare)
+        reqs.sort(key=lambda r:(0 if r["in_tab"] else 1, -r["w"]))
+        cobst=list(obstacles); out=[]
+        DIRS=[(0,-1),(1,0),(0,1),(-1,0),(1,-1),(1,1),(-1,1),(-1,-1)]; STEP=5
+        cands=[(0,0)]+[(dx*r*STEP, dy*r*STEP) for r in range(1,7) for dx,dy in DIRS]
+        for req in reqs:
+            w,h=req["w"],req["h"]; chosen=None
+            for ox,oy in cands:
+                px,py=req["x"]+ox, req["y"]+oy
+                if (px-cx)**2+(py-cy)**2 > (rad-3)**2: continue
+                bb=(px-w/2, py-h/2, px+w/2, py+h/2)
+                if any(not(bb[2]<=p[0] or bb[0]>=p[2] or bb[3]<=p[1] or bb[1]>=p[3]) for p in cobst): continue
+                chosen=(px,py,bb); break
+            if chosen is None:
+                self._last_const_dropped.append(req["ab"])
+                if req["in_tab"]: self._last_const_dropped_tab.append(req["ab"])
+                continue
+            px,py,bb=chosen; cobst.append(bb)
+            self._last_const_label_boxes.append((bb, req["ab"]))
+            out.append(f'<text x="{px:.1f}" y="{py+h*0.34:.1f}" text-anchor="middle" '
+                       f'fill="{cfill}" font-size="{csz}" opacity="{cop}" '
+                       f'letter-spacing="{ctr}">{req["text"]}</text>')
         return '\n'.join(out)
 
     def _render_messier_table(self, b, theme, mctx):
