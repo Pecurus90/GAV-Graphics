@@ -72,14 +72,28 @@ class Engine(Compositor, MessierMixin, PanelsMixin, DiscMixin, EphemerisMixin):
                 "place": data.place, "hour": data.hour_local,
                 "lat1": f"{data.lat:.1f}", "lon1": f"{data.lon:.1f}"}
 
+    # Le QUATTRO FASI REALI (D11), riportate MAN MANO da generate() via callback.
+    # Indici: 0 effemeridi, 1 proiezione, 2 composizione, 3 rendering PNG. Il
+    # motore NON conosce la UI (invariante #1): riceve un `progress` dall'esterno e
+    # lo chiama; la fase 3 (PNG) la segna chi rasterizza (render.py, chiamato dal
+    # confine). Il callback non cambia MAI l'output: assente -> nessuna chiamata.
+    FASE_EFFEMERIDI, FASE_PROIEZIONE, FASE_COMPOSIZIONE, FASE_RENDERING = 0, 1, 2, 3
+
     def _render_block_tool(self, b, theme, ctx, w, h, tool_ctx):
         """I tipi di blocco SPECIFICI del Cielo del Mese (disco, luna, pianeti,
         campioni, Messier). Sovrascrive il hook di Compositor: i tipi generici li
         gestisce gia' la base. `tool_ctx` porta i dati che questi blocchi
-        consumano (SkyData, tempo siderale/latitudine, contesto Messier)."""
+        consumano (SkyData, tempo siderale/latitudine, contesto Messier) e il
+        callback di avanzamento. Il DISCO e' dove si proiettano le ~5000 stelle
+        (fase PROIEZIONE); finito il disco, i pannelli sono COMPOSIZIONE."""
         t=b["type"]
         data=tool_ctx["data"]; lst=tool_ctx["lst"]; lat_rad=tool_ctx["lat_rad"]; mctx=tool_ctx["mctx"]
-        if t=="disc":         return self._render_disc(b, theme, lst, lat_rad)
+        progress=tool_ctx.get("progress")
+        if t=="disc":
+            if progress: progress(self.FASE_PROIEZIONE)   # sto proiettando il cielo
+            svg=self._render_disc(b, theme, lst, lat_rad)
+            if progress: progress(self.FASE_COMPOSIZIONE)  # disco fatto, compongo il resto
+            return svg
         if t=="moon_panel":   return self._render_moon_panel(b, theme, data)
         if t=="moon_calendar":return self._render_moon_calendar(b, theme, data)
         if t=="planet_panel": return self._render_planet_panel(b, theme, data)
@@ -91,10 +105,13 @@ class Engine(Compositor, MessierMixin, PanelsMixin, DiscMixin, EphemerisMixin):
 
     # ---- render: volantino A4 (prepara i dati del cielo, poi compone) ----
     def generate(self, year, month, lat, lon, place, theme, out,
-                 hour_local=23, tzname='Europe/Rome', layout=None):
+                 hour_local=23, tzname='Europe/Rome', layout=None, progress=None):
+        """`progress`: callback opzionale (fase_idx) -> None per la barra di
+        avanzamento onesta (D11). Assente = nessuna chiamata, output identico."""
         if layout is None:
             with open(DEFAULT_LAYOUT, encoding='utf-8') as fh:
                 layout=json.load(fh)
+        if progress: progress(self.FASE_EFFEMERIDI)  # calcolo pianeti/Luna
         lst, lat_rad, _ = self.sky_context(year,month,lat,lon,hour_local,tzname)
         data=self.sky_data(year,month,lat,lon,place,hour_local,tzname)
         ctx=self._render_ctx(data)
@@ -105,4 +122,5 @@ class Engine(Compositor, MessierMixin, PanelsMixin, DiscMixin, EphemerisMixin):
             mc=layout["messier"]
             mctx=self.messier_context(lst, lat_rad, mc["cx"], mc["cy"], mc["rad"], mc["n"])
         return self._compose(layout, theme, ctx, out,
-                             tool_ctx={"data":data, "lst":lst, "lat_rad":lat_rad, "mctx":mctx})
+                             tool_ctx={"data":data, "lst":lst, "lat_rad":lat_rad,
+                                       "mctx":mctx, "progress":progress})

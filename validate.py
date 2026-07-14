@@ -75,6 +75,13 @@ def valida_mese(month):
     return m
 
 
+def valida_ora(hour):
+    h = _intero(hour, "Ora")
+    if not (0 <= h <= 23):
+        raise InputError(f"Ora fuori intervallo: {h}. Ammesse 0-23.")
+    return h
+
+
 def valida_lat(lat):
     v = _numero(lat, "Latitudine")
     if not (-90.0 <= v <= 90.0):
