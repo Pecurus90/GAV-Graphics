@@ -436,9 +436,20 @@ Ordinato per rischio reale.
   nel giro deliberato (#6e), insieme alla rimozione di `moon_panel`. (I tre
   design social nuovi dichiarano gia' i font del brand: non hanno golden.)
 - **R7 — Codice morto:** `render.py:DISPLAY`, `generate.py:NAKED_EYE`, param
-  `obs` inutilizzato in `planet_table`, chiave `'Peg'` duplicata in `CONST_IT`.
+  `obs` inutilizzato in `planet_table`.
   *(`brand/formats.py` era orfano — rimosso in #6a-riordino: il canvas vive nel
   file di layout, come deciso in R5/D7.)*
+  *(**Corretto 2026-07-14, #7d:** R7 dichiarava anche una chiave `'Peg'`
+  **duplicata** in `CONST_IT`. **Non esiste**: contate con `ast.literal_eval` +
+  `Counter`, 35 chiavi, 0 duplicati. Il debito era immaginario, o sanato senza
+  aggiornare il file. Terza volta che una riga di questo file viene smentita dalla
+  misura: quando il file e il codice divergono, ha ragione il codice.)*
+- **R8 — I nomi italiani delle costellazioni sono incompleti.** *(Scoperto #7d.)*
+  `const_lines.json` ha **88 sigle** (89 figure: `Ser` compare due volte —
+  Serpente Caput e Cauda, due regioni distinte: è corretto, e produce due
+  etichette). `CONST_IT` ne nomina **35**; altri 9 si recuperano dal catalogo
+  Messier. **44 costellazioni restano mute** sulla mappa. Non si inventano: si
+  propongono e si approvano.
 
 **Mai verificato:** la correttezza astronomica dell'output. Sappiamo che il
 codice produce un SVG. Non sappiamo che sia giusto.
