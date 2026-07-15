@@ -83,6 +83,28 @@ def test_carosello_produce_due_pagine():
     assert m, "il carosello deve finire con due token"
 
 
+# --- il carosello vale SOLO fra formati quadrati (Instagram ritaglia le proporzioni) ---
+def test_carosello_rifiuta_formato_non_quadrato():
+    """L'A4 e' verticale: affiancato al profondo quadrato, Instagram lo ritaglia.
+    Il carosello deve RIFIUTARLO con un errore in italiano che spiega il perche',
+    e NON produrre alcuna pagina."""
+    r = client.get("/carosello?year=2026&month=8&formato=a4")
+    assert r.status_code == 200
+    assert "event: errore" in r.text, "l'A4 doveva essere rifiutato"
+    assert "quadrat" in r.text.lower(), "l'errore deve spiegare che serve un formato quadrato"
+    assert "event: pagina" not in r.text, "nessuna pagina va prodotta per un formato rifiutato"
+
+
+def test_carosello_solo_quadrati_dai_dati():
+    """La regola usa l'ASPETTO della scheda (un dato), non una lista di formati
+    scritta a mano: l'A4 non e' 'sq', tutti gli altri formati-scheda lo sono."""
+    import app.main as A
+    asp = {f: s.get("aspect") for f, s in A.formati_scheda()}
+    assert asp["a4"] != "sq", "l'A4 e' verticale: aspetto != sq"
+    assert all(v == "sq" for f, v in asp.items() if f != "a4"), \
+        f"tutti i formati social sono quadrati: {asp}"
+
+
 # --- la larghezza PNG e' quella GIUSTA per formato (stessa logica del CLI) ---
 def test_larghezza_png_per_formato():
     import json, os

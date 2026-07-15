@@ -206,6 +206,17 @@ def carosello(year=2026, month=8, lat=45.5455, lon=11.5353, place="Vicenza",
         a2 = _valida(year, month, lat, lon, theme, p2, hour)
     except validate.InputError as e:
         return StreamingResponse(iter([_sse("errore", str(e))]), media_type="text/event-stream")
+    # Il carosello vale SOLO fra formati quadrati: Instagram pretende che tutte le
+    # immagini di un carosello abbiano le STESSE proporzioni, altrimenti le ritaglia
+    # (l'A4 verticale accanto al quadrato profondo verrebbe tagliato). L'aspetto e'
+    # un DATO della scheda, non una lista di formati scritta a mano.
+    scheda1 = a1[6].get("scheda", {})
+    if scheda1.get("aspect") != "sq":
+        nome = scheda1.get("nome", formato)
+        return StreamingResponse(iter([_sse("errore",
+            f"Il carosello affianca due pagine e Instagram pretende le stesse "
+            f"proporzioni: «{nome}» e' verticale e verrebbe ritagliato. Scegli un "
+            f"formato quadrato.")]), media_type="text/event-stream")
     q = queue.Queue()
 
     def lavora():
@@ -512,7 +523,12 @@ body{font-family:var(--testo);color:var(--t1);background:radial-gradient(135% 75
    else{st.ora=((st.ora+d)%24+24)%24;$('in-ora').value=(st.ora<10?'0':'')+st.ora+':00';}});});
  $('coord-btn').addEventListener('click',function(){this.classList.toggle('open');$('coord-wrap').classList.toggle('open');$('coord-lbl').textContent=this.classList.contains('open')?'Nascondi coordinate':'Inserisci coordinate precise';});
  // selezione schede/pastiglie
- document.querySelectorAll('.fmt').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.fmt').forEach(function(x){x.classList.remove('sel');});b.classList.add('sel');st.fmt=b.getAttribute('data-fmt');st.fmtName=b.getAttribute('data-name');st.ar=b.getAttribute('data-ar');});});
+ // Il carosello vale SOLO fra formati quadrati (Instagram ritaglia le proporzioni
+ // diverse): per un formato verticale il pulsante si spegne e SPIEGA il perche'.
+ function updateCarosello(){var sq=st.ar==='sq',c=$('carosello');c.disabled=!sq;
+   c.querySelector('small').textContent=sq?'2 pagine: cielo + profondo'
+     :'solo per i formati quadrati — Instagram ritaglia le proporzioni diverse';}
+ document.querySelectorAll('.fmt').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.fmt').forEach(function(x){x.classList.remove('sel');});b.classList.add('sel');st.fmt=b.getAttribute('data-fmt');st.fmtName=b.getAttribute('data-name');st.ar=b.getAttribute('data-ar');updateCarosello();});});
  document.querySelectorAll('.pal').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.pal').forEach(function(x){x.classList.remove('sel');});b.classList.add('sel');st.pal=b.getAttribute('data-pal');st.palName=b.getAttribute('data-name');st.dot=b.getAttribute('data-dot');});});
  // stati
  var S={initial:'s-initial',generating:'s-generating',preview:'s-preview',error:'s-error'};
@@ -524,7 +540,7 @@ body{font-family:var(--testo);color:var(--t1);background:radial-gradient(135% 75
  function fillCaps(m,a){$('cap-when').textContent=MESI[m-1]+' '+a+' · '+(st.ora<10?'0':'')+st.ora+':00';$('cap-loc').textContent=$('in-loc').value.trim()||'Vicenza';$('cap-fmt').textContent=st.fmtName;$('cap-pal').textContent=st.palName;$('cap-sw').style.background=st.dot;}
  function frame(token,ar){return '<div class="poster-frame'+(ar==='a4'?' a4':'')+'"><img src="/anteprima?token='+token+'&_='+Date.now()+'"></div>';}
  function dlLink(fmt,formato,label,cls,small){var q=params().p;q.set('fmt',fmt);q.set('formato',formato);return '<a class="btn '+cls+'" href="/download?'+q.toString()+'" download>'+label+(small?' <small>'+small+'</small>':'')+'</a>';}
- function busy(b,car){$('genera').disabled=b;$('carosello').disabled=b;$('genera').textContent=b?'Generazione in corso…':'Genera anteprima';}
+ function busy(b,car){$('genera').disabled=b;$('carosello').disabled=b||st.ar!=='sq';$('genera').textContent=b?'Generazione in corso…':'Genera anteprima';}
  function fail(msg){$('err-msg').textContent=msg;show('error');busy(false);}
  function run(url,carosello){
    var pr=params();busy(true);show('generating');setPhase(0);
@@ -550,6 +566,7 @@ body{font-family:var(--testo);color:var(--t1);background:radial-gradient(135% 75
  $('genera').addEventListener('click',function(){run('/genera',false);});
  $('carosello').addEventListener('click',function(){run('/carosello',true);});
  $('err-back').addEventListener('click',function(){show('initial');});
+ updateCarosello();  // stato iniziale coerente col formato di default
 })();
 </script>
 </body></html>"""
