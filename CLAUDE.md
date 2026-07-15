@@ -613,6 +613,19 @@ Ordinato per rischio reale.
   portrait diverse. Fix in `a4.json` (dati, D6), che **muoverà di nuovo il golden**:
   movimento deliberato e contato, come per il logo (#7g). Non blocca il video ai
   soci: quello usa il carosello quadrato, che è pulito.
+  **ESITO (#7h, in preparazione):** il designer ha consegnato due proposte — vedi
+  il progetto claude.ai/design «Infografica cielo del mese», file
+  `A4 - Fascia inferiore.html`. **La struttura risolutiva: due CORSIE ORIZZONTALI**
+  (pianeti sopra, fasi lunari sotto, un divisore in mezzo): non condividono mai lo
+  spazio verticale, quindi non collidono nemmeno con 7+ pianeti. **Verificato
+  dall'architetto renderizzando gli SVG del designer col NOSTRO `render.py`
+  (resvg + font del brand): rendono, usano i token del tema (`data-token`), fasi
+  come archi vettoriali.** Marco ha scelto la **proposta B — "Schieramento"**
+  (i 7 pianeti in fila unica, coerente col dashboard). **Sgonfia il lavoro:** la
+  striscia lunare 1→31 è il blocco `moon_calendar` che il dashboard **già usa** —
+  si riusa, non si riscrive.
+  *Ordine:* prima si CHIUDE #7g (logo A4 + golden +1 `<image>`, già contato),
+  poi #7h (la fascia, secondo movimento deliberato del golden).
 
 **Mai verificato:** la correttezza astronomica dell'output. Sappiamo che il
 codice produce un SVG. Non sappiamo che sia giusto.
