@@ -50,7 +50,7 @@ python cielo.py --year 2026 --month 8 --format post --png
 python cielo.py --year 2026 --month 8 --format profondo --png
 
 # Un design social con una palette diversa
-python cielo.py --year 2026 --month 8 --format dashboard --palette notte-blu --png
+python cielo.py --year 2026 --month 8 --format dashboard --palette aurora-boreale --png
 ```
 
 L'output finisce in `out/` (cartella usa-e-getta, non versionata).
@@ -68,7 +68,8 @@ Scoperti dai file in `brand/layouts/`:
 
 Scoperte dai file in `brand/palettes/`:
 
-- **`osservatorio`** (default), **`notte-blu`**, **`petrolio`**, **`luce-rossa`**.
+- **`osservatorio`** (default), **`luce-rossa`**, **`aurora-boreale`**,
+  **`nebulosa`**, **`ottone-antico`**, **`cielo-di-ghiaccio`**.
 
 ## Web app
 

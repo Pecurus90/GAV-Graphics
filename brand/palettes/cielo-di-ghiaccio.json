@@ -1,0 +1,95 @@
+{
+ "name": "Cielo di Ghiaccio",
+ "descrizione": "La notte tersa d'inverno, argento e ciano di ghiaccio",
+ "bg": [
+  "#141c2a",
+  "#0c121c",
+  "#050810"
+ ],
+ "disk": [
+  "#16202e",
+  "#0b121c",
+  "#05080f"
+ ],
+ "gold": "#e6c982",
+ "neon": "#8fdcf0",
+ "panel": "#0e1622",
+ "border": "#324a64",
+ "border2": "#38495e",
+ "divider": "#1e2c40",
+ "grid": "#28405a",
+ "bgstar": "#8ba2ba",
+ "text": "#f0f5fa",
+ "text2": "#c2cfdc",
+ "text3": "#95a6b8",
+ "text4": "#65758a",
+ "label": "#a8c6da",
+ "cardinal": "#90acc4",
+ "moon_lit": "#f2f7fb",
+ "moon_label": "#d2e0ea",
+ "status": {
+  "ok": "#6fd0a8",
+  "info": "#6cc0e8",
+  "warn": "#e8b45a",
+  "muted": "#65758a"
+ },
+ "star_ramp": [
+  [
+   -0.33,
+   "#96aaff"
+  ],
+  [
+   -0.1,
+   "#a5b9ff"
+  ],
+  [
+   0.0,
+   "#c3d2ff"
+  ],
+  [
+   0.2,
+   "#e6ebff"
+  ],
+  [
+   0.4,
+   "#fff8eb"
+  ],
+  [
+   0.59,
+   "#fff0cd"
+  ],
+  [
+   0.8,
+   "#ffdfaa"
+  ],
+  [
+   1.0,
+   "#ffce91"
+  ],
+  [
+   1.3,
+   "#ffb778"
+  ],
+  [
+   1.6,
+   "#ff9f60"
+  ],
+  [
+   2.0,
+   "#ff8246"
+  ],
+  [
+   3.3,
+   "#ff6e3c"
+  ]
+ ],
+ "planet_colors": {
+  "Mercurio": "#8f8a86",
+  "Venere": "#e8dcb0",
+  "Marte": "#b8532f",
+  "Giove": "#d8b98a",
+  "Saturno": "#e2c886",
+  "Urano": "#aadde0",
+  "Nettuno": "#3f6cb5"
+ }
+}

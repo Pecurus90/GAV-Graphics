@@ -1,0 +1,95 @@
+{
+ "name": "Ottone Antico",
+ "descrizione": "L'atlante inciso sull'ottone, con il verderame antico",
+ "bg": [
+  "#231b0f",
+  "#161006",
+  "#0a0703"
+ ],
+ "disk": [
+  "#241d10",
+  "#151007",
+  "#0a0704"
+ ],
+ "gold": "#eab23e",
+ "neon": "#5fc4b4",
+ "panel": "#1c160c",
+ "border": "#6a4e22",
+ "border2": "#524019",
+ "divider": "#33260f",
+ "grid": "#453413",
+ "bgstar": "#b09258",
+ "text": "#f8efdc",
+ "text2": "#dcc8a2",
+ "text3": "#b09a70",
+ "text4": "#82724a",
+ "label": "#dcbc7c",
+ "cardinal": "#c4a464",
+ "moon_lit": "#f8f0dc",
+ "moon_label": "#e6d2a8",
+ "status": {
+  "ok": "#9ac06a",
+  "info": "#5f99c8",
+  "warn": "#d97a3a",
+  "muted": "#82724a"
+ },
+ "star_ramp": [
+  [
+   -0.33,
+   "#96aaff"
+  ],
+  [
+   -0.1,
+   "#a5b9ff"
+  ],
+  [
+   0.0,
+   "#c3d2ff"
+  ],
+  [
+   0.2,
+   "#e6ebff"
+  ],
+  [
+   0.4,
+   "#fff8eb"
+  ],
+  [
+   0.59,
+   "#fff0cd"
+  ],
+  [
+   0.8,
+   "#ffdfaa"
+  ],
+  [
+   1.0,
+   "#ffce91"
+  ],
+  [
+   1.3,
+   "#ffb778"
+  ],
+  [
+   1.6,
+   "#ff9f60"
+  ],
+  [
+   2.0,
+   "#ff8246"
+  ],
+  [
+   3.3,
+   "#ff6e3c"
+  ]
+ ],
+ "planet_colors": {
+  "Mercurio": "#8f8a86",
+  "Venere": "#e8dcb0",
+  "Marte": "#b8532f",
+  "Giove": "#d8b98a",
+  "Saturno": "#e2c886",
+  "Urano": "#aadde0",
+  "Nettuno": "#3f6cb5"
+ }
+}

@@ -32,7 +32,7 @@ def test_corona_tacche_visibili(eng, root):
     test FALLISCE: e' la rete che prima mancava."""
     RAD = 270.0
     MIN_W, MIN_L, MIN_DLUM = 0.9, 4.0, 0.15
-    for pal in ("notte-blu", "luce-rossa"):
+    for pal in ("osservatorio", "luce-rossa"):
         theme = _theme(root, pal)
         lst, lat_rad, _ = eng.sky_context(2026, 8, 45.5455, 11.5353)
         svg = eng.sky_disc_svg(340.0, 520.0, RAD, lst, lat_rad, theme,

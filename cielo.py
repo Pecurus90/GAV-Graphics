@@ -12,11 +12,12 @@ Uso:
   python cielo.py --year 2026 --month 8 --place Vicenza                       # A4, SVG
   python cielo.py --year 2026 --month 8 --place Vicenza --png                 # A4, SVG + PNG
   python cielo.py --year 2026 --month 8 --format post --png                   # post 1080, SVG + PNG
-  python cielo.py --year 2026 --month 8 --format dashboard --palette notte-blu # design social
+  python cielo.py --year 2026 --month 8 --format dashboard --palette aurora-boreale # design social
 
 Formato e palette si scelgono per NOME, non per percorso: i nomi validi sono i
 file in brand/layouts/ (a4, post, dashboard, editorial, rail, ...) e in
-brand/palettes/ (osservatorio, notte-blu, petrolio, luce-rossa, ...).
+brand/palettes/ (osservatorio, luce-rossa, aurora-boreale, nebulosa,
+ottone-antico, cielo-di-ghiaccio).
 """
 import os, json, argparse
 
