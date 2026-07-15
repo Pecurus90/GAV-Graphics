@@ -1,0 +1,66 @@
+name: CI portatile — R9 su Windows + macOS
+
+# Trigger: manuale (workflow_dispatch, disponibile quando il file e' su main) e
+# push di un tag. NON su ogni push: il runner macOS costa 10x (D4/#8 M2/B1).
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'ci-*'
+      - 'v*'
+
+jobs:
+  test:
+    name: ${{ matrix.os }} · py3.12
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false          # voglio il risultato di ENTRAMBI gli OS, non fermarmi al primo rosso
+      matrix:
+        os: [windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Dipendenze pinnate
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Versioni effettive (per il confronto cross-OS)
+        run: pip freeze
+
+      - name: Suite (il golden a TOLLERANZA collaudato cross-OS)
+        run: python -m pytest -q
+
+      # PROVA DI R9 sul runner: se resvg (.pyd/.dylib) o de421 non caricassero,
+      # o i font non si trovassero, questo passo fallirebbe.
+      - name: Rendi un PNG col CLI
+        run: python cielo.py --year 2026 --month 8 --format post --png --out out/ci_post.svg
+
+      - name: Asserisci che il PNG sia VERO (esiste, PNG valido, > 50 KB, 1080x1080)
+        shell: python
+        run: |
+          import os, struct
+          p = os.path.join("out", "ci_post.png")
+          assert os.path.exists(p), f"PNG mancante: {p}"
+          size = os.path.getsize(p)
+          head = open(p, "rb").read(24)
+          assert head[:8] == b"\x89PNG\r\n\x1a\n", "non e' un PNG valido"
+          w, h = struct.unpack(">II", head[16:24])
+          print(f"PNG: {size} bytes, {w}x{h}")
+          assert size > 50_000, f"PNG sospettosamente piccolo ({size} B): resvg/font da guardare"
+          assert (w, h) == (1080, 1080), f"dimensioni inattese: {w}x{h}"
+
+      # Sempre: cosi' posso SCARICARE e GUARDARE il PNG anche se l'assert fallisce
+      # (un PNG da 2 KB o coi font di sistema e' un fallimento, non un successo).
+      - name: Carica il PNG come artefatto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci_post-${{ matrix.os }}
+          path: out/ci_post.png
+          if-no-files-found: warn
