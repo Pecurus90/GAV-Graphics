@@ -347,6 +347,16 @@ descrive lo fa scollare al primo cambiamento.
   (D2) valida contro quella dichiarazione, non contro una lista globale.
   Necessario, non speculativo: senza, la prima voce "prossimamente" della barra
   laterale (D10) rompe la validazione.
+  **Il SET di palette (deciso 2026-07-15, dopo consolidamento col designer): SEI,
+  nessuna gemella.** osservatorio (default/golden, **intatta**), luce-rossa
+  (funzionale, **intatta**), + 4 nuove del designer armonizzate col logo: **Aurora
+  Boreale** (verde polare), **Nebulosa** (viola magenta), **Ottone Antico** (caldo
+  ottone), **Cielo di Ghiaccio** (blu-argento). **Ritirate** `notte-blu` (gemella
+  di osservatorio, distanza 26,4) e `petrolio` (teal assorbito da Aurora). Le 4
+  nuove: 20 token di marca dal designer + `star_ramp`/`planet_colors` innestati da
+  osservatorio (fisica, uguale per tutte). **Verificate dall'architetto: passano
+  `validate.py` e rendono sul cielo vero.** Le stelle restano coi colori reali in
+  ogni palette (onestà astronomica intatta anche su fondo ottone/viola).
 - **D14 — Il taglio di `generate.py`. FATTO (#7e, 2026-07-14).**
   **Riuscito su entrambi i criteri, verificati dall'architetto e non sulla parola:**
   - **(a) Output identico byte per byte.** I golden non sono stati toccati in
