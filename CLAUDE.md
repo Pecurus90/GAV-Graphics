@@ -596,6 +596,23 @@ Ordinato per rischio reale.
   rispondere alla domanda *prima*. Marco ha deciso di **non anticiparlo**: si
   affronta al giro del packaging. La proposta resta scritta qui perché la
   decisione sia una **scelta**, non una dimenticanza.
+- **R10 — L'A4 ha una COLLISIONE, congelata nel golden da dieci giri.**
+  *(Trovata 2026-07-15, aprendo l'immagine — NON un test.)* Nel volantino A4 il
+  pannello delle **fasi lunari** (4 fasi a tutta larghezza) si sovrappone al
+  pannello dei **pianeti** (cresciuto a 7 voci, che invade la metà destra): "Primo
+  Quarto" finisce sopra "Saturno", la Luna Piena copre l'elenco, la legenda si
+  accavalla a "Giove". **I formati quadrati (dashboard/post/editorial/rail/profondo)
+  sono PULITI** — il dashboard ha già la soluzione elegante (striscia lunare mensile
+  in basso, pianeti in un pannello a lato). L'A4 è rimasto indietro.
+  **La lezione, in diretta:** il golden è passato **verde per dieci giri**. Nessun
+  test l'ha vista, perché *il golden confronta i byte, non i pixel*: dice "l'output
+  non è cambiato", non "l'output è giusto". Si è vista solo **aprendo l'immagine**.
+  È il motivo della regola «GUARDA L'IMMAGINE, NON IL REPORT».
+  **Decisione (Marco, 2026-07-15):** la resa dell'A4 stampato la rivede il
+  **designer** (brief autonomo), non una toppa copiata dal quadrato — proporzioni
+  portrait diverse. Fix in `a4.json` (dati, D6), che **muoverà di nuovo il golden**:
+  movimento deliberato e contato, come per il logo (#7g). Non blocca il video ai
+  soci: quello usa il carosello quadrato, che è pulito.
 
 **Mai verificato:** la correttezza astronomica dell'output. Sappiamo che il
 codice produce un SVG. Non sappiamo che sia giusto.
