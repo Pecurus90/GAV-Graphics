@@ -470,6 +470,17 @@ descrive lo fa scollare al primo cambiamento.
   Prezzi accettati: **~100 MB a pacchetto** (Python + numpy); **non firmato** →
   SmartScreen (Windows) e **Gatekeeper** (Mac, più severo: «tasto destro → Apri»
   la prima volta). Da documentare nel README.
+  **VERIFICATO su Windows (Milestone 1, vedi R9).** Ricetta che ha funzionato:
+  **python-build-standalone** (astral-sh, variante `install_only` — evita il
+  pasticcio del file `._pth` dell'embeddable ufficiale, `pip install` diretto) +
+  `pip install -r requirements.txt` dentro. Peso reale del bundle: **~251 MB** (più
+  dei 100 stimati). **Il bundle DEVE includere `engine/`** — omesso dalla prima
+  lista, ma `cielo.py` e `app/main.py` fanno `from engine.generate import Engine`
+  (il ponte di #7e); senza, l'import spacca. Lista bundle completa: `app/`,
+  `compose/`, `strumenti/`, `engine/`, `brand/`, `data/`, `cielo.py`, `render.py`,
+  `validate.py`, `CREDITI.md`, + il launcher. **Launcher da rifinire (Milestone
+  2):** `Avvia.bat` oggi fissa la porta 8000; renderla configurabile (se un socio
+  ha la 8000 occupata, oggi fallirebbe il bind).
 - **D15 — L'`.exe` apre il browser; e cosa manca DAVVERO per averlo.**
   *(Deciso da Marco, 2026-07-14.)* Doppio clic ⇒ il programma parte in silenzio e
   **apre il browser** sull'interfaccia dell'app. Niente terminale, niente Python
@@ -642,6 +653,19 @@ Ordinato per rischio reale.
   `strumenti/cielo/engine.py:36`, `render.py:15`). Il taglio ha aggiunto
   annidamento, quindi altri modi di sbagliare. Si sanano con **una funzione sola**
   (`resource_path`) che conosce `sys._MEIPASS`.
+  **RISOLTO — SÌ, su Windows (Milestone 1, 2026-07-15). ESEGUITO, non dedotto.**
+  Col modello portatile (D17) R9 ha risposta **SÌ**, e le sei basi di percorso
+  **NON sono state toccate**: `git diff` = solo `.gitignore`, zero `.py` cambiati —
+  nel bundle portatile `__file__` funziona, quindi `resource_path`/`_MEIPASS`
+  **non servono**. Prova di rilocabilità: bundle copiato in `%TEMP%\prova_socio\`,
+  lontano dal repo, e da lì CLI+web+`Avvia.bat` funzionano. Font del brand
+  verificati in modo **non falsificabile**: dashboard reso dal bundle spostato =
+  **sha256 IDENTICO** al rendering in-repo coi font del brand (un ripiego sul font
+  di sistema avrebbe cambiato i byte). Restano da verificare **su Mac** (Milestone
+  2) — lì i binari nativi e Gatekeeper sono un'altra prova, non ancora eseguita.
+  *Nota: il rischio temuto (deps native) è filato liscio; l'unico attrito è stato
+  ambientale (porta 8000 occupata da un server fantasma) — non un difetto del
+  bundle.*
 - **R10 — L'A4 ha una COLLISIONE, congelata nel golden da dieci giri.**
   *(Trovata 2026-07-15, aprendo l'immagine — NON un test.)* Nel volantino A4 il
   pannello delle **fasi lunari** (4 fasi a tutta larghezza) si sovrappone al
