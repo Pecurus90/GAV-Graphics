@@ -7,6 +7,8 @@
      "starfield": {"seed": 11, "count": 220, "r_min": 0.4, "r_max": 1.6,
                    "op_min": 0.12, "op_max": 0.5, "fill": "bgstar"}},
 
+    {"type": "image", "href": "brand/logo/logo-emblema.png",
+     "x": 60, "y": 74, "w": 96, "h": 96},
     {"type": "text", "x": 540, "y": 72, "fill": "gold", "size": 16, "anchor": "middle",
      "weight": "600", "letter_spacing": 4, "content": "GRUPPO ASTROFILI VICENTINI"},
     {"type": "text", "x": 540, "y": 134, "fill": "text", "size": 56, "anchor": "middle",

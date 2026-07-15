@@ -9,6 +9,8 @@
 
     {"type": "disc", "cx": 540, "cy": 550, "rad": 330},
 
+    {"type": "image", "href": "brand/logo/logo-emblema.png",
+     "x": 60, "y": 62, "w": 96, "h": 96},
     {"type": "text", "x": 540, "y": 78, "fill": "gold", "size": 24,
      "weight": "bold", "anchor": "middle", "letter_spacing": 3,
      "content": "GRUPPO ASTROFILI VICENTINI"},

@@ -7,9 +7,11 @@
      "starfield": {"seed": 5, "count": 220, "r_min": 0.4, "r_max": 1.6,
                    "op_min": 0.12, "op_max": 0.5, "fill": "bgstar"}},
 
-    {"type": "text", "x": 56, "y": 92, "fill": "gold", "size": 15,
+    {"type": "image", "href": "brand/logo/logo-emblema.png",
+     "x": 56, "y": 62, "w": 78, "h": 78},
+    {"type": "text", "x": 148, "y": 96, "fill": "gold", "size": 15,
      "weight": "600", "letter_spacing": 2.8, "content": "GRUPPO ASTROFILI"},
-    {"type": "text", "x": 56, "y": 116, "fill": "gold", "size": 15,
+    {"type": "text", "x": 148, "y": 120, "fill": "gold", "size": 15,
      "weight": "600", "letter_spacing": 2.8, "content": "VICENTINI"},
     {"type": "text", "x": 54, "y": 178, "fill": "text", "size": 46,
      "weight": "800", "letter_spacing": 0.5, "content": "IL CIELO DI"},
