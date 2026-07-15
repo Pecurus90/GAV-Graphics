@@ -626,6 +626,17 @@ Ordinato per rischio reale.
   si riusa, non si riscrive.
   *Ordine:* prima si CHIUDE #7g (logo A4 + golden +1 `<image>`, già contato),
   poi #7h (la fascia, secondo movimento deliberato del golden).
+  **#7h fatto e verificato dall'architetto** (render aperto, collisione sparita,
+  disco identico): la parata dei pianeti è il blocco `planet_parade` (`panels.py`);
+  le note usano le **parole del motore** ("Telescopico", "Non osservabile"), non i
+  segnaposto del designer (D6). **Due code lasciate aperte apposta:**
+  - **La legenda "colore stelle = temperatura" è stata TOLTA dall'A4** (la proposta
+    B occupava quello spazio). Il **post quadrato la tiene** (pannello "COLORI DELLE
+    STELLE"): incoerenza. *(Marco, 2026-07-15:)* si **rimette nel giro di revisione
+    dei design**, chiedendo al designer di trovarle posto — non una toppa.
+  - **Margine di stampa in basso ~2,8 mm** (footer a y1258 su 1273): identico al
+    mockup, ma **da verificare in tipografia** (di solito vogliono 3-5 mm). Si alza
+    con un numero in `a4.json`.
 
 **Mai verificato:** la correttezza astronomica dell'output. Sappiamo che il
 codice produce un SVG. Non sappiamo che sia giusto.
