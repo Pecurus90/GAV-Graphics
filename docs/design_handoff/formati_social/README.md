@@ -1,9 +1,11 @@
 # Handoff — Nuovi formati del post quadrato (Parata · Cornice · Zenit)
 
 *(Designer via claude.ai/design, 2026-07-15, file `Formati Social - Nuovi.dc.html`.
-Consegna in risposta a `BRIEF-formati-social.md`. **Marco tiene tutti e tre** i
-concept: editoriale e colonna escono, entrano Parata, Cornice, Zenit — con
-dashboard fanno quattro impaginazioni quadrate.)*
+Consegna in risposta a `BRIEF-formati-social.md`. **Tre concept consegnati e
+piaciuti** (Parata, Cornice, Zenit). **DECISIONE RIMANDATA** *(Marco,
+2026-07-15)*: quali implementare e **al posto di cosa** (editoriale/colonna) si
+valuta **dopo, col designer** — non è congelato. Questo handoff è il riferimento
+per quando ci si torna; il giro di implementazione NON è ancora partito.)*
 
 **Attenzione:** a differenza dell'A4, questi concept sono un **componente vivo** del
 canvas del designer, non SVG estraibile. L'esecutore li costruisce dalle
