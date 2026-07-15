@@ -437,6 +437,29 @@ descrive lo fa scollare al primo cambiamento.
   basso e nessuno osserva — e sul telefono sono illeggibili.
   Il dizionario dei 44 nomi **resta scritto** (`CONST_IT_MINORI`, fonte UAI): si
   riaccende con una parola nel file di layout. È un dato, non codice.
+- **D17 — Distribuzione: Python PORTATILE per-OS, non PyInstaller. E deve girare
+  su Windows E Mac.** *(Deciso da Marco, 2026-07-15: «deve funzionare su windows e
+  mac». Modello scelto dall'architetto sotto quel vincolo.)*
+  Non un `.exe` PyInstaller, ma **una cartella** per OS con dentro un **Python
+  portatile** (Windows: embeddable; Mac: python-build-standalone) + **tutte le
+  librerie già installate** (pip prende il wheel nativo giusto per OS: resvg_py
+  Windows su Windows, macOS su Mac) + il nostro repo + un launcher (`Avvia.bat` /
+  `Avvia.command`) che avvia uvicorn e apre il browser (D15).
+  **Perché batte PyInstaller per il NOSTRO caso** *(verificato, non dedotto)*:
+  - **Aggira R9 su DUE fronti.** (1) I binari nativi non vengono reimpacchettati:
+    `resvg_py.pyd`/`.so` sta in `site-packages` e si carica normale. (2) `__file__`
+    funziona: l'app gira dai `.py` veri nella loro cartella vera, quindi **le sei
+    basi di percorso NON vanno rifatte** — niente `resource_path`, niente
+    `_MEIPASS`. È *più semplice* del `.exe`.
+  - **Cross-platform verificato**: `resvg-py 0.3.3` (la nostra) pubblica wheel
+    `macosx_11_0_arm64` **e** `macosx_10_12_x86_64` per cp312, oltre a `win_amd64`;
+    numpy/skyfield idem; `de421.bsp` è dato puro. *(Fonti: PyPI JSON API, 2026-07-15.)*
+  - **NON esiste un artefatto unico per i due OS**: `resvg_py` è nativo per
+    piattaforma. Stessa ricetta, **due pacchetti**, costruiti su runner Windows e
+    macOS in **GitHub Actions** (D4).
+  Prezzi accettati: **~100 MB a pacchetto** (Python + numpy); **non firmato** →
+  SmartScreen (Windows) e **Gatekeeper** (Mac, più severo: «tasto destro → Apri»
+  la prima volta). Da documentare nel README.
 - **D15 — L'`.exe` apre il browser; e cosa manca DAVVERO per averlo.**
   *(Deciso da Marco, 2026-07-14.)* Doppio clic ⇒ il programma parte in silenzio e
   **apre il browser** sull'interfaccia dell'app. Niente terminale, niente Python
