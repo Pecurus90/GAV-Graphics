@@ -38,10 +38,14 @@ jobs:
 
       # PROVA DI R9 sul runner: se resvg (.pyd/.dylib) o de421 non caricassero,
       # o i font non si trovassero, questo passo fallirebbe.
+      # !cancelled(): la PROVA di R9 (render su Mac) gira ANCHE se la suite e'
+      # rossa, cosi' la risposta R9 non resta ostaggio di un test fallito altrove.
       - name: Rendi un PNG col CLI
+        if: ${{ !cancelled() }}
         run: python cielo.py --year 2026 --month 8 --format post --png --out out/ci_post.svg
 
       - name: Asserisci che il PNG sia VERO (esiste, PNG valido, > 50 KB, 1080x1080)
+        if: ${{ !cancelled() }}
         shell: python
         run: |
           import os, struct
