@@ -14,6 +14,9 @@ env/
 *.png
 # out/ e' la cartella dei prodotti del CLI (default di --out): usa-e-getta
 out/
+# dist/ e' il pacchetto portatile (Python + librerie + repo): artefatto di
+# build, si riassembla, MAI in git (centinaia di MB). Vedi milestone #8 / R9.
+dist/
 # ...ma i riferimenti "golden" dei test DEVONO essere tracciati
 !tests/golden/
 !tests/golden/**
