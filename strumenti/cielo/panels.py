@@ -68,6 +68,60 @@ class PanelsMixin:
                 out.extend(row)
         return '\n'.join(out)
 
+    def _render_planet_parade(self, b, theme, data):
+        """Parata ORIZZONTALE dei pianeti (proposta B del designer, A4): una
+        colonna per pianeta, pallino colorato in cima (colore REALE dal tema,
+        anello per Saturno dal DATO `shape`), poi nome, alzata/tramonto e nota
+        su righe centrate, con un divisore verticale fra le colonne. E' la corsia
+        SUPERIORE della fascia inferiore: non condivide spazio verticale con la
+        striscia lunare (corsia sotto), quindi non collidono mai (risolve R10).
+
+        Diverso da `planet_panel` (righe verticali, un pianeta sotto l'altro):
+        qui i pianeti stanno IN FILA. Il FILE possiede geometria e stile (x0,
+        col_step, cy_dot, le parti di testo coi loro dy/content); il CODICE mette
+        il colore del pianeta e la forma ad anello, che vengono dal dato."""
+        out=[]
+        x0,step,cyd,r=b["x0"],b["col_step"],b["cy_dot"],b["r"]
+        planets=data.planets
+        # divisori verticali fra le colonne (n-1), a meta' fra due pianeti.
+        sep=b.get("sep")
+        if sep:
+            for i in range(len(planets)-1):
+                sx=x0+step*(i+0.5)
+                out.append(f'<line x1="{sx:.1f}" y1="{sep["y1"]}" x2="{sx:.1f}" y2="{sep["y2"]}" '
+                           f'stroke="{theme[sep["stroke"]]}" stroke-width="{sep["width"]}"/>')
+        for i,pl in enumerate(planets):
+            cx=x0+i*step
+            col=theme["planet_colors"][pl.name]        # colore reale per-pianeta
+            out.append(f'<circle cx="{cx:.1f}" cy="{cyd}" r="{r}" fill="{col}"/>')
+            if pl.shape=="ringed":                      # Saturno: l'anello dal dato
+                rg=b["ring"]
+                out.append(f'<ellipse cx="{cx:.1f}" cy="{cyd}" rx="{r*rg["rx"]:.2f}" '
+                           f'ry="{r*rg["ry"]:.2f}" fill="none" stroke="{col}" '
+                           f'stroke-width="{rg["width"]}" transform="rotate({rg["rot"]} {cx:.1f} {cyd})"/>')
+            # nota su due righe, COMPATTA per la colonna stretta (~117px): la
+            # riga 1 e' la CATEGORIA (la nota fino alla virgola: "Visibile
+            # serale", "Telescopico", "Non osservabile"); la riga 2 e' DOVE
+            # guardare (la direzione), o - per i pianeti senza direzione (muted,
+            # o sotto l'orizzonte) - la CODA della nota dopo la virgola ("vicino
+            # al Sole"). Nessun testo inventato: sono le stringhe del motore,
+            # spezzate sulla sua stessa virgola. Deriva di PRESENTAZIONE (come
+            # note_dir in planet_panel), non contenuto nuovo.
+            cat, _, tail = pl.note.partition(", ")
+            item={"name":pl.name,"rise":pl.rise,"set":pl.set_,
+                  "note":pl.note,"direction":pl.direction,
+                  "note_cat":cat,"note_where":pl.direction or tail}
+            # righe di testo centrate sulla colonna: quali e come le decide il FILE
+            # (name, rise, set, note1, note2). Ogni parte porta il proprio content.
+            for part in ("name","rise","set","note1","note2"):
+                if part not in b:
+                    continue
+                p=b[part]
+                tb={"x":f"{cx:.1f}","y":cyd+p["dy"],"fill":p["fill"],"size":p["size"],
+                    "weight":p.get("weight"),"anchor":"middle","content":p["content"]}
+                out.append(self._render_text(tb, theme, item))
+        return '\n'.join(out)
+
     def _render_moon_panel(self, b, theme, data):
         """Dischi delle fasi (fila x0 + passo gap). La forma illuminata dipende
         da `key` (piena=cerchio, primo/ultimo=semicerchio ad arco): logica di
