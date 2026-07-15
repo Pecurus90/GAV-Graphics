@@ -22,8 +22,9 @@ import os
 
 import pytest
 
+from golden_compare import svg_diff  # confronto a TOLLERANZA (D5)
+
 GOLDEN = os.path.join(os.path.dirname(__file__), "golden", "disc_2026-08_vicenza.svg")
-A4_GOLDEN = os.path.join(os.path.dirname(__file__), "golden", "cielo_2026-08_vicenza.svg")
 
 # Parametri canonici del disco. NON cambiarli senza rigenerare il golden apposta.
 DISC = dict(year=2026, month=8, lat=45.5455, lon=11.5353, cx=450.0, cy=500.0, rad=384.0)
@@ -70,24 +71,25 @@ def test_disc_golden_invariato(eng, root):
         f"Riferimento disc-golden mancante: {GOLDEN}. Rigeneralo e committalo.")
     atteso = open(GOLDEN, encoding="utf-8").read()
     ottenuto = disc_document(eng, _theme(root))
-    if ottenuto != atteso:
-        la, lb = atteso.splitlines(), ottenuto.splitlines()
-        n = min(len(la), len(lb))
-        prima = next((i for i in range(n) if la[i] != lb[i]), n)
-        dett = (f"righe golden={len(la)} ottenute={len(lb)}; "
-                f"prima differenza alla riga {prima + 1}:\n"
-                f"  golden : {la[prima] if prima < len(la) else '<fine>'}\n"
-                f"  attuale: {lb[prima] if prima < len(lb) else '<fine>'}")
-        pytest.fail("Disco divergente dal golden (rendering del disco cambiato).\n" + dett)
+    msg = svg_diff(ottenuto, atteso)
+    if msg:
+        pytest.fail("Disco divergente dal golden oltre la tolleranza numerica.\n" + msg)
 
 
-def test_disc_e_fetta_dell_a4(eng, root):
-    """Cross-check fra le due guardie: agli stessi parametri, il frammento del
-    disco compare VERBATIM dentro il golden A4. Se un giorno divergono, una delle
-    due e' stata rigenerata a sproposito e lo scopriamo subito."""
-    a4 = open(A4_GOLDEN, encoding="utf-8").read()
-    frag = _fragment(eng, _theme(root))
-    assert frag in a4, "Il frammento del disco non e' piu' una fetta del golden A4."
+def test_disc_e_fetta_dell_a4(eng, root, tmp_path):
+    """Invariante D7: il disco sigillato compare VERBATIM dentro l'A4 (la
+    composizione lo scala e lo posiziona, non lo ridisegna). Confronto fra due
+    generazioni FRESCHE dello STESSO run (frammento + A4): e' una relazione
+    STRUTTURALE, esatta su qualunque piattaforma. NON si legge il file golden
+    A4 (generato su Windows): la sua deriva d'ultima-cifra su un altro OS
+    (D5/CI) rifarebbe scattare la mina, mentre qui non c'entra nulla."""
+    theme = _theme(root)
+    out = str(tmp_path / "a4.svg")
+    eng.generate(DISC["year"], DISC["month"], DISC["lat"], DISC["lon"], "Vicenza",
+                 theme, out)                      # layout di default = A4
+    a4 = open(out, encoding="utf-8").read()
+    frag = _fragment(eng, theme)                  # disco "naive", come nell'A4
+    assert frag in a4, "Il disco non e' piu' una fetta VERBATIM dell'A4 (invariante D7)."
 
 
 def test_disc_generazione_deterministica(eng, root):

@@ -25,6 +25,8 @@ import os
 
 import pytest
 
+from golden_compare import svg_diff  # confronto a TOLLERANZA (D5)
+
 GOLDEN = os.path.join(os.path.dirname(__file__), "golden", "cielo_2026-08_vicenza.svg")
 
 # Parametri canonici: NON cambiarli senza rigenerare il golden apposta.
@@ -41,9 +43,11 @@ def _genera_svg(eng, root, tmp_path):
 
 
 def test_golden_svg_invariato(eng, root, tmp_path):
-    """Rigenera l'SVG canonico e lo confronta byte-a-byte col riferimento.
-    Se fallisce: il motore ha cambiato output. Capire SE il cambiamento e'
-    voluto. Se lo e', rigenerare il golden apposta e committarlo a parte."""
+    """Rigenera l'SVG canonico e lo confronta col riferimento a TOLLERANZA (D5):
+    i numeri entro `TOL` px, tutto il resto (nomi, testo, COLORI) esatto. Cosi'
+    la deriva d'ultima-cifra tra piattaforme (CI, D4) non fa ROSSO fantasma, ma
+    una regressione vera (coordinata spostata, colore cambiato) resta rossa.
+    Se fallisce per un cambiamento VOLUTO: rigenerare il golden apposta."""
     assert os.path.exists(GOLDEN), (
         f"Riferimento golden mancante: {GOLDEN}. "
         "Rigeneralo con i parametri canonici e committalo."
@@ -51,17 +55,9 @@ def test_golden_svg_invariato(eng, root, tmp_path):
     atteso = open(GOLDEN, encoding="utf-8").read()
     ottenuto = _genera_svg(eng, root, tmp_path)
 
-    if ottenuto != atteso:
-        # messaggio diagnostico: prima riga divergente, per rendere il fallimento
-        # azionabile invece di un opaco "stringhe diverse".
-        la, lb = atteso.splitlines(), ottenuto.splitlines()
-        n = min(len(la), len(lb))
-        prima = next((i for i in range(n) if la[i] != lb[i]), n)
-        dett = (f"righe golden={len(la)} ottenute={len(lb)}; "
-                f"prima differenza alla riga {prima + 1}:\n"
-                f"  golden : {la[prima] if prima < len(la) else '<fine>'}\n"
-                f"  attuale: {lb[prima] if prima < len(lb) else '<fine>'}")
-        pytest.fail("SVG divergente dal golden (output del motore cambiato).\n" + dett)
+    msg = svg_diff(ottenuto, atteso)
+    if msg:
+        pytest.fail("SVG divergente dal golden oltre la tolleranza numerica.\n" + msg)
 
 
 def test_golden_generazione_deterministica(eng, root, tmp_path):
