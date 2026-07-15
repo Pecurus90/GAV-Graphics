@@ -596,6 +596,19 @@ Ordinato per rischio reale.
   rispondere alla domanda *prima*. Marco ha deciso di **non anticiparlo**: si
   affronta al giro del packaging. La proposta resta scritta qui perché la
   decisione sia una **scelta**, non una dimenticanza.
+  **AGGIORNAMENTO 2026-07-15 — si affronta ORA (giro #8, il packaging).** Marco,
+  messo davanti al bivio spike-prima / build-diretta, ha scelto la **build
+  diretta** (l'architetto raccomandava lo spike). *Rischio accettato
+  consapevolmente.* Mitigazione strutturale, non uno spike travestito: la build
+  vera è ordinata in **milestone**, e il **Milestone 1 è il pezzo rischioso** — un
+  exe onefile del CLI che carica de421 e chiama resvg e sputa un PNG. Usa il
+  codice VERO (non throwaway) e resta come fondazione; ma se non si impacchetta, lo
+  scopri al primo milestone, non dopo aver scritto lo spec + il workflow Actions.
+  **Misura aggiornata post-#7e (2026-07-15): NON quattro basi di percorso, ma SEI**
+  (`cielo.py:27`, `validate.py:19`, `compose/compositor.py:20`, `app/main.py:34`,
+  `strumenti/cielo/engine.py:36`, `render.py:15`). Il taglio ha aggiunto
+  annidamento, quindi altri modi di sbagliare. Si sanano con **una funzione sola**
+  (`resource_path`) che conosce `sys._MEIPASS`.
 - **R10 — L'A4 ha una COLLISIONE, congelata nel golden da dieci giri.**
   *(Trovata 2026-07-15, aprendo l'immagine — NON un test.)* Nel volantino A4 il
   pannello delle **fasi lunari** (4 fasi a tutta larghezza) si sovrappone al
