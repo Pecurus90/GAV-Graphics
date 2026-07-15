@@ -318,6 +318,20 @@ descrive lo fa scollare al primo cambiamento.
   Inoltre, per D7, andrà **ristretto al solo disco**: se sorveglia anche la
   composizione, fallirà a ogni ritocco estetico legittimo — e un test che è
   sempre rosso viene ignorato, che è il modo in cui una rete di sicurezza muore.
+  **FATTO (#8 Milestone 2/A, 2026-07-15):** convertito a **tolleranza** in vista
+  della CI. `tests/golden_compare.py::svg_diff` tokenizza l'SVG: i numeri con
+  **tolleranza assoluta 0,15 px**, il resto (nomi, testo, **colori `#hex`**) esatto.
+  I `.svg` golden **non toccati** (solo il confronto cambia); motore intatto.
+  **TOL=0,15 e non 0,05** — l'architetto suggeriva 0,05 su premessa sbagliata
+  («ultima cifra dei `%.2f` = 0,01»); l'esecutore ha **misurato**: la maggioranza
+  delle coordinate è **`%.1f`** (contate dall'architetto: 4333 vs 2057 `%.2f`),
+  dove un salto d'ultima-cifra fra piattaforme è **0,1 px** — quindi 0,05 avrebbe
+  rifiutato il rumore normale. 0,15 sta sopra lo 0,1 e ~7× sotto una regressione da
+  1 px (prende anche 0,3). **Rete viva, non placebo** (dimostrato): tollera 0,1 px,
+  fallisce a 0,3 e 1,0, fallisce se cambia un `#hex`. *Se in CI emergesse una deriva
+  > 0,15, NON si alza la tolleranza (annacquerebbe la rete): è un caso da guardare
+  in faccia.* Nota per la CI (passo B): **fissare le versioni** (numpy compreso) per
+  ridurre la deriva cross-OS e per riproducibilità (D4).
 - **D12 — Il secondo strumento è NOTO, e questo sblocca il refactor.**
   *(Marco, 2026-07-13.)* "Pillole di astronomia" non è più un'ipotesi: è un post
   1080×1080 con **un'immagine caricata dall'utente** (trascinata e posizionata),
