@@ -51,7 +51,7 @@ def test_genera_input_sbagliato_da_evento_errore_non_500():
 
 def test_genera_valida_riporta_le_quattro_fasi():
     """La barra dice il vero: lo stream riporta le fasi 0..3 e poi 'fatto'."""
-    r = client.get("/genera?year=2026&month=8&formato=post")
+    r = client.get("/genera?year=2026&month=8&formato=zenit")
     assert r.status_code == 200
     for i in range(4):
         assert f"event: fase\ndata: {i}" in r.text, f"manca la fase {i}"
@@ -68,13 +68,13 @@ def test_schede_dal_disco_escludono_profondo():
     import app.main as A
     nomi = [f for f, _ in A.formati_scheda()]
     assert "profondo" not in nomi, "profondo non e' un formato-scheda: e' la pagina 2"
-    assert set(nomi) == {"a4", "post", "dashboard", "editorial", "rail"}, nomi
+    assert set(nomi) == {"a4", "dashboard", "parata", "cornice", "zenit"}, nomi
     assert A._pagina2_formato() == "profondo"
 
 
 # --- il carosello: UN'AZIONE, DUE pagine con gli stessi parametri ---
 def test_carosello_produce_due_pagine():
-    r = client.get("/carosello?year=2026&month=8&formato=post")
+    r = client.get("/carosello?year=2026&month=8&formato=zenit")
     assert r.status_code == 200
     assert "event: pagina\ndata: 1" in r.text and "event: pagina\ndata: 2" in r.text
     # 'fatto' porta DUE token (pagina 1 e pagina 2)
@@ -114,7 +114,7 @@ def test_larghezza_png_per_formato():
         lay = json.load(open(os.path.join(ROOT, "brand", "layouts", f"{fmt}.json"), encoding="utf-8"))
         return render.png_width(lay)
     assert w("a4") == 1800, "l'A4 (canvas 900) va a 1800"
-    assert w("post") == 1080, "il post social va a 1080, NON alla misura dell'A4"
+    assert w("zenit") == 1080, "il quadrato social va a 1080, NON alla misura dell'A4"
     assert w("profondo") == 1080
     import cielo
     assert cielo.render.png_width is render.png_width, "il CLI riusa la stessa logica"

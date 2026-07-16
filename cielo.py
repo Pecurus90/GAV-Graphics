@@ -11,11 +11,11 @@ di qui; e' il CLI che tira le fila dei due moduli.
 Uso:
   python cielo.py --year 2026 --month 8 --place Vicenza                       # A4, SVG
   python cielo.py --year 2026 --month 8 --place Vicenza --png                 # A4, SVG + PNG
-  python cielo.py --year 2026 --month 8 --format post --png                   # post 1080, SVG + PNG
-  python cielo.py --year 2026 --month 8 --format dashboard --palette aurora-boreale # design social
+  python cielo.py --year 2026 --month 8 --format zenit --png                  # quadrato 1080, SVG + PNG
+  python cielo.py --year 2026 --month 8 --format parata --palette aurora-boreale # design social
 
 Formato e palette si scelgono per NOME, non per percorso: i nomi validi sono i
-file in brand/layouts/ (a4, post, dashboard, editorial, rail, ...) e in
+file in brand/layouts/ (a4, dashboard, parata, cornice, zenit, ...) e in
 brand/palettes/ (osservatorio, luce-rossa, aurora-boreale, nebulosa,
 ottone-antico, cielo-di-ghiaccio).
 """
@@ -42,7 +42,7 @@ def main():
     p.add_argument('--palette', default='osservatorio',
                    help="nome della palette in brand/palettes/ (default: osservatorio)")
     p.add_argument('--format', default='a4',
-                   help="nome del layout in brand/layouts/ (a4, post, dashboard, editorial, rail, ...)")
+                   help="nome del layout in brand/layouts/ (a4, dashboard, parata, cornice, zenit, ...)")
     p.add_argument('--out', default=None,
                    help="file SVG di uscita (default: out/cielo_<formato>.svg)")
     p.add_argument('--png', action='store_true', help="produce ANCHE il PNG accanto all'SVG")

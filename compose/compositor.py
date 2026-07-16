@@ -67,11 +67,18 @@ class Compositor:
         """Pannello: rettangolo (arrotondato con `rx`) usato come CONTENITORE nei
         design social. Primitiva NUOVA in #6d: i tre mockup incorniciano pianeti,
         luna e colori in pannelli, e nessuna primitiva esistente disegna un
-        riquadro. Fill e stroke sono TOKEN del tema (mai hex cablati)."""
+        riquadro. Fill e stroke sono TOKEN del tema (mai hex cablati).
+        `fill_opacity`/`opacity` (opzionali) rendono il pannello TRANSLUCIDO: il
+        vetro colorato di Zenit sopra il disco a tutto campo (niente blur, che
+        resvg non ha - D7). Emessi solo se presenti: l'output di chi non li usa
+        (a4/dashboard/...) NON cambia."""
         s=(f'<rect x="{b["x"]}" y="{b["y"]}" width="{b["w"]}" height="{b["h"]}" '
            f'rx="{b.get("rx",0)}" fill="{theme[b["fill"]]}"')
+        if "fill_opacity" in b: s+=f' fill-opacity="{b["fill_opacity"]}"'
         if b.get("stroke"):
             s+=f' stroke="{theme[b["stroke"]]}" stroke-width="{b.get("stroke_width",1)}"'
+            if "stroke_opacity" in b: s+=f' stroke-opacity="{b["stroke_opacity"]}"'
+        if "opacity" in b: s+=f' opacity="{b["opacity"]}"'
         return s+'/>'
 
     def _render_image(self, b):

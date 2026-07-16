@@ -42,7 +42,7 @@ jobs:
       # rossa, cosi' la risposta R9 non resta ostaggio di un test fallito altrove.
       - name: Rendi un PNG col CLI
         if: ${{ !cancelled() }}
-        run: python cielo.py --year 2026 --month 8 --format post --png --out out/ci_post.svg
+        run: python cielo.py --year 2026 --month 8 --format dashboard --png --out out/ci_post.svg
 
       - name: Asserisci che il PNG sia VERO (esiste, PNG valido, > 50 KB, 1080x1080)
         if: ${{ !cancelled() }}

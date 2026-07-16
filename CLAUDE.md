@@ -62,7 +62,7 @@ il compositore senza toccare il cielo.
 | `validate.py` | 205 | Validazione input (R4) + contratto del tema (D2). Condiviso da CLI e web, **non** importato dal motore (invariante #1). |
 | `render.py` | 53 | SVG→PNG via resvg. Usato dal CLI **e** dalla web app. |
 | `app/main.py` | 98 | Web app FastAPI sottile: `/`, `/preview`, `/download`. **Attenzione:** l'HTML è dentro il `.py` (f-string), non in template. E **la UI espone solo l'A4**: niente selettore di formato, PNG sempre a 1800 px. Tutto il lavoro social (post, pagina 2, i quattro design) è raggiungibile **solo dal CLI**. Da sanare in #7f. |
-| `brand/layouts/*.json` | — | La composizione come dati. `a4`, `post`, `profondo` (pagina 2), + i tre design social `dashboard`/`editorial`/`rail`. Aggiungerne uno = aggiungere un file. |
+| `brand/layouts/*.json` | — | La composizione come dati. `a4`, `profondo` (pagina 2), + i quattro quadrati `dashboard`/`parata`/`cornice`/`zenit` (set finale; ritirati `post`/`editorial`/`rail`). Aggiungerne uno = aggiungere un file. |
 | `brand/palettes/*.json` | — | I temi. **Non** in `themes/`. |
 | `data/stars6.json` | — | 5044 stelle GeoJSON, tutte con `mag` e `bv`. |
 

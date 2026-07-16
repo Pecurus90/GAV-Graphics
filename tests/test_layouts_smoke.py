@@ -38,9 +38,11 @@ def test_layout_rende_con_ogni_palette(eng, tmp_path, layout_path, palette_path)
     assert len(svg) > 500, "SVG sospettosamente corto"
 
 
-def test_almeno_le_dodici_combinazioni_social():
-    """Guardia sulla copertura: i 3 design social × 4 palette = 12 combinazioni
-    devono esistere davvero (non un parametrize vuoto che passa a vuoto)."""
+def test_i_quattro_quadrati_del_set_finale():
+    """Guardia sulla copertura: i 4 quadrati del set finale × le palette devono
+    esistere davvero (non un parametrize vuoto che passa a vuoto). Il set: dashboard
+    (l'ancora) + Parata/Cornice/Zenit (eredi di colonna/editoriale/post)."""
     nomi = set(_ids(LAYOUTS))
-    assert {"dashboard", "editorial", "rail"} <= nomi, f"design social mancanti: {nomi}"
+    assert {"dashboard", "parata", "cornice", "zenit"} <= nomi, f"quadrati mancanti: {nomi}"
+    assert {"post", "editorial", "rail"}.isdisjoint(nomi), f"ritirati ancora presenti: {nomi}"
     assert len(PALETTES) >= 4, f"attese >=4 palette, trovate {len(PALETTES)}"
