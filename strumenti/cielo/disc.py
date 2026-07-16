@@ -95,7 +95,7 @@ class DiscMixin:
                     x,y=self.project(al,zz,cx,cy,rad); col=bv2hex(ramp,bv)
                     a(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{7*k:.1f}" fill="{col}" opacity="0.30" filter="url(#softglow)"/>')
                     a(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{2.6*k:.1f}" fill="{col}"/>')
-                    a(f'<text x="{x+7*k:.1f}" y="{y-5*k:.1f}" fill="{theme["text"]}" font-size="{11.5*k:.1f}" opacity="0.95">{nm}</text>')
+                    a(f'<text x="{x+7*k:.1f}" y="{y-5*k:.1f}" fill="{theme["text"]}" font-size="{11.5*k:.1f}" opacity="0.95">{self._esc(nm)}</text>')
             if labels:
                 label_set = None if labels is True else set(labels)
                 for f in self.clines:
@@ -106,7 +106,7 @@ class DiscMixin:
                     al,zz=self.altaz(allp[:,0],allp[:,1],lst,lat_rad); m=al>3
                     if m.sum()<2: continue
                     x,y=self.project(al[m],zz[m],cx,cy,rad)
-                    a(f'<text x="{x.mean():.1f}" y="{y.mean():.1f}" fill="{theme["label"]}" font-size="{12.5*k:.1f}" opacity="0.82" text-anchor="middle" letter-spacing="0.5">{CONST_IT[ab]}</text>')
+                    a(f'<text x="{x.mean():.1f}" y="{y.mean():.1f}" fill="{theme["label"]}" font-size="{12.5*k:.1f}" opacity="0.82" text-anchor="middle" letter-spacing="0.5">{self._esc(CONST_IT[ab])}</text>')
         else:
             # PERCORSO SOCIAL: dischi delle stelle nominate + etichette con
             # ANTI-COLLISIONE deterministica (vedi _disc_labels_declutter).
@@ -122,7 +122,7 @@ class DiscMixin:
         if cardinals:
             for lab,ang in (('N',0),('E',90),('S',180),('O',270)):
                 rr=rad+22*k; ax=cx-rr*np.sin(np.radians(ang)); ay=cy-rr*np.cos(np.radians(ang))
-                a(f'<text x="{ax:.1f}" y="{ay+6*k:.1f}" fill="{theme["cardinal"]}" font-size="{19*k:.1f}" font-weight="bold" text-anchor="middle">{lab}</text>')
+                a(f'<text x="{ax:.1f}" y="{ay+6*k:.1f}" fill="{theme["cardinal"]}" font-size="{19*k:.1f}" font-weight="bold" text-anchor="middle">{self._esc(lab)}</text>')
         return '\n'.join(s)
 
     def _disc_ticks(self, cx, cy, rad, k, theme, ticks):
@@ -212,7 +212,7 @@ class DiscMixin:
             px,py=chosen[0],chosen[1]
             anc=f' text-anchor="{req["anchor"]}"' if req["anchor"]!="start" else ""
             out.append(f'<text x="{px:.1f}" y="{py:.1f}" fill="{req["fill"]}" '
-                       f'font-size="{req["size"]:.1f}" opacity="{req["opacity"]}"{anc}{req["extra"]}>{req["text"]}</text>')
+                       f'font-size="{req["size"]:.1f}" opacity="{req["opacity"]}"{anc}{req["extra"]}>{self._esc(req["text"])}</text>')
         self._last_dropped=dropped; self._last_dropped_labels=dropped_labels
         return '\n'.join(out)
 

@@ -302,12 +302,12 @@ class MessierMixin:
                            f'stroke="{col}" stroke-width="0.9" stroke-opacity="0.7"/>')
             if req["kind"]=="group":
                 out.append(f'<text x="{px:.1f}" y="{py:.1f}" text-anchor="middle" fill="{col}" '
-                           f'font-size="11.5" font-weight="600">{req["text"]}</text>')
+                           f'font-size="11.5" font-weight="600">{self._esc(req["text"])}</text>')
                 out.append(f'<text x="{px:.1f}" y="{py+14:.1f}" text-anchor="middle" fill="{theme["text3"]}" '
-                           f'font-size="9.5">{req["sub"]}</text>')
+                           f'font-size="9.5">{self._esc(req["sub"])}</text>')
             else:
                 out.append(f'<text x="{px:.1f}" y="{py:.1f}" fill="{lab_col}" '
-                           f'font-size="{lsz}" font-weight="600">{req["text"]}</text>')
+                           f'font-size="{lsz}" font-weight="600">{self._esc(req["text"])}</text>')
         self._last_messier_labels=len(label_boxes); self._last_messier_dropped=dropped
         self._last_messier_leadered=leadered
         self._last_symbol_boxes=symbol_boxes; self._last_label_boxes=label_boxes
@@ -431,7 +431,7 @@ class MessierMixin:
                                             "vbbox":fig["vbbox"],"margin":M})
             out.append(f'<text x="{px:.1f}" y="{py+h*0.34:.1f}" text-anchor="middle" '
                        f'fill="{cfill}" font-size="{csz}" opacity="{cop}" '
-                       f'letter-spacing="{ctr}">{req["text"]}</text>')
+                       f'letter-spacing="{ctr}">{self._esc(req["text"])}</text>')
         return '\n'.join(out)
 
     def _render_messier_table(self, b, theme, mctx):
@@ -455,13 +455,13 @@ class MessierMixin:
             # nome: "Mxx — Nome" se c'e' un nome curato, altrimenti solo "Mxx"
             if grp:
                 name=(f'<text x="{x0+namex:.0f}" y="{y:.0f}" fill="{theme["text"]}" font-size="14" '
-                      f'font-weight="600">{r["nome_it"]}</text>')
+                      f'font-weight="600">{self._esc(r["nome_it"])}</text>')
             elif r.get("nome_fonte")=="curato":
                 name=(f'<text x="{x0+namex:.0f}" y="{y:.0f}" fill="{theme["text"]}" font-size="14" '
-                      f'font-weight="600"><tspan fill="{col}">{r["sigla"]}</tspan> — {r["nome_it"]}</text>')
+                      f'font-weight="600"><tspan fill="{col}">{self._esc(r["sigla"])}</tspan> — {self._esc(r["nome_it"])}</text>')
             else:
                 name=(f'<text x="{x0+namex:.0f}" y="{y:.0f}" fill="{theme["text"]}" font-size="14" '
-                      f'font-weight="600"><tspan fill="{col}">{r["sigla"]}</tspan></text>')
+                      f'font-weight="600"><tspan fill="{col}">{self._esc(r["sigla"])}</tspan></text>')
             out.append(name)
             # riga secondaria: Tipo · Costellazione (per la Vergine: conteggio)
             if grp:
@@ -469,7 +469,7 @@ class MessierMixin:
             else:
                 sec=f'{r["famiglia"][0].upper()+r["famiglia"][1:]} · {r["costellazione_it"]}'
             out.append(f'<text x="{x0+namex:.0f}" y="{y+16:.0f}" fill="{theme["text3"]}" '
-                       f'font-size="11.5">{sec}</text>')
+                       f'font-size="11.5">{self._esc(sec)}</text>')
             # strumento a destra
             kind="binocolo" if r["visione"]=="binocolo" else "telescopio"
             out.append(self._instrument_icon_svg(kind, x0+instx, y-4, theme["text3"]))
@@ -502,12 +502,12 @@ class MessierMixin:
             x=item["x"]; rot=-22 if fam=="galassia" else 0
             out.append(self._messier_symbol_svg(fam, x, y, s, col, sw, rot))
             out.append(f'<text x="{x+16:.0f}" y="{y+4:.0f}" fill="{theme["text"]}" font-size="12.5" '
-                       f'font-weight="500">{label}</text>')
+                       f'font-weight="500">{self._esc(label)}</text>')
         grp=b.get("gruppo")
         if grp:
             out.append(self._mini_grappolo_svg(grp["x"], y, s, col, sw))
             out.append(f'<text x="{grp["x"]+16:.0f}" y="{y+4:.0f}" fill="{theme["text"]}" font-size="12.5" '
-                       f'font-weight="500">{grp.get("label","Grappolo di galassie")}</text>')
+                       f'font-weight="500">{self._esc(grp.get("label","Grappolo di galassie"))}</text>')
         key=b["inst_key"]
         out.append(self._instrument_icon_svg("binocolo", key["x"], y-5, theme["text3"]))
         out.append(f'<text x="{key["x"]+16:.0f}" y="{y-1:.0f}" fill="{theme["text2"]}" font-size="12" '

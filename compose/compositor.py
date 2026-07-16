@@ -14,6 +14,7 @@ e' stato SPOSTATO tale e quale (refactor puro, output invariato), e Engine ora
 lo eredita.
 """
 import os, json, base64
+from xml.sax.saxutils import escape as _xml_escape
 import numpy as np
 
 # Radice del progetto: <root>/compose/compositor.py -> due dirname.
@@ -25,6 +26,17 @@ ICONS_FILE = os.path.join(_BASE, "brand", "icons", "icons.json")
 class Compositor:
     """Base condivisa: primitive di disegno generiche + scaffolding di marca.
     Nessuna dipendenza dall'astronomia (invariante del taglio D14)."""
+
+    @staticmethod
+    def _esc(s):
+        """Escapa il TESTO (contenuto degli elementi, NON gli attributi) per l'XML:
+        `&`, `<`, `>` diventano entita'. Serve perche' del testo puo' contenere
+        caratteri speciali - su tutti il NOME DEL LUOGO, input LIBERO dell'utente
+        (`--place` da CLI, parametro `place` sul web): «Bassano & Dintorni» senza
+        escaping produce un SVG malformato che resvg (e minidom) rifiutano - un 500
+        sul PC del socio (D4). Si applica al RISULTATO del testo, mai al template ne'
+        agli attributi (quelli non ricevono input dell'utente)."""
+        return _xml_escape(str(s))
 
     # ---- render: componenti riutilizzabili ----
     def defs_svg(self, theme, extra_gradients=""):
@@ -55,7 +67,7 @@ class Compositor:
         if b.get("weight"): s+=f' font-weight="{b["weight"]}"'
         if b.get("anchor"): s+=f' text-anchor="{b["anchor"]}"'
         if "letter_spacing" in b: s+=f' letter-spacing="{b["letter_spacing"]}"'
-        return s+f'>{b["content"].format(**ctx)}</text>'
+        return s+f'>{self._esc(b["content"].format(**ctx))}</text>'
 
     def _render_line(self, b, theme):
         s=(f'<line x1="{b["x1"]}" y1="{b["y1"]}" x2="{b["x2"]}" y2="{b["y2"]}" '
