@@ -505,6 +505,26 @@ descrive lo fa scollare al primo cambiamento.
   `validate.py`, `CREDITI.md`, + il launcher. **Launcher da rifinire (Milestone
   2):** `Avvia.bat` oggi fissa la porta 8000; renderla configurabile (se un socio
   ha la 8000 occupata, oggi fallirebbe il bind).
+- **D18 — L'editor dei colori è un EDITOR DI PALETTE, non un ricolore del poster.**
+  *(Marco, 2026-07-15: «slider sui colori come un programma di fotoritocco, per ogni
+  elemento». Forma decisa con l'architetto.)*
+  **Cosa produce, e perché conta:** l'output dell'editor è **una palette nuova
+  salvata e validata**, NON "questo poster è colorato così". Due ragioni:
+  - **Le 2 chiavi astronomiche restano BLOCCATE** (`star_ramp`, `planet_colors`):
+    sono fisica, non gusto. Mai sullo slider, mai esposte — si **innestano** da
+    osservatorio al salvataggio. È D2: *una palette può cambiare un blu, non può
+    mentire sull'astronomia*. Non negoziabile.
+  - **L'exe va a TUTTI i soci.** Ricolore libero per-poster = trenta soci, trenta
+    identità visive, e le sei palette appena consolidate (D13) diventano carta
+    straccia. Con l'editor-di-palette Marco ha **piena autonomia sui colori senza
+    passare dal designer**, ma **la palette resta l'unità** e il socio continua a
+    scegliere da una lista coerente.
+  **Struttura:** slider/selettori sui **20 token di marca** + anteprima **sul cielo
+  vero** + "salva come palette" (nome + descrizione → JSON in `brand/palettes/`,
+  chiavi astronomiche innestate, `validate.py` come cancello). Appare nella lista
+  come le altre.
+  **Timing (Marco):** **PRIMA dell'exe** — la prima versione che arriva ai soci lo
+  avrà dentro. Sposta il rilascio, consegna un'app più completa.
 - **D15 — L'`.exe` apre il browser; e cosa manca DAVVERO per averlo.**
   *(Deciso da Marco, 2026-07-14.)* Doppio clic ⇒ il programma parte in silenzio e
   **apre il browser** sull'interfaccia dell'app. Niente terminale, niente Python
