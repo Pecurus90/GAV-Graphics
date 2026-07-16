@@ -61,7 +61,7 @@ il compositore senza toccare il cielo.
 | `cielo.py` | 101 | Il CLI (D1). Mappa i formati ai file di layout e **compone** motore + `render`. |
 | `validate.py` | 205 | Validazione input (R4) + contratto del tema (D2). Condiviso da CLI e web, **non** importato dal motore (invariante #1). |
 | `render.py` | 53 | SVG→PNG via resvg. Usato dal CLI **e** dalla web app. |
-| `app/main.py` | 98 | Web app FastAPI sottile: `/`, `/preview`, `/download`. **Attenzione:** l'HTML è dentro il `.py` (f-string), non in template. E **la UI espone solo l'A4**: niente selettore di formato, PNG sempre a 1800 px. Tutto il lavoro social (post, pagina 2, i quattro design) è raggiungibile **solo dal CLI**. Da sanare in #7f. |
+| `app/main.py` | 811 | Web app FastAPI: `/`, `/preview`, `/download`, + l'editor di palette (D18). **L'HTML sta dentro il `.py`**, non in template (debito `#7f`) — ma è una **raw string** `PAGINA = r"""…"""` riempita con `.replace()`, **NON una f-string**: le graffe del CSS non sono un problema, il CSS si riscrive libero. **La UI ESPONE i formati** (`<button class="fmt" data-fmt=…>`, riga ~309) + la barra laterale (D10). *(Riga riscritta 2026-07-16: diceva «98 righe» (erano 811), «f-string» (è `r"""`) e «espone solo l'A4, niente selettore di formato» (il selettore c'è). **Tre errori in una riga**: quinta smentita di questo file per misura.)* |
 | `brand/layouts/*.json` | — | La composizione come dati. `a4`, `profondo` (pagina 2), + i quattro quadrati `dashboard`/`parata`/`cornice`/`zenit` (set finale; ritirati `post`/`editorial`/`rail`). Aggiungerne uno = aggiungere un file. |
 | `brand/palettes/*.json` | — | I temi. **Non** in `themes/`. |
 | `data/stars6.json` | — | 5044 stelle GeoJSON, tutte con `mag` e `bv`. |
@@ -576,8 +576,9 @@ descrive lo fa scollare al primo cambiamento.
   - **Da imbarcare:** `brand/` (palette, layout, font, logo, icone), `data/`, e
     **`CREDITI.md`** (obbligo BSD-2, non un optional). *(Corretto 2026-07-14:
     questo punto elencava anche `app/templates/`. **Non esiste**: l'HTML è scritto
-    dentro `app/main.py`, in una f-string. Se #7f introdurrà dei template veri,
-    andranno aggiunti qui.)*
+    dentro `app/main.py`. Se #7f introdurrà dei template veri, andranno aggiunti
+    qui.)* *(Corretto 2026-07-16: diceva «in una f-string». È una **raw string**
+    `r"""…"""` riempita con `.replace()`.)*
   - **Build in GitHub Actions**, mai a mano: ambiente sporco = exe irriproducibile.
   - **Niente di tutto questo dipende da #7e o #7f.** L'`.exe` si potrebbe fare
     subito; Marco ha scelto di farlo **dopo**, per consegnare ai soci un prodotto
