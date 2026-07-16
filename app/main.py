@@ -21,7 +21,7 @@ layout o una palette domani non richiede di toccare la UI.
 Tutto OFFLINE (D4/D15): font e logo locali, nessun CDN.
 """
 import json, tempfile, os, uuid, queue, threading
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -32,7 +32,6 @@ import render
 import validate
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
-PALETTES = os.path.join(BASE, "brand", "palettes")
 LAYOUTS = os.path.join(BASE, "brand", "layouts")
 
 app = FastAPI(title="Cielo del Mese")
@@ -86,12 +85,12 @@ def _pagina2_formato():
 
 
 def palette_pastiglie():
-    """Le palette dal disco: nome, descrizione, e i colori VERI (bg, neon) per il
-    campione. Nessun colore scritto a mano nella UI: viene dalla palette."""
+    """Le palette dal disco (di serie + create dal socio, UNIONE via validate): nome,
+    descrizione, e i colori VERI (bg, neon) per il campione. Nessun colore scritto a
+    mano nella UI: viene dalla palette."""
     out = []
-    for p in sorted(x[:-5] for x in os.listdir(PALETTES) if x.endswith(".json")):
-        d = _leggi(PALETTES, p)
-        out.append((p, d))
+    for p in validate.palette_disponibili():
+        out.append((p, validate.carica_palette(p)))
     return out
 
 
@@ -103,7 +102,7 @@ def _valida(year, month, lat, lon, theme, formato, hour):
     la = validate.valida_lat(lat); lo = validate.valida_lon(lon)
     ho = validate.valida_ora(hour)
     pal = validate.valida_palette(theme); fo = validate.valida_formato(formato)
-    th = _leggi(PALETTES, pal); validate.valida_tema(th, f"{pal}.json")
+    th = validate.carica_palette(pal); validate.valida_tema(th, f"{pal}.json")
     layout = _leggi(LAYOUTS, fo)
     return y, m, la, lo, ho, th, layout, fo
 
@@ -243,6 +242,61 @@ def anteprima(token=""):
 
 
 # ---------------------------------------------------------------------------
+# D18 — L'EDITOR DI PALETTE. Anteprima sul cielo VERO + salva-come-palette.
+# ---------------------------------------------------------------------------
+# L'anteprima si rende a LARGHEZZA RIDOTTA: misurato (2026-07-16) che il costo e'
+# quasi tutto rasterizzazione resvg (raster 1080 ~0,93s, geometria ~0), quindi
+# NON serve cachare la geometria — basta rasterizzare piu' piccolo. A 600px
+# l'anteprima e' ~0,8s: buona per un aggiornamento a RILASCIO del colore, non una
+# live-preview per-pixel (che resvg non puo' dare, e non la promettiamo).
+ANTEPRIMA_W = 600
+
+
+def _tema_da_richiesta(body):
+    """Compone il tema dai token di marca del client + astro innestate (validate),
+    poi lo VALIDA. La whitelist e l'innesto sono in validate: qui non si tocca."""
+    theme = validate.componi_palette_utente(body.get("tokens") or {}, "Anteprima", "")
+    validate.valida_tema(theme, "anteprima")
+    return theme
+
+
+@app.post("/palette/anteprima")
+async def palette_anteprima(request: Request):
+    body = await request.json()
+    try:
+        y = validate.valida_anno(body.get("year", 2026))
+        m = validate.valida_mese(body.get("month", 8))
+        la = validate.valida_lat(body.get("lat", 45.5455))
+        lo = validate.valida_lon(body.get("lon", 11.5353))
+        ho = validate.valida_ora(body.get("hour", 23))
+        fo = validate.valida_formato(body.get("formato", "post"))
+        theme = _tema_da_richiesta(body)
+        layout = _leggi(LAYOUTS, fo)
+    except validate.InputError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    place = (body.get("place") or "Vicenza").strip() or "Vicenza"
+    token = uuid.uuid4().hex
+    svg = os.path.join(tempfile.gettempdir(), f"editor_{token}.svg")
+    png = os.path.join(tempfile.gettempdir(), f"editor_{token}.png")
+    engine.generate(y, m, la, lo, place, theme, svg, hour_local=ho, layout=layout)
+    render.svg_file_to_png(svg, png, width=ANTEPRIMA_W)
+    return FileResponse(png, media_type="image/png")
+
+
+@app.post("/palette/salva")
+async def palette_salva(request: Request):
+    body = await request.json()
+    try:
+        slug, theme, _path = validate.salva_palette_utente(
+            body.get("name"), body.get("descrizione"), body.get("tokens") or {})
+    except validate.InputError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    # la pastiglia gia' pronta: il client la infila nella lista e la seleziona
+    return {"slug": slug, "name": theme["name"], "dot": theme["neon"],
+            "pastiglia": _pastiglia_html(slug, theme, sel=True)}
+
+
+# ---------------------------------------------------------------------------
 # La pagina: schede/pastiglie popolate dal disco, poi il markup portato dal design.
 # ---------------------------------------------------------------------------
 def _schede_html(default="dashboard"):
@@ -260,23 +314,43 @@ def _schede_html(default="dashboard"):
     return "\n".join(out)
 
 
+def _pastiglia_html(p, d, sel=False):
+    """UNA pastiglia palette. Un solo posto che sa com'e' fatta: la usano sia la
+    pagina iniziale sia la risposta di /palette/salva (cosi' una palette creata
+    compare identica alle altre)."""
+    bg = d["bg"]; neon = d["neon"]
+    grad = f"linear-gradient(160deg,{bg[0]},{bg[1]} 55%,{bg[2]})"
+    selc = " sel" if sel else ""
+    nv = (f'<span class="nv">◑ {d["nota"]}</span>' if d.get("nota") else "")
+    return (
+        f'<button type="button" class="pal{selc}" data-pal="{p}" '
+        f'data-name="{d["name"]}" data-dot="{neon}">'
+        f'<span class="tick">✓</span>'
+        f'<span class="swatch" style="background:{grad};">'
+        f'<span class="stars"></span><span class="disc"></span>'
+        f'<span class="neon" style="background:{neon};box-shadow:0 0 12px {neon};"></span></span>'
+        f'<span class="meta"><div class="pname">{d["name"]}</div>'
+        f'<div class="ptag">{d.get("descrizione","")}</div>{nv}</span></button>')
+
+
 def _pastiglie_html(default="osservatorio"):
-    out = []
-    for p, d in palette_pastiglie():
-        bg = d["bg"]; neon = d["neon"]
-        grad = f"linear-gradient(160deg,{bg[0]},{bg[1]} 55%,{bg[2]})"
-        sel = " sel" if p == default else ""
-        nv = (f'<span class="nv">◑ {d["nota"]}</span>' if d.get("nota") else "")
-        out.append(
-            f'<button type="button" class="pal{sel}" data-pal="{p}" '
-            f'data-name="{d["name"]}" data-dot="{neon}">'
-            f'<span class="tick">✓</span>'
-            f'<span class="swatch" style="background:{grad};">'
-            f'<span class="stars"></span><span class="disc"></span>'
-            f'<span class="neon" style="background:{neon};box-shadow:0 0 12px {neon};"></span></span>'
-            f'<span class="meta"><div class="pname">{d["name"]}</div>'
-            f'<div class="ptag">{d.get("descrizione","")}</div>{nv}</span></button>')
-    return "\n".join(out)
+    return "\n".join(_pastiglia_html(p, d, sel=(p == default))
+                     for p, d in palette_pastiglie())
+
+
+# Token DI MARCA (solo quelli) di ogni palette, per SEMINARE l'editor da una
+# palette esistente. Le 2 chiavi astronomiche NON entrano qui: il client non le
+# vede mai (D2/D18) — l'innesto avviene solo server-side al salvataggio.
+def _brand_tokens(d):
+    bt = {k: d.get(k) for k in validate.STYLE_TOKENS}
+    bt["bg"] = d.get("bg"); bt["disk"] = d.get("disk")
+    bt["status"] = {k: (d.get("status") or {}).get(k) for k in validate.STATUS_KEYS}
+    return bt
+
+
+def _paldata_json():
+    return json.dumps({p: _brand_tokens(d) for p, d in palette_pastiglie()},
+                      ensure_ascii=False)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -286,7 +360,8 @@ def index():
     return (PAGINA
             .replace("<!--MESI-->", mesi)
             .replace("<!--SCHEDE-->", _schede_html())
-            .replace("<!--PASTIGLIE-->", _pastiglie_html()))
+            .replace("<!--PASTIGLIE-->", _pastiglie_html())
+            .replace("/*PALDATA*/", _paldata_json()))
 
 
 PAGINA = r"""<!DOCTYPE html><html lang="it"><head><meta charset="utf-8">
@@ -430,6 +505,44 @@ body{font-family:var(--testo);color:var(--t1);background:radial-gradient(135% 75
 .err-msg{font-size:16.5px;color:#f6c6b3;line-height:1.5;font-weight:500;background:rgba(240,138,106,.09);border:1px solid rgba(240,138,106,.22);border-radius:12px;padding:15px 18px;margin-bottom:18px}
 .err-hint{font-size:13.5px;color:var(--t3);line-height:1.55;margin-bottom:22px}
 .err-card .btn-gold{background:#f0a074}.err-card .btn-gold:hover{background:#f4b48c}
+/* --- D18: editor di palette --- */
+.pal-add{width:100%;margin-top:10px;background:rgba(19,29,49,.4);border:1.5px dashed var(--bordo-forte);border-radius:13px;color:var(--t2);font-family:var(--testo);font-weight:600;font-size:14px;padding:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:.14s}
+.pal-add:hover{border-color:var(--oro);color:var(--oro-chiaro)}
+.pal-add .plus{font-family:var(--display);font-weight:800;font-size:17px;line-height:1}
+.editor{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:26px;background:rgba(3,5,11,.72)}
+.editor.on{display:flex}
+.ed-card{width:min(1050px,100%);max-height:calc(100vh - 44px);display:flex;flex-direction:column;background:linear-gradient(180deg,#0e1728,#0a1120);border:1px solid var(--bordo-forte);border-radius:20px;box-shadow:0 40px 100px rgba(0,0,0,.6);overflow:hidden}
+.ed-head{display:flex;align-items:center;gap:14px;padding:19px 24px;border-bottom:1px solid var(--bordo)}
+.ed-head .eh-ic{width:34px;height:34px;border-radius:10px;background:rgba(228,172,74,.14);border:1px solid rgba(228,172,74,.34);display:flex;align-items:center;justify-content:center;color:var(--oro);font-size:17px}
+.ed-head h2{font-family:var(--display);font-weight:800;font-size:20px;color:var(--t1);line-height:1.1}
+.ed-head .eh-sub{font-size:11.5px;color:var(--t4);margin-top:2px}
+.ed-head .eh-x{margin-left:auto;background:none;border:none;color:var(--t3);font-size:20px;cursor:pointer;padding:4px 9px;border-radius:8px;line-height:1}
+.ed-head .eh-x:hover{color:var(--t1);background:rgba(150,170,215,.1)}
+.ed-body{display:grid;grid-template-columns:1fr 384px;min-height:0;flex:1;overflow:hidden}
+.ed-controls{overflow-y:auto;padding:20px 24px}
+.ed-group{margin-bottom:19px}
+.ed-grp-title{font-family:var(--display);font-weight:600;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#a9b8d6;margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.ed-grp-title .line{flex:1;height:1px;background:linear-gradient(90deg,rgba(228,172,74,.4),transparent)}
+.ed-sws{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.ed-sw{display:flex;align-items:center;gap:10px;background:var(--superficie);border:1px solid var(--bordo);border-radius:10px;padding:7px 10px}
+.ed-sw label{font-size:12px;color:var(--t2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.ed-sw input[type=color]{-webkit-appearance:none;-moz-appearance:none;appearance:none;width:34px;height:26px;border:1px solid var(--bordo-forte);border-radius:7px;background:none;cursor:pointer;padding:0;flex:0 0 34px}
+.ed-sw input[type=color]::-webkit-color-swatch-wrapper{padding:2px}
+.ed-sw input[type=color]::-webkit-color-swatch{border:none;border-radius:5px}
+.ed-sw input[type=color]::-moz-color-swatch{border:none;border-radius:5px}
+.ed-side{background:linear-gradient(180deg,rgba(5,7,15,.4),rgba(5,7,15,.2));border-left:1px solid var(--bordo);display:flex;flex-direction:column;padding:20px;overflow-y:auto}
+.ed-prev-wrap{position:relative;display:flex;align-items:center;justify-content:center;flex:1;min-height:230px;margin-bottom:16px}
+.ed-frame{height:min(46vh,420px)}
+.ed-load{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(5,7,15,.32);border-radius:18px}
+.ed-load.on{display:flex}
+.ed-load .sp{width:26px;height:26px;border-radius:50%;border:3px solid rgba(228,172,74,.25);border-top-color:var(--oro);animation:spin .7s linear infinite}
+.ed-load .txt{margin-left:11px;font-size:12.5px;color:var(--t2);font-weight:500}
+.ed-foot .field-lbl{margin-top:2px}
+.ed-foot .txt{margin-bottom:11px}
+.ed-err{display:none;font-size:13px;color:#f6c6b3;background:rgba(240,138,106,.1);border:1px solid rgba(240,138,106,.28);border-radius:10px;padding:9px 12px;margin-bottom:11px;line-height:1.4}
+.ed-err.on{display:block}
+.ed-actions{display:flex;gap:10px}
+.ed-actions .btn{flex:1;justify-content:center}
 </style></head>
 <body>
 <div class="titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>
@@ -472,7 +585,8 @@ body{font-family:var(--testo);color:var(--t1);background:radial-gradient(135% 75
     <div class="section"><div class="sec-head"><span class="lbl">Formato</span><span class="line"></span></div>
       <div class="formats" id="formats"><!--SCHEDE--></div></div>
     <div class="section"><div class="sec-head"><span class="lbl">Palette</span><span class="line"></span></div>
-      <div class="palettes" id="palettes"><!--PASTIGLIE--></div></div>
+      <div class="palettes" id="palettes"><!--PASTIGLIE--></div>
+      <button type="button" class="pal-add" id="pal-add"><span class="plus">＋</span> Crea la tua palette</button></div>
     <button class="genera" id="genera">Genera anteprima</button>
     <button class="carosello-btn" id="carosello">Genera il carosello <small>2 pagine: cielo + profondo</small></button>
   </aside>
@@ -508,6 +622,36 @@ body{font-family:var(--testo);color:var(--t1);background:radial-gradient(135% 75
         <div class="err-hint">Correggi il valore nel pannello a sinistra e premi di nuovo.</div>
         <button class="btn btn-gold" id="err-back">Torna alle impostazioni</button></div></div>
   </main>
+  <div class="editor" id="editor">
+    <div class="ed-card">
+      <div class="ed-head">
+        <span class="eh-ic">✦</span>
+        <div><h2>Crea una palette</h2>
+          <div class="eh-sub">Componi i colori del brand · le stelle restano coi loro colori reali</div></div>
+        <button class="eh-x" id="ed-x" type="button" aria-label="Chiudi">✕</button>
+      </div>
+      <div class="ed-body">
+        <div class="ed-controls" id="ed-groups"></div>
+        <div class="ed-side">
+          <div class="ed-prev-wrap">
+            <div class="poster-frame ed-frame" id="ed-frame"><img id="ed-prev-img" alt="Anteprima"></div>
+            <div class="ed-load" id="ed-prev-load"><span class="sp"></span><span class="txt">aggiorno…</span></div>
+          </div>
+          <div class="ed-foot">
+            <div class="ed-err" id="ed-err"></div>
+            <div class="field-lbl">Nome della palette</div>
+            <input class="txt" id="ed-name" type="text" placeholder="Es. Tramonto adriatico" maxlength="40">
+            <div class="field-lbl">Descrizione <span style="color:var(--t4)">(facoltativa)</span></div>
+            <input class="txt" id="ed-desc" type="text" placeholder="Due parole sul carattere" maxlength="80">
+            <div class="ed-actions">
+              <button class="btn btn-ghost" id="ed-cancel" type="button">Annulla</button>
+              <button class="btn btn-gold" id="ed-save" type="button">Salva palette</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 <script>
 (function(){
@@ -529,7 +673,8 @@ body{font-family:var(--testo);color:var(--t1);background:radial-gradient(135% 75
    c.querySelector('small').textContent=sq?'2 pagine: cielo + profondo'
      :'solo per i formati quadrati — Instagram ritaglia le proporzioni diverse';}
  document.querySelectorAll('.fmt').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.fmt').forEach(function(x){x.classList.remove('sel');});b.classList.add('sel');st.fmt=b.getAttribute('data-fmt');st.fmtName=b.getAttribute('data-name');st.ar=b.getAttribute('data-ar');updateCarosello();});});
- document.querySelectorAll('.pal').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.pal').forEach(function(x){x.classList.remove('sel');});b.classList.add('sel');st.pal=b.getAttribute('data-pal');st.palName=b.getAttribute('data-name');st.dot=b.getAttribute('data-dot');});});
+ function wirePal(b){b.addEventListener('click',function(){document.querySelectorAll('.pal').forEach(function(x){x.classList.remove('sel');});b.classList.add('sel');st.pal=b.getAttribute('data-pal');st.palName=b.getAttribute('data-name');st.dot=b.getAttribute('data-dot');});}
+ document.querySelectorAll('.pal').forEach(wirePal);
  // stati
  var S={initial:'s-initial',generating:'s-generating',preview:'s-preview',error:'s-error'};
  function show(n){Object.keys(S).forEach(function(k){$(S[k]).classList.toggle('active',k===n);});}
@@ -566,6 +711,100 @@ body{font-family:var(--testo);color:var(--t1);background:radial-gradient(135% 75
  $('genera').addEventListener('click',function(){run('/genera',false);});
  $('carosello').addEventListener('click',function(){run('/carosello',true);});
  $('err-back').addEventListener('click',function(){show('initial');});
+
+ // --- D18: editor di palette ---
+ // I 20+ token DI MARCA, raggruppati in modo leggibile. Le 2 chiavi astronomiche
+ // (star_ramp/planet_colors) NON compaiono: il client non le vede mai (D2/D18).
+ var __PAL=/*PALDATA*/;
+ var GROUPS=[
+  {t:'Sfondi',items:[['bg.0','Sfondo · cima'],['bg.1','Sfondo · centro'],['bg.2','Sfondo · fondo'],['disk.0','Disco · cima'],['disk.1','Disco · centro'],['disk.2','Disco · fondo']]},
+  {t:'Accenti',items:[['neon','Neon'],['gold','Oro']]},
+  {t:'Struttura',items:[['border','Bordo'],['border2','Bordo forte'],['grid','Griglia'],['divider','Divisori'],['panel','Pannello']]},
+  {t:'Testo',items:[['text','Testo'],['text2','Testo 2'],['text3','Testo 3'],['text4','Testo 4']]},
+  {t:'Etichette e Luna',items:[['moon_lit','Luna illuminata'],['moon_label','Etichetta Luna'],['bgstar','Stelle di sfondo'],['label','Etichette'],['cardinal','Punti cardinali']]},
+  {t:'Stati',items:[['status.ok','Visibile'],['status.info','Informazione'],['status.warn','Attenzione'],['status.muted','Spento']]}
+ ];
+ var groupsBuilt=false;
+ function buildGroups(){
+   if(groupsBuilt)return; groupsBuilt=true;
+   var html='';
+   GROUPS.forEach(function(g){
+     html+='<div class="ed-group"><div class="ed-grp-title">'+g.t+'<span class="line"></span></div><div class="ed-sws">';
+     g.items.forEach(function(it){
+       html+='<div class="ed-sw"><label title="'+it[1]+'">'+it[1]+'</label><input type="color" data-k="'+it[0]+'"></div>';
+     });
+     html+='</div></div>';
+   });
+   $('ed-groups').innerHTML=html;
+   document.querySelectorAll('#ed-groups input[type=color]').forEach(function(inp){
+     inp.addEventListener('input',schedulePreview);
+   });
+ }
+ function collectTokens(){
+   var t={status:{},bg:[],disk:[]};
+   document.querySelectorAll('#ed-groups input[type=color]').forEach(function(inp){
+     var k=inp.getAttribute('data-k'),v=inp.value;
+     if(k.indexOf('.')<0){t[k]=v;return;}
+     var pp=k.split('.');
+     if(pp[0]==='status'){t.status[pp[1]]=v;}else{t[pp[0]][+pp[1]]=v;}
+   });
+   return t;
+ }
+ function seed(slug){
+   var d=__PAL[slug]||__PAL['osservatorio'];
+   document.querySelectorAll('#ed-groups input[type=color]').forEach(function(inp){
+     var k=inp.getAttribute('data-k'),v,pp;
+     if(k.indexOf('.')<0){v=d[k];}
+     else{pp=k.split('.');v=(pp[0]==='status')?(d.status||{})[pp[1]]:(d[pp[0]]||[])[+pp[1]];}
+     if(v)inp.value=v;
+   });
+ }
+ var pvSeq=0,pvT;
+ function schedulePreview(){clearTimeout(pvT);pvT=setTimeout(updatePreview,220);}
+ function updatePreview(){
+   var my=++pvSeq;$('ed-prev-load').classList.add('on');
+   var payload={tokens:collectTokens(),year:$('in-anno').value,month:$('in-mese').value,
+     hour:st.ora,place:$('in-loc').value.trim()||'Vicenza',lat:$('in-lat').value,
+     lon:$('in-lon').value,formato:st.fmt};
+   fetch('/palette/anteprima',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+    .then(function(r){if(!r.ok)return r.json().then(function(j){throw new Error(j.detail||'Errore');});return r.blob();})
+    .then(function(b){if(my!==pvSeq)return;var u=URL.createObjectURL(b);var img=$('ed-prev-img');
+      if(img.dataset.u)URL.revokeObjectURL(img.dataset.u);img.src=u;img.dataset.u=u;$('ed-prev-load').classList.remove('on');})
+    .catch(function(e){if(my!==pvSeq)return;$('ed-prev-load').classList.remove('on');edErr(e.message);});
+ }
+ function edErr(msg){var e=$('ed-err');if(msg){e.textContent=msg;e.classList.add('on');}else{e.classList.remove('on');}}
+ function openEditor(){
+   buildGroups();seed(st.pal);
+   $('ed-name').value='';$('ed-desc').value='';edErr('');
+   $('ed-frame').className='poster-frame ed-frame'+(st.ar==='a4'?' a4':'');
+   $('editor').classList.add('on');updatePreview();
+ }
+ function closeEditor(){$('editor').classList.remove('on');}
+ function addPastiglia(j){
+   document.querySelectorAll('.pal').forEach(function(x){x.classList.remove('sel');});
+   var tmp=document.createElement('div');tmp.innerHTML=j.pastiglia.trim();var btn=tmp.firstChild;
+   $('palettes').appendChild(btn);wirePal(btn);btn.classList.add('sel');
+   var box=btn.querySelector('.stars');for(var i=0;i<7;i++){var s=document.createElement('i');s.style.left=(8+Math.random()*70)+'%';s.style.top=(12+Math.random()*70)+'%';s.style.opacity=(0.4+Math.random()*0.5).toFixed(2);box.appendChild(s);}
+   __PAL[j.slug]=collectTokens();
+   st.pal=j.slug;st.palName=j.name;st.dot=j.dot;
+ }
+ function save(){
+   var name=$('ed-name').value.trim();
+   if(!name){edErr('Serve un nome per la palette.');return;}
+   $('ed-save').disabled=true;edErr('');
+   fetch('/palette/salva',{method:'POST',headers:{'Content-Type':'application/json'},
+     body:JSON.stringify({name:name,descrizione:$('ed-desc').value.trim(),tokens:collectTokens()})})
+    .then(function(r){if(!r.ok)return r.json().then(function(j){throw new Error(j.detail||'Errore');});return r.json();})
+    .then(function(j){addPastiglia(j);closeEditor();})
+    .catch(function(e){edErr(e.message);})
+    .then(function(){$('ed-save').disabled=false;});
+ }
+ $('pal-add').addEventListener('click',openEditor);
+ $('ed-x').addEventListener('click',closeEditor);
+ $('ed-cancel').addEventListener('click',closeEditor);
+ $('ed-save').addEventListener('click',save);
+ $('editor').addEventListener('click',function(e){if(e.target===this)closeEditor();});
+
  updateCarosello();  // stato iniziale coerente col formato di default
 })();
 </script>

@@ -13,12 +13,33 @@ messaggio + exit 1 per il CLI, HTTP 4xx per il web.
 
 Tutti i messaggi sono in ITALIANO (invariante #5): mai un traceback, mai un 500.
 """
+import json
 import os
 import re
+import sys
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 LAYOUTS_DIR = os.path.join(BASE, "brand", "layouts")
 PALETTES_DIR = os.path.join(BASE, "brand", "palettes")
+
+
+def user_palettes_dir():
+    """Cartella delle palette CREATE DAL SOCIO (D18). Vive FUORI dal bundle, in una
+    cartella dati dell'OS scrivibile: cosi' SOPRAVVIVE a un aggiornamento (D17: il
+    bundle e' una cartella sostituita in blocco) ed e' scrivibile anche se il bundle
+    sta in una cartella di sola lettura (es. Program Files). Sovrascrivibile via env
+    per i test (non inquinare l'%APPDATA% vero)."""
+    override = os.environ.get("CIELO_PALETTE_UTENTE")
+    if override:
+        return override
+    if os.name == "nt":
+        base = os.environ.get("APPDATA") or os.path.expanduser("~")
+    elif sys.platform == "darwin":
+        base = os.path.join(os.path.expanduser("~"), "Library", "Application Support")
+    else:
+        base = os.environ.get("XDG_DATA_HOME") or os.path.join(
+            os.path.expanduser("~"), ".local", "share")
+    return os.path.join(base, "CieloDelMese", "palettes")
 
 # Copertura delle effemeridi de421.bsp: fuori da qui skyfield fallirebbe con un
 # errore oscuro. Meglio un messaggio chiaro.
@@ -39,7 +60,35 @@ def formati_disponibili():
 
 
 def palette_disponibili():
-    return sorted(f[:-5] for f in os.listdir(PALETTES_DIR) if f.endswith(".json"))
+    """UNIONE delle palette di serie (nel bundle) e di quelle create dal socio (D18):
+    la UI e il CLI le pescano da qui, quindi una palette creata appare 'come le
+    altre' senza toccare la lista."""
+    nomi = set()
+    for d in (PALETTES_DIR, user_palettes_dir()):
+        if os.path.isdir(d):
+            nomi.update(f[:-5] for f in os.listdir(d) if f.endswith(".json"))
+    return sorted(nomi)
+
+
+def _palette_file(name):
+    """Il file di una palette per nome. Le palette DI SERIE vincono sul nome: un
+    socio non puo' adombrare 'osservatorio' (i 6 canonici restano intoccabili)."""
+    p = os.path.join(PALETTES_DIR, f"{name}.json")
+    if os.path.exists(p):
+        return p
+    p = os.path.join(user_palettes_dir(), f"{name}.json")
+    return p if os.path.exists(p) else None
+
+
+def carica_palette(name):
+    """Legge una palette per nome dall'una o dall'altra cartella. Alza InputError in
+    italiano se il nome non esiste (mai un traceback: invariante #5)."""
+    f = _palette_file(name)
+    if f is None:
+        disp = palette_disponibili()
+        raise InputError(f"Palette sconosciuta: '{name}'. Disponibili: {', '.join(disp)}.")
+    with open(f, encoding="utf-8") as fh:
+        return json.load(fh)
 
 
 # ---------------------------------------------------------------------------
@@ -235,3 +284,72 @@ def _valida_planet_colors(pc, err):
         err("'planet_colors' non fisico: Marte deve essere rossastro (R > B).")
     if nb <= nr:
         err("'planet_colors' non fisico: Nettuno deve essere bluastro (B > R).")
+
+
+# ---------------------------------------------------------------------------
+# D18 — L'EDITOR DI PALETTE. Compone e SALVA una palette creata dal socio.
+#
+# La regola non negoziabile (D2/D18): il socio edita SOLO i token DI MARCA; le 2
+# chiavi ASTRONOMICHE si INNESTANO da osservatorio al salvataggio, mai dal client.
+# «Una palette puo' cambiare un blu, non puo' mentire sull'astronomia.» Qui la
+# garanzia e' STRUTTURALE: la palette si costruisce da ZERO con una whitelist di
+# sole chiavi di marca + le astro innestate — qualunque star_ramp/planet_colors
+# arrivasse dal client viene semplicemente ignorato.
+# ---------------------------------------------------------------------------
+ASTRO_KEYS = ("star_ramp", "planet_colors")  # innestate, MAI editabili
+GRAD_KEYS = ("bg", "disk")                    # gradienti di marca a 3 tinte
+
+
+def _osservatorio():
+    with open(os.path.join(PALETTES_DIR, "osservatorio.json"), encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def _slug(nome):
+    return re.sub(r"[^a-z0-9]+", "-", (nome or "").strip().lower()).strip("-")
+
+
+def componi_palette_utente(brand, name, descrizione):
+    """Costruisce la palette a partire dai SOLI token di marca (`brand`, dal client)
+    + le chiavi astronomiche INNESTATE da osservatorio. Whitelist esplicita: nessuna
+    chiave estranea del client entra. NON scrive nulla e NON valida (lo fa il
+    chiamante col cancello `valida_tema`) — cosi' e' riusabile anche per l'anteprima.
+
+    `brand` e' il dict annidato mandato dall'editor: token piatti + `bg`/`disk`
+    (liste di 3) + `status` (oggetto ok/info/warn/muted)."""
+    brand = brand or {}
+    st = brand.get("status") or {}
+    theme = {"name": name, "descrizione": descrizione}
+    for k in STYLE_TOKENS:                       # 16 token piatti di marca
+        theme[k] = brand.get(k)
+    for k in GRAD_KEYS:                           # gradienti a 3 tinte (bg, disk)
+        theme[k] = brand.get(k)
+    theme["status"] = {k: st.get(k) for k in STATUS_KEYS}
+    osserv = _osservatorio()                      # ASTRO: innestate, non dal client
+    for k in ASTRO_KEYS:
+        theme[k] = osserv[k]
+    return theme
+
+
+def salva_palette_utente(name, descrizione, brand):
+    """Compone + VALIDA (cancello D2) + scrive la palette nella cartella del socio.
+    Alza InputError in italiano (nome mancante, collisione con una di serie, o
+    contratto non rispettato) SENZA scrivere. Ritorna (slug, theme, percorso)."""
+    nome = (name or "").strip()
+    if not nome:
+        raise InputError("Serve un nome per la palette.")
+    slug = _slug(nome)
+    if not slug:
+        raise InputError(f"Il nome '{name}' non produce un nome-file valido: "
+                         "usa lettere o numeri.")
+    if os.path.exists(os.path.join(PALETTES_DIR, f"{slug}.json")):
+        raise InputError(f"C'e' gia' una palette di serie chiamata '{slug}': "
+                         "scegli un altro nome.")
+    theme = componi_palette_utente(brand, nome, (descrizione or "").strip())
+    valida_tema(theme, f"{slug}.json")            # IL CANCELLO — se non valida, non salva
+    d = user_palettes_dir()
+    os.makedirs(d, exist_ok=True)
+    path = os.path.join(d, f"{slug}.json")
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(theme, fh, ensure_ascii=False, indent=2)
+    return slug, theme, path

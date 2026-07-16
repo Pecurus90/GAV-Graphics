@@ -27,7 +27,6 @@ import validate
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 LAYOUTS_DIR = os.path.join(BASE, "brand", "layouts")
-PALETTES_DIR = os.path.join(BASE, "brand", "palettes")
 
 
 def main():
@@ -62,8 +61,9 @@ def main():
         palette = validate.valida_palette(args.palette)
         with open(os.path.join(LAYOUTS_DIR, f"{fmt}.json"), encoding="utf-8") as fh:
             layout = json.load(fh)
-        with open(os.path.join(PALETTES_DIR, f"{palette}.json"), encoding="utf-8") as fh:
-            theme = json.load(fh)
+        # La palette si legge dall'UNIONE (di serie + create dal socio, D18): cosi'
+        # una palette dell'editor si usa da CLI 'come le altre'.
+        theme = validate.carica_palette(palette)
         validate.valida_tema(theme, f"{palette}.json")
     except validate.InputError as e:
         raise SystemExit(f"Errore: {e}")
