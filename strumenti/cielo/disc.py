@@ -31,7 +31,7 @@ class DiscMixin:
     def sky_disc_svg(self, cx, cy, rad, lst, lat_rad, theme, ramp=None,
                      cardinals=True, labels=True, marquee=True, ticks=None,
                      star_names=None, declutter=False, clip_id='dclip',
-                     figure_stars=False):
+                     figure_stars=False, cardinal_gap=22):
         """Disegna SOLO il disco cielo (cornice + stelle + costellazioni) di
         centro (cx,cy) e raggio rad, a QUALSIASI misura. Restituisce il
         frammento SVG (stringa). Le costanti visive scalano con k=rad/R, quindi
@@ -120,8 +120,14 @@ class DiscMixin:
             a(self._disc_ticks(cx, cy, rad, k, theme, ticks))
         # punti cardinali
         if cardinals:
+            # `cardinal_gap` (default 22): quanto FUORI dal bordo cadono le lettere,
+            # in unita' del disco di riferimento (scalate da k). Additivo - assente
+            # -> +22 come sempre. Zenit, col disco che SBORDA il canvas (rad 560),
+            # lo mette NEGATIVO per portarle appena DENTRO il canvas (invariante #3:
+            # N in alto, E a sinistra = orientamento, identita' visiva). Non tocca
+            # la proiezione: solo dove finisce la lettera.
             for lab,ang in (('N',0),('E',90),('S',180),('O',270)):
-                rr=rad+22*k; ax=cx-rr*np.sin(np.radians(ang)); ay=cy-rr*np.cos(np.radians(ang))
+                rr=rad+cardinal_gap*k; ax=cx-rr*np.sin(np.radians(ang)); ay=cy-rr*np.cos(np.radians(ang))
                 a(f'<text x="{ax:.1f}" y="{ay+6*k:.1f}" fill="{theme["cardinal"]}" font-size="{19*k:.1f}" font-weight="bold" text-anchor="middle">{self._esc(lab)}</text>')
         return '\n'.join(s)
 
@@ -230,4 +236,5 @@ class DiscMixin:
                                  ticks=b.get("ticks"),
                                  star_names=b.get("star_names"),
                                  declutter=b.get("declutter", False),
-                                 figure_stars=b.get("figure_stars", False))
+                                 figure_stars=b.get("figure_stars", False),
+                                 cardinal_gap=b.get("cardinal_gap", 22))

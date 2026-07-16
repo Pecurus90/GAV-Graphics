@@ -7,7 +7,7 @@
      "starfield": {"seed": 8, "count": 240, "r_min": 0.4, "r_max": 1.7,
                    "op_min": 0.12, "op_max": 0.5, "fill": "bgstar"}},
 
-    {"type": "disc", "cx": 540, "cy": 540, "rad": 560, "declutter": true,
+    {"type": "disc", "cx": 540, "cy": 540, "rad": 560, "declutter": true, "cardinal_gap": -27,
      "labels": ["UMa", "UMi", "Cas", "Cep", "Dra", "Cyg", "Lyr", "Aql", "Her",
                 "CrB", "Boo", "Sco", "Sgr", "Peg", "And", "Per", "Aur", "Ori",
                 "Tau", "Gem", "Leo", "CMa", "Oph", "Ser", "Aqr", "Cap", "Del",
