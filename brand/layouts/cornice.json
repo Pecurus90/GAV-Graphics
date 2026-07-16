@@ -47,7 +47,7 @@
     {"type": "panel", "x": 720, "y": 748, "w": 320, "h": 288, "rx": 16,
      "fill": "panel", "stroke": "border2", "stroke_width": 1},
     {"type": "text", "x": 742, "y": 782, "fill": "label", "size": 13,
-     "weight": "600", "letter_spacing": 2.2, "content": "COLORI DELLE STELLE"},
+     "weight": "600", "letter_spacing": 2.2, "content": "TEMPERATURA STELLE"},
     {"type": "line", "x1": 742, "y1": 794, "x2": 1018, "y2": 794, "stroke": "divider", "stroke_width": 1},
     {"type": "swatches", "from": "ramp", "x0": 750, "cy": 822, "r": 7,
      "cols": 1, "col_step": 0, "row_step": 34,

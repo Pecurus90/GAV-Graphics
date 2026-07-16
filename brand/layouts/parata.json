@@ -37,7 +37,7 @@
     {"type": "disc", "cx": 540, "cy": 600, "rad": 196, "labels": false},
 
     {"type": "text", "x": 44, "y": 434, "fill": "label", "size": 13,
-     "weight": "600", "letter_spacing": 2.2, "content": "COLORI DELLE STELLE"},
+     "weight": "600", "letter_spacing": 2.2, "content": "TEMPERATURA STELLE"},
     {"type": "text", "x": 1036, "y": 434, "fill": "text4", "size": 11,
      "anchor": "end", "content": "temperatura"},
     {"type": "swatches", "from": "ramp", "x0": 46, "cy": 476, "r": 8,
