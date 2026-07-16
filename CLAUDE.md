@@ -629,6 +629,36 @@ imprevisto.
 4. **#7f — La barra laterale (D10) + il contratto del tema per-strumento (D13).**
    Una voce attiva (*Cielo del Mese*), una "prossimamente" spenta. **Non** un
    framework per plugin.
+4b. **#7i — Il set finale dei quadrati.** *(FATTO, 2026-07-16.)* Il set è
+   **a4 · dashboard · parata · cornice · zenit · profondo**. Ritirati `post`,
+   `editorial`, `rail` (ognuno con un erede; `post` portava ancora il vecchio
+   `moon_panel` a 4 fasi: debito, non minimalismo). **Default: `dashboard`** —
+   Marco ha visto Zenit reso e ha scelto dashboard; il cancello «prima vederlo
+   reso» è servito a questo. Unica aggiunta di codice: il pannello accetta
+   `fill_opacity`/`opacity`/`stroke_opacity` **opzionali** (il vetro di Zenit),
+   emessi solo se presenti → golden fermi. Il pannello dei colori si chiama ora
+   **«TEMPERATURA STELLE»** su tutti i quadrati.
+   **DUE DIFETTI APERTI, misurati dall'architetto sull'output reso** (prossimo
+   giro, dopo R11):
+   - **Zenit non ha i punti cardinali.** Esistono nell'SVG ma cadono **fuori dal
+     canvas** e resvg li taglia: `rad=560` su canvas 1080 e `disc.py:124` ha
+     `rr=rad+22` **cablato** → N a y −42, S a 1122, E a x −42, O a 1122. **È una
+     carta del cielo senza orientamento**, e l'invariante #3 dice che N-in-alto /
+     E-a-sinistra *è* identità visiva. Solo Zenit: dashboard/parata/cornice li
+     hanno dentro. Rimedio proposto: rendere `+22` un **parametro opzionale** (come
+     `fill_opacity`), così Zenit li mette **dentro** il bordo e resta a tutto campo.
+   - **Cornice: il pallino di Marte è verde.** Usa `"dot": {"fill_status": true}`;
+     dashboard/zenit usano `fill_planet`, parata usa `planet_parade`. **Ereditato
+     fedelmente da `editorial`** — non un errore dell'esecutore — ma ora Cornice è
+     **l'unico**, ed è *la stessa forma di debito* per cui `post` è stato ritirato.
+     Sullo stesso poster c'è la legenda che insegna *pallino = colore fisico*: un
+     Marte verde lì sotto è ciò che **D2** esiste per impedire.
+   **LA LEZIONE, che vale più dei due difetti:** l'esecutore ha scritto «PNG 1080,
+   **guardati**» — e li aveva guardati davvero. **Guardare trova solo ciò che stai
+   cercando.** È identico a R10 (una collisione grossolana sopravvissuta a dieci
+   giri di gente che guardava). La conclusione non è «guarda meglio»: è che quel
+   controllo va reso **una rete** — un test che pretenda i cardinali **dentro il
+   canvas**, con l'iniezione del guasto.
 5. **Il packaging: l'`.exe` in GitHub Actions (D4 + D15).** *(Anticipato su Pillole —
    deciso da Marco, 2026-07-14: «prima l'exe che funziona e lo condivido, poi
    progettiamo Pillole».)*
@@ -665,6 +695,10 @@ Ordinato per rischio reale.
   esistenti + contratto del tema (D2). Errore = messaggio in italiano; il CLI
   esce con exit 1, la web risponde **HTTP 400** (non più 500, non più 200
   incoerente).
+  **⚠️ RISOLTO NON VUOL DIRE COMPLETO — `place` NON è validato** *(scoperto
+  2026-07-16, vedi R11)*: è **testo libero** da CLI (`cielo.py:41`) **e dal web**
+  (parametro di `/preview`, `/download`, `/genera`), e finisce **grezzo** nel testo
+  dell'SVG. Quarta volta che una riga di questo file viene smentita dalla misura.
 - **R5 — RISOLTO (#5b).** Il layout A4 non è più fuso in `generate()`: vive in
   `brand/layouts/a4.json`. `generate()` è un compositore che cammina i blocchi.
   Il confine è: il **file** possiede cosa/dove/quale-dato; il **codice** possiede
@@ -785,9 +819,75 @@ Ordinato per rischio reale.
     B occupava quello spazio). Il **post quadrato la tiene** (pannello "COLORI DELLE
     STELLE"): incoerenza. *(Marco, 2026-07-15:)* si **rimette nel giro di revisione
     dei design**, chiedendo al designer di trovarle posto — non una toppa.
+    **VERIFICATA E PRONTA (2026-07-16), da eseguire.** Vedi
+    `docs/design_handoff/a4_legenda_stelle/`. Il designer (2º giro, dopo che il 1º
+    fu rimandato indietro con la geometria vera) la mette nella **striscia fra il
+    bordo del disco e il divisore**, col divisore come linea di base. **L'architetto
+    ha verificato sul NOSTRO render, non sul mockup**: disco reale `cx450 cy500
+    r384` → bordo a **y884**, divisore **y900**, «S» **y912**; la striscia è libera,
+    i campioni stanno a r≥400 e l'alone (blur σ3,4 su r384) sfuma a ~395 — nessuna
+    collisione. *(L'architetto aveva segnalato una collisione con l'alone: **ritratta**,
+    l'aveva calcolata sulla geometria del mockup.)*
+    **Due correzioni al designer, trovate RENDENDO:** (1) le sue spaziature (64 px)
+    **fanno scavallare i testi**, perché misurate sulle sue temperature corte e non
+    sulle nostre, ancorate al B-V — i numeri che reggono sono `x0=222 step=106 r=4.5`
+    corpo 11, resi e guardati; (2) i **sei hex cablati si buttano** (invariante #2):
+    i colori vengono dal `star_ramp` via `bv2hex`, e anche le **sue temperature si
+    buttano** perché contraddicono quelle del quadrato.
+    **Il lavoro si sgonfia: è DATI, zero Python.** Il blocco `swatches`
+    (`panels.py:226`) **sa già fare la fila orizzontale** — il commento dice che
+    *era proprio l'A4*; #7h l'aveva solo rimosso da `a4.json` (`385af71`). Stessa
+    economia di `moon_calendar`.
+    **Marco ha scelto le TEMPERATURE** (viste rese, contro le **parole** storiche
+    «calde·bianche·gialle·arancioni·rosse»): un pallino giallo con scritto "gialle"
+    dice il colore, non la temperatura — e «colore = temperatura» è *il messaggio*.
+    **Il titolo è `TEMPERATURA STELLE`**, non «COLORI DELLE STELLE»: #7i ha
+    rinominato il pannello su tutti i quadrati, e l'A4 segue.
+    **Muoverà il golden dell'A4**: movimento deliberato e contato (+6 `<circle>`,
+    +7 `<text>`, disco intatto).
   - **Margine di stampa in basso ~2,8 mm** (footer a y1258 su 1273): identico al
     mockup, ma **da verificare in tipografia** (di solito vogliono 3-5 mm). Si alza
     con un numero in `a4.json`.
+
+- **R11 — Il compositore non fa l'ESCAPING XML dei testi.** *(Trovato
+  dall'esecutore in #7i, riportato e **non corretto** — regola #4. Riprodotto
+  dall'architetto, non dedotto.)* `compose/compositor.py::_render_text` emette
+  `b["content"].format(**ctx)` **grezzo** nell'SVG. Con `place="Bassano &
+  Dintorni"` l'SVG **non passa** `xml.dom.minidom.parseString` (la `&` cruda nel
+  sottotitolo). Ha già morso in casa: è ciò che ha fatto crashare `cornice` con un
+  `</>` in un'etichetta.
+  **Non è latente: è l'input dell'utente** (vedi il buco di R4 sopra), ed è
+  precisamente ciò che **D4 dichiara bloccante** — *«un HTTP 500 sul PC di un socio
+  è "il programma non funziona", e non hai i log»*. Va chiuso **prima del rilascio**.
+  *Il fix è golden-safe e la previsione è falsificabile:* i golden hanno **zero `&`
+  grezze** e **nessun layout/dato/palette contiene `&`** → l'escaping deve essere un
+  **no-op sull'output attuale**. Se un golden si muove, una premessa è falsa: si
+  guarda in faccia, non si rigenera.
+  **Attenzione al confine:** `_render_text` **potrebbe non essere l'unico** punto
+  d'emissione di testo (campioni, pianeti, stelle, Messier, costellazioni). Vanno
+  trovati tutti.
+  *Deciso da Marco (2026-07-16): si chiude **solo l'escaping**; la validazione di
+  `place` è un giro a parte, perché «cosa sia un nome-luogo lecito» è una domanda
+  di prodotto, non di codice.*
+
+- **R12 — Gli asset di `docs/` non sono in git: la documentazione di design è
+  committata a metà.** *(Trovato 2026-07-16, verificato con `git ls-files`.)*
+  `.gitignore` ha `*.svg` e `*.png` **globali** — scritti per l'output del motore
+  (`out/`), ma sono pattern globali e si mangiano anche `docs/`. Contraddice **la
+  regola delle case** scritta in questo file: `docs/` è *ciò che serve agli UMANI*
+  e sta nel repo; `out/` è *usa e getta, mai in git*. L'ignore tratta il primo come
+  il secondo.
+  Conseguenze **misurate, non temute**:
+  - **`docs/mockups/dashboard.svg` non è in git** — cioè *la prova* che R6 cita per
+    dire che i font del brand funzionano **esiste solo sul PC di Marco**. Se cambia
+    computer, la prova sparisce e resta l'affermazione.
+  - Gli **handoff HTML del designer sono tracciati, i loro `assets/*.png` no**: chi
+    clona apre l'HTML e vede le immagini rotte.
+  - **Nessuna PNG, in tutto `docs/`, è tracciata.**
+  Rimedio (non applicato): restringere l'ignore con un'eccezione per `docs/`.
+  Costo ~1-2 MB. **`.gitignore` non è né CLAUDE.md né `docs/`: non è roba
+  dell'architetto** — va nel prompt dell'esecutore.
+  *Marco (2026-07-16): «fermati, ne parliamo dopo» — si decide a coda vuota.*
 
 **Mai verificato:** la correttezza astronomica dell'output. Sappiamo che il
 codice produce un SVG. Non sappiamo che sia giusto.

@@ -34,12 +34,14 @@ che però ha *tutto* il contenuto.
 
 ## Conseguenza: il DEFAULT cambia
 
-`post` è oggi il default in `app/main.py` (`formato="post"` e
-`body.get("formato","post")`) **e il render della CI** (`ci.yml`: `--format post`).
-**Marco ha scelto: il nuovo default è ZENIT.**
-⚠️ **Ordine obbligato:** il default si può impostare **solo dopo** aver costruito
-Zenit e averlo **visto reso** dal nostro motore. Se alla prova non convince, si
-ripiega su `dashboard`. Non è un dubbio sulla scelta: è che prima Zenit non esiste.
+`post` era il default in `app/main.py` **e il render della CI** (`ci.yml`).
+
+**ESITO (#7i, 2026-07-16): il default è `dashboard`, non Zenit.**
+La regola era: il default si sposta **solo dopo** aver visto Zenit reso — e se non
+convince, si ripiega su `dashboard`. **Zenit è stato costruito, reso e guardato:
+Marco ha scelto `dashboard`.** Zenit resta nel set, non è il default.
+*(Questo paragrafo diceva «il nuovo default è ZENIT»: corretto dopo la prova.
+Il cancello "prima vederlo reso" ha funzionato — è servito a questo.)*
 
 ## Costo (verificato)
 
