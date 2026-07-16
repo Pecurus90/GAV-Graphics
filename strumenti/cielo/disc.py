@@ -72,7 +72,11 @@ class DiscMixin:
                 a(f'<circle cx="{xs[i]:.1f}" cy="{ys[i]:.1f}" r="{2.2*k:.2f}" fill="{theme["text"]}" opacity="0.72"/>')
         else:
             alt,az=self.altaz(self.sra,self.sdec,lst,lat_rad); xs,ys=self.project(alt,az,cx,cy,rad)
-            for i in np.argsort(-self.smag):
+            # kind='stable': il 98% delle stelle e' in pareggio di magnitudine e un
+            # sort instabile rompe il pareggio in modo diverso per CPU/build numpy
+            # -> ordine di disegno diverso su ogni piattaforma (invariante #6 violato,
+            # stanato dalla CI). 'stable' fissa il tie-break all'indice originale.
+            for i in np.argsort(-self.smag, kind='stable'):
                 if alt[i]<=0 or self.smag[i]>5.25: continue
                 sr=k*max(0.45,(5.35-self.smag[i])*0.92); col=bv2hex(ramp,self.sbv[i])
                 if self.smag[i]<1.5:

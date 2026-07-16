@@ -104,6 +104,16 @@ descrive lo fa scollare al primo cambiamento.
 5. **Tutti i testi rivolti all'utente sono in italiano.** Anche gli errori.
 6. **Il codice del motore è puro:** stesse coordinate + stessa data ⇒ stesso
    output. Nessuna I/O nascosta, nessun orologio di sistema.
+   *(Violato in silenzio fino al 2026-07-15, scoperto dalla CI — #8 M2/B1.)*
+   `disc.py:75` ordinava le stelle con `np.argsort(-smag)` (quicksort **instabile**),
+   e il **98% delle 5044 stelle è in pareggio di magnitudine** (411 magnitudini
+   distinte, gruppo max 72). Il tie-break varia per CPU/build numpy → **ordine delle
+   stelle diverso su ogni piattaforma** (Windows-CI e Windows locale davano valori
+   diversi: 180,6 vs 532,6 per la stessa coordinata). Non era rumore d'ultima-cifra:
+   un riordino. **La CI l'ha stanato, il golden a tolleranza l'ha giustamente
+   respinto** (non si alza la tolleranza per un bug). Fix: `kind='stable'` (tie-break
+   per indice originale, identico ovunque) + rigenerazione deliberata dei golden.
+   *Lezione: "puro" su una macchina sola è un caso fortunato, non una prova.*
 
 ---
 
