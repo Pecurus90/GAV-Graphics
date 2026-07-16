@@ -705,8 +705,19 @@ Ordinato per rischio reale.
   lontano dal repo, e da lì CLI+web+`Avvia.bat` funzionano. Font del brand
   verificati in modo **non falsificabile**: dashboard reso dal bundle spostato =
   **sha256 IDENTICO** al rendering in-repo coi font del brand (un ripiego sul font
-  di sistema avrebbe cambiato i byte). Restano da verificare **su Mac** (Milestone
-  2) — lì i binari nativi e Gatekeeper sono un'altra prova, non ancora eseguita.
+  di sistema avrebbe cambiato i byte).
+  **CHIUSO ANCHE SU MAC (#8 M2/B1, 2026-07-15) — CI verde su entrambi.** Su
+  `macos-latest` (arm64): wheel `resvg_py` macOS + `de421` installati senza build da
+  sorgente, render eseguito, **PNG scaricato e GUARDATO** (414 KB, 1080×1080, poster
+  vero — disco, ~5000 stelle, logo). Suite **230 verde su macOS E Windows** (numpy
+  2.3.5). **Il motore è deterministico su entrambi** (dopo il fix dell'argsort).
+  **Due code aperte, dichiarate:**
+  - **I font del brand su Mac NON sono ancora provati**: il render R9 usa `post`,
+    che dichiara Helvetica/Arial. Barlow/Instrument su Mac si provano rendendo un
+    formato del brand (dashboard) in CI — B2.
+  - **Gatekeeper NON è provato dalla CI**: il runner esegue senza chiedere permessi;
+    il socio che fa doppio clic su un'app non firmata sì. Serve un **Mac vero** +
+    la decisione firma/notarizzazione.
   *Nota: il rischio temuto (deps native) è filato liscio; l'unico attrito è stato
   ambientale (porta 8000 occupata da un server fantasma) — non un difetto del
   bundle.*
