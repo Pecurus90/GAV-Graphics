@@ -525,6 +525,32 @@ descrive lo fa scollare al primo cambiamento.
   come le altre.
   **Timing (Marco):** **PRIMA dell'exe** — la prima versione che arriva ai soci lo
   avrà dentro. Sposta il rilascio, consegna un'app più completa.
+  **FATTO e verificato dall'architetto (2026-07-16).** Il cancello regge: iniettando
+  un client malizioso (`Marte:#0000ff`) l'astro viene **innestato da osservatorio e
+  il valore del client ignorato** — dimostrato col rosso. Nell'editor `star_ramp` e
+  `planet_colors` sono **irraggiungibili**, e il vincolo è **detto all'utente** nel
+  sottotitolo: *«Componi i colori del brand · le stelle restano coi loro colori
+  reali»*. Poster reso con una palette creata a mano: bellissimo, e **le stelle
+  mantengono i colori veri** (Arturo arancione, Antares rosso) su fondo viola.
+  **Correzioni dell'esecutore, accettate:**
+  - **I colori editabili sono 26, non 20** (16 piatti + `bg`×3 + `disk`×3 +
+    `status`×4). L'architetto confondeva "20 chiavi" con "20 colori" (e
+    `descrizione` non è un colore). Contato e confermato.
+  - **`disk` è EDITABILE, non innestato:** non è fisica, è lo sfondo del disco =
+    identità visiva. Prova: **le 6 palette di serie hanno `disk` diversi**.
+    *(Wart segnalata, non corretta: `validate.py` lo classifica sotto "astronomia"
+    pur senza vincolo fisico — raggruppamento fuorviante, funziona lo stesso.)*
+  - **Il CLI legge dall'unione** (di-serie + utente): una palette dell'editor si usa
+    anche da riga di comando. Era un bug introdotto dall'unione stessa.
+  **Misura dell'anteprima (smonta l'ipotesi dell'architetto):** effemeridi **~0 ms**
+  → non c'è geometria da cachare; il costo è il **raster** (932 ms @1080, 538 @600),
+  che dipende dal tema e quindi **non è cacheabile**. Anteprima ~0,8 s a 600 px,
+  aggiornata al rilascio del cursore, spinner onesto (nessuna live-preview promessa).
+  **Dove vivono le palette utente:** cartella **dati dell'OS** (non nel bundle) →
+  **sopravvivono all'aggiornamento** del pacchetto. Prezzo accettato: non viaggiano
+  se il socio copia la cartella su un altro PC.
+  **Non verificato:** su **Mac** la cartella dati e il render con palette utente non
+  sono provati (codice OS-condizionale, eseguito solo su Windows) — da coprire in B2.
 - **D15 — L'`.exe` apre il browser; e cosa manca DAVVERO per averlo.**
   *(Deciso da Marco, 2026-07-14.)* Doppio clic ⇒ il programma parte in silenzio e
   **apre il browser** sull'interfaccia dell'app. Niente terminale, niente Python
