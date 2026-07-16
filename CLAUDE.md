@@ -640,19 +640,47 @@ imprevisto.
    **«TEMPERATURA STELLE»** su tutti i quadrati.
    **DUE DIFETTI APERTI, misurati dall'architetto sull'output reso** (prossimo
    giro, dopo R11):
-   - **Zenit non ha i punti cardinali.** Esistono nell'SVG ma cadono **fuori dal
-     canvas** e resvg li taglia: `rad=560` su canvas 1080 e `disc.py:124` ha
-     `rr=rad+22` **cablato** → N a y −42, S a 1122, E a x −42, O a 1122. **È una
-     carta del cielo senza orientamento**, e l'invariante #3 dice che N-in-alto /
-     E-a-sinistra *è* identità visiva. Solo Zenit: dashboard/parata/cornice li
-     hanno dentro. Rimedio proposto: rendere `+22` un **parametro opzionale** (come
-     `fill_opacity`), così Zenit li mette **dentro** il bordo e resta a tutto campo.
-   - **Cornice: il pallino di Marte è verde.** Usa `"dot": {"fill_status": true}`;
-     dashboard/zenit usano `fill_planet`, parata usa `planet_parade`. **Ereditato
-     fedelmente da `editorial`** — non un errore dell'esecutore — ma ora Cornice è
-     **l'unico**, ed è *la stessa forma di debito* per cui `post` è stato ritirato.
-     Sullo stesso poster c'è la legenda che insegna *pallino = colore fisico*: un
-     Marte verde lì sotto è ciò che **D2** esiste per impedire.
+   - **Zenit non aveva i punti cardinali. RISOLTO (2026-07-16, commit `6fb4448`).**
+     Esistevano nell'SVG ma cadevano **fuori dal canvas** e resvg li tagliava:
+     `rad=560` su canvas 1080 e `disc.py:124` aveva `rr=rad+22` **cablato** → N a
+     y −42, S a 1122, E a x −42, O a 1122. **Era una carta del cielo senza
+     orientamento** (invariante #3). Solo Zenit.
+     Fix: `+22` è ora `cardinal_gap`, **parametro opzionale** del blocco `disc`
+     (additivo come `fill_opacity`: assente ⇒ identico); `zenit.json` usa
+     `"cardinal_gap": -27` e li mette **dentro** il bordo, restando a tutto campo.
+     Coordinate reali dopo il fix: **N(540, 28.1) · E(19.4, 548.8) ·
+     S(540, 1069.4) · O(1060.6, 548.8)** — tutte dentro. Altri formati: **0 righe
+     cambiate** (verificato diffando prima/dopo via `git stash`, non dedotto).
+     **E ora c'è una RETE, non un'occhiata**: `tests/test_cardinals.py` pretende i
+     quattro cardinali dentro il canvas **per ogni formato**; iniettato il guasto
+     → `FAILED [zenit]` con `assert 0 <= -43.3`, ripristinato → 5 verdi.
+   - **Cornice: il pallino di Marte è verde. APERTO — va al giro di design.**
+     Usa `"dot": {"fill_status": true}`; dashboard/zenit usano `fill_planet`,
+     parata usa `planet_parade`. **Ereditato fedelmente da `editorial`** — non un
+     errore dell'esecutore — ma ora Cornice è **l'unico**, ed è *la stessa forma di
+     debito* per cui `post` è stato ritirato. Sullo stesso poster c'è la legenda
+     «TEMPERATURA STELLE» che insegna *pallino = colore fisico*: un Marte verde lì
+     sotto è ciò che **D2** esiste per impedire.
+     **L'architetto aveva ordinato `fill_planet`. L'esecutore si è FERMATO, e aveva
+     ragione** *(settima correzione, misurata contro una deduzione)*: in Cornice
+     l'osservabilità **vive solo nel colore del pallino** — Cornice mostra nome e
+     orari, **non la nota** che i tre fratelli hanno. Con `fill_planet` liscio
+     Urano/Nettuno (`info` = *«Telescopico»*, `ephemeris.py:135`) perderebbero
+     l'unico segno che servono un telescopio.
+     **Gerarchia dei due mali, ed è ciò che decide:** Marte verde è
+     un'**incoerenza** (nessuno ci rimette una serata); «Telescopico» che sparisce
+     **manda un socio a cercare Urano a occhio nudo** e a concludere che il
+     programma sbaglia — il peccato che il progetto nomina più volte (*«mai mandare
+     l'osservatore a cercare il nulla»*: è la ragione per cui M33 non dice
+     «binocolo»). L'istruzione dell'architetto, presa alla lettera, avrebbe
+     **peggiorato** il poster.
+     **La diagnosi vera non è «token sbagliato»: Cornice ha perso la COLONNA DELLE
+     NOTE** che dashboard/Zenit/Parata hanno, e usa il pallino come surrogato. Il
+     `status_ring` (che `panels.py:52` già supporta) sarebbe lo stesso difetto
+     travestito: un secondo linguaggio sullo stesso pallino, **senza legenda**.
+     Dove entrano le note è una domanda di **spazio e gerarchia** = designer.
+     *Marco (2026-07-16): si tiene `fill_status` — male minore e reversibile — e il
+     Task 2 si chiude dentro il giro di design.*
    **LA LEZIONE, che vale più dei due difetti:** l'esecutore ha scritto «PNG 1080,
    **guardati**» — e li aveva guardati davvero. **Guardare trova solo ciò che stai
    cercando.** È identico a R10 (una collisione grossolana sopravvissuta a dieci
@@ -849,13 +877,35 @@ Ordinato per rischio reale.
     mockup, ma **da verificare in tipografia** (di solito vogliono 3-5 mm). Si alza
     con un numero in `a4.json`.
 
-- **R11 — Il compositore non fa l'ESCAPING XML dei testi.** *(Trovato
-  dall'esecutore in #7i, riportato e **non corretto** — regola #4. Riprodotto
-  dall'architetto, non dedotto.)* `compose/compositor.py::_render_text` emette
-  `b["content"].format(**ctx)` **grezzo** nell'SVG. Con `place="Bassano &
-  Dintorni"` l'SVG **non passa** `xml.dom.minidom.parseString` (la `&` cruda nel
-  sottotitolo). Ha già morso in casa: è ciò che ha fatto crashare `cornice` con un
-  `</>` in un'etichetta.
+- **R11 — L'escaping XML dei testi. RISOLTO (2026-07-16), con un RESIDUO
+  dichiarato.** *(Trovato dall'esecutore in #7i, riportato e **non corretto** —
+  regola #4; riprodotto dall'architetto, non dedotto.)*
+  Era: `_render_text` emetteva `b["content"].format(**ctx)` **grezzo**. Con
+  `place="Bassano & Dintorni"` l'SVG **non passava** `parseString` (la `&` cruda
+  nel sottotitolo). Aveva già morso in casa: è ciò che ha fatto crashare `cornice`
+  con un `</>` in un'etichetta.
+  **Fix e prova:** golden `diff` **vuoto** e — prova forte — **a4 rigenerato con
+  sha256 IDENTICO al golden** (non «non vedo differenze»: *è lo stesso file*). La
+  previsione del no-op ha retto byte-per-byte. Suite 238→242. Il test guarda
+  `parseString`, cioè **il difetto**, non `'&amp;' in svg`, che sarebbe la toppa;
+  iniettato il guasto → **4 rossi** con l'`ExpatError` vero, ripristinato → verdi.
+  **Il choke point è la parte elegante:** `panels.py` instrada *tutto* il suo testo
+  attraverso `_render_text` (pianeti, parata, luna, calendario, campioni), quindi
+  **un punto solo** protegge pannelli e layout. Ed è dove entra `place`.
+  **Scelta dell'esecutore, confermata dall'architetto:** ha escapato **tutti** i
+  punti-testo, non solo `place`. Ragione migliore della mia: **i nomi Messier sono
+  dati che il GAV modifica** — una `&` lì è plausibile, non ipotetica. Escapare solo
+  `place` avrebbe tappato *un ingresso*, non *la classe*. Ha evitato la trappola
+  giusta: in `messier.py` escapa **i valori** e lascia `<tspan>` e `—` (escapare
+  tutta la stringa avrebbe stampato `&lt;tspan&gt;`).
+  **⚠️ RESIDUO — undici `_esc()` A MANO, non coperti da test.** I bypass di
+  `_render_text` sono `disc.py` (4: stella-guida, costellazione, cardinale,
+  etichetta anti-collisione) e `messier.py` (7). Il test passa **solo `place`**, che
+  arriva al sottotitolo — **non** ai nomi Messier né alle stelle. Quindi: se domani
+  qualcuno aggiunge la dodicesima etichetta e scorda `_esc`, **nessun test lo dice**.
+  Un choke point difeso da una rete, e undici punti difesi dalla **disciplina** — che
+  in questo progetto è già fallita tre volte. *Registrato, non corretto: il commit
+  era pulito e a scopo unico, allargarlo è ciò che vietiamo.*
   **Non è latente: è l'input dell'utente** (vedi il buco di R4 sopra), ed è
   precisamente ciò che **D4 dichiara bloccante** — *«un HTTP 500 sul PC di un socio
   è "il programma non funziona", e non hai i log»*. Va chiuso **prima del rilascio**.
