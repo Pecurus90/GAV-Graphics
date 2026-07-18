@@ -28,7 +28,7 @@
     {"type": "text", "x": 156, "y": 138, "fill": "text", "size": 37,
      "weight": "800", "letter_spacing": 0.5, "content": "IL CIELO DI {month_upper} {year}"},
     {"type": "text", "x": 158, "y": 168, "fill": "text3", "size": 12.5,
-     "content": "Nord Italia · {place} · valido ~15 {month_name}, ore {hour}:00"},
+     "content": "Cielo visibile dal Nord Italia · {place} · valido ~15 {month_name}, ore {hour}:00"},
 
     {"type": "panel", "x": 712, "y": 40, "w": 328, "h": 320, "rx": 18,
      "fill": "panel", "fill_opacity": 0.6,
