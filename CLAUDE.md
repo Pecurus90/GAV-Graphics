@@ -791,6 +791,32 @@ imprevisto.
    **buttato** perché il designer aveva misurato il proprio mockup — l'unica fonte che
    può vedere — e quel mockup era **più vecchio del programma**. Vedi *«Il confine col
    designer»* nel Metodo di lavoro.
+4e. **#7n — FASE 1: il contenuto unificato fra i formati.** *(FATTO, 2026-07-18.)*
+   Marco: *«dashboard ok, non c'è da fare nulla»* — **fonte di verità, intatto**; gli
+   altri si allineano. **Prima il contenuto, poi la geometria**, e la ragione è
+   operativa: fissato cosa deve starci dentro, si sa **quanto spazio resta al disco**.
+   Al contrario si ingrandisce la mappa e poi si scopre che il contenuto non ci sta.
+   - **Testata** allineata su Zenit (diceva «Nord Italia…», ora «Cielo visibile dal
+     Nord Italia…» come gli altri tre).
+   - **Legenda «TEMPERATURA STELLE» rimessa sull'A4** — la coda di #7h, chiusa.
+   - **Piedino A4**: aggiunta l'email, tolto «GAV · Vicenza» (ripeteva la testata) →
+     `instagram · facebook · email`, identico a dashboard e parata.
+   - **Icone di Zenit: RIMANDATE, deliberatamente.** Il contenuto **c'è già** (entrambi
+     i contatti in una riga); manca solo lo *stile* a icone. E quella riga sta **dentro
+     la zona che collide** con Scorpione/Antares: si rifà **una volta sola**, nel giro
+     delle etichette. *(L'architetto aveva detto «tre icone ovunque, è meccanico»:
+     sbagliato, corretto dalla misura dell'esecutore.)*
+   **Il golden dell'A4 si è mosso, DELIBERATO E CONTATO:** 15 aggiunte, 1 rimozione,
+   leggibili riga per riga (i 13 della legenda + icona email `<g><path>` + indirizzo,
+   meno «GAV · Vicenza»). **Disco intatto.** I sei colori vengono da
+   `bv2hex(star_ramp, bv)` — **nessun hex cablato** (invariante #2).
+   *È la differenza fra un golden **mosso** e uno **rigenerato perché era rosso**.*
+   **Nona correzione dell'esecutore:** l'architetto prevedeva `+1 <image>` per l'icona
+   email — sono **glifi `<path>` inline** (Simple Icons via `_render_icon`), non raster.
+   Il golden ha **un solo `<image>`, il logo**. Non è un cavillo: cercare un `<image>`
+   in più e non trovarlo avrebbe fatto concludere che il fix non era entrato.
+   *Principio confermato: ci si ferma quando **non torna il conto**, non quando torna
+   per una strada diversa da quella prevista.*
 5. **Il packaging: l'`.exe` in GitHub Actions (D4 + D15).** *(Anticipato su Pillole —
    deciso da Marco, 2026-07-14: «prima l'exe che funziona e lo condivido, poi
    progettiamo Pillole».)*
