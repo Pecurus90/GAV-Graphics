@@ -1698,6 +1698,19 @@
 <text x="450.0" y="52" fill="#ffd27a" font-size="21" font-weight="bold" text-anchor="middle" letter-spacing="3">GRUPPO ASTROFILI VICENTINI</text>
 <text x="450.0" y="86" fill="#eef3ff" font-size="30" font-weight="bold" text-anchor="middle" letter-spacing="1.5">IL CIELO DI AGOSTO 2026</text>
 <text x="450.0" y="108" fill="#8b98b8" font-size="12.5" text-anchor="middle">Cielo visibile dal Nord Italia · Vicenza · valido ~15 agosto, ore 23:00</text>
+<text x="40" y="895" fill="#ffd27a" font-size="10.5" letter-spacing="2">TEMPERATURA STELLE</text>
+<circle cx="222" cy="891" r="4.5" fill="#96aaff"/>
+<text x="231" y="895" fill="#8b98b8" font-size="11">oltre 15.000 K</text>
+<circle cx="328" cy="891" r="4.5" fill="#c3d2ff"/>
+<text x="337" y="895" fill="#8b98b8" font-size="11">≈ 10.000 K</text>
+<circle cx="434" cy="891" r="4.5" fill="#fff8eb"/>
+<text x="443" y="895" fill="#8b98b8" font-size="11">≈ 7.000 K</text>
+<circle cx="540" cy="891" r="4.5" fill="#ffebc3"/>
+<text x="549" y="895" fill="#8b98b8" font-size="11">≈ 5.800 K</text>
+<circle cx="646" cy="891" r="4.5" fill="#ffb778"/>
+<text x="655" y="895" fill="#8b98b8" font-size="11">≈ 4.000 K</text>
+<circle cx="752" cy="891" r="4.5" fill="#ff6e3c"/>
+<text x="761" y="895" fill="#8b98b8" font-size="11">sotto 3.000 K</text>
 <line x1="40" y1="900" x2="860" y2="900" stroke="#243055" stroke-width="1"/>
 <text x="40" y="930" fill="#7fb6d8" font-size="15" font-weight="bold" letter-spacing="2.5">PIANETI VISIBILI</text>
 <text x="860" y="930" fill="#5b678a" font-size="12.5" text-anchor="end">alzata ↑ / tramonto ↓ · 15 ago</text>
