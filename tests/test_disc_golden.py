@@ -41,15 +41,16 @@ def _theme(root):
                           encoding="utf-8"))
 
 
-def _fragment(eng, theme, social=False):
+def _fragment(eng, theme, social=False, ticks=None):
     """Il frammento del SOLO disco, agli stessi parametri del golden A4. Con
     social=True accende anti-collisione + tacche (cio' che il disc-golden ora
-    sorveglia); senza, e' il disco ingenuo che resta una fetta VERBATIM dell'A4."""
+    sorveglia). `ticks` (senza social) rende il disco COME nell'A4: dal commit 5
+    l'A4 ha la corona di tacche, quindi la sua fetta VERBATIM le include."""
     lst, lat_rad, _ = eng.sky_context(DISC["year"], DISC["month"], DISC["lat"], DISC["lon"])
     if social:
         return eng.sky_disc_svg(DISC["cx"], DISC["cy"], DISC["rad"], lst, lat_rad, theme,
                                 declutter=True, ticks=TICKS)
-    return eng.sky_disc_svg(DISC["cx"], DISC["cy"], DISC["rad"], lst, lat_rad, theme)
+    return eng.sky_disc_svg(DISC["cx"], DISC["cy"], DISC["rad"], lst, lat_rad, theme, ticks=ticks)
 
 
 def disc_document(eng, theme):
@@ -88,7 +89,7 @@ def test_disc_e_fetta_dell_a4(eng, root, tmp_path):
     eng.generate(DISC["year"], DISC["month"], DISC["lat"], DISC["lon"], "Vicenza",
                  theme, out)                      # layout di default = A4
     a4 = open(out, encoding="utf-8").read()
-    frag = _fragment(eng, theme)                  # disco "naive", come nell'A4
+    frag = _fragment(eng, theme, ticks=TICKS)     # disco come nell'A4 (dal commit 5: con le tacche)
     assert frag in a4, "Il disco non e' piu' una fetta VERBATIM dell'A4 (invariante D7)."
 
 
