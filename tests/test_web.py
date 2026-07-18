@@ -68,7 +68,7 @@ def test_schede_dal_disco_escludono_profondo():
     import app.main as A
     nomi = [f for f, _ in A.formati_scheda()]
     assert "profondo" not in nomi, "profondo non e' un formato-scheda: e' la pagina 2"
-    assert set(nomi) == {"a4", "dashboard", "parata", "cornice", "zenit"}, nomi
+    assert set(nomi) == {"a4", "dashboard", "parata", "zenit"}, nomi
     assert A._pagina2_formato() == "profondo"
 
 

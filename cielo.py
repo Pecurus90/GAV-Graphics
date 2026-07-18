@@ -15,7 +15,7 @@ Uso:
   python cielo.py --year 2026 --month 8 --format parata --palette aurora-boreale # design social
 
 Formato e palette si scelgono per NOME, non per percorso: i nomi validi sono i
-file in brand/layouts/ (a4, dashboard, parata, cornice, zenit, ...) e in
+file in brand/layouts/ (a4, dashboard, parata, zenit, ...) e in
 brand/palettes/ (osservatorio, luce-rossa, aurora-boreale, nebulosa,
 ottone-antico, cielo-di-ghiaccio).
 """
@@ -42,7 +42,7 @@ def main():
     p.add_argument('--palette', default='osservatorio',
                    help="nome della palette in brand/palettes/ (default: osservatorio)")
     p.add_argument('--format', default='a4',
-                   help="nome del layout in brand/layouts/ (a4, dashboard, parata, cornice, zenit, ...)")
+                   help="nome del layout in brand/layouts/ (a4, dashboard, parata, zenit, ...)")
     p.add_argument('--out', default=None,
                    help="file SVG di uscita (default: out/cielo_<formato>.svg)")
     p.add_argument('--png', action='store_true', help="produce ANCHE il PNG accanto all'SVG")

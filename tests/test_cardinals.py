@@ -25,10 +25,7 @@ import re
 
 import pytest
 
-# Solo i formati ATTIVI. `cornice` e' RITIRATO (D19) e ha un caso a se': e' un
-# "poster incorniciato", il disco sta DENTRO una cornice-pannello, quindi i suoi
-# cardinali cadono sulla cornice per DISEGNO -- non e' il difetto che qui
-# sorvegliamo. (Nota: cornice e' ancora esposto nella UI, ritiro incompleto.)
+# Il set finale dei formati (cornice RITIRATO in X1, D19).
 FORMATI = ["a4", "dashboard", "parata", "zenit"]
 # I cardinali: <text ... font-weight="bold" text-anchor="middle">N|E|S|O</text>.
 _CARD = re.compile(r'<text x="([\-\d.]+)" y="([\-\d.]+)"[^>]*'

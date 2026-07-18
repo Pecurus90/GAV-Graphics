@@ -53,7 +53,6 @@ MESI = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio",
 _GLYPH = {
  "dashboard": '<circle cx="9" cy="12" r="6"/><rect x="17" y="7" width="4" height="4" rx="1"/><rect x="17" y="13" width="4" height="4" rx="1"/>',
  "parata": '<rect x="3" y="5" width="18" height="14" rx="1"/><line x1="6" y1="9" x2="18" y2="9"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="6" y1="15" x2="18" y2="15"/>',
- "cornice": '<rect x="3" y="4" width="18" height="18" rx="1"/><rect x="6" y="7" width="12" height="12" rx="1"/><circle cx="12" cy="13" r="4"/>',
  "zenit": '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/>',
  "a4": '<rect x="6" y="3" width="12" height="18" rx="1"/><circle cx="12" cy="10" r="4"/><line x1="8" y1="17" x2="16" y2="17"/>',
 }
