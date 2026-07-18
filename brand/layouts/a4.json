@@ -7,7 +7,7 @@
      "starfield": {"seed": 7, "count": 240, "r_min": 0.3, "r_max": 1.0,
                    "op_min": 0.15, "op_max": 0.5, "fill": "bgstar"}},
 
-    {"type": "disc", "cx": 450.0, "cy": 500.0, "rad": 384.0, "ticks": {"minor": 10, "major": 30}},
+    {"type": "disc", "cx": 450.0, "cy": 500.0, "rad": 384.0},
 
     {"type": "image", "href": "brand/logo/logo-emblema.png",
      "x": 60, "y": 30, "w": 82, "h": 82},
