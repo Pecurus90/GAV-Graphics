@@ -1,0 +1,70 @@
+name: Pacchetto Windows (portatile)
+
+# Costruisce il bundle Windows portatile (D4/D17) e lo pubblica come artefatto.
+# MAI a mano: ambiente pulito e riproducibile. Modello: Python portatile
+# (python-build-standalone, install_only) + dipendenze pinnate installate dentro
+# + il repo + il launcher. La ricetta e' quella verificata in R9 (Milestone 1).
+#
+# Trigger: manuale, o push di un tag pkg-*/v*. NON su ogni push.
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'pkg-*'
+      - 'v*'
+
+# Versione del Python portatile: PINNATA per riproducibilita' (D4). install_only
+# = niente pasticcio del file ._pth dell'embeddable ufficiale, `pip install`
+# diretto (D17). Estrae in una cartella "python/" -> python/python.exe.
+env:
+  PBS_URL: https://github.com/astral-sh/python-build-standalone/releases/download/20260623/cpython-3.12.13+20260623-x86_64-pc-windows-msvc-install_only.tar.gz
+  BUNDLE: dist/CieloDelMese
+
+jobs:
+  build:
+    name: Bundle Windows · py3.12 portatile
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Scarica il Python portatile (pinnato) ed estrailo nel bundle
+        run: |
+          New-Item -ItemType Directory -Force -Path "$env:BUNDLE" | Out-Null
+          curl.exe -L -o py.tar.gz "$env:PBS_URL"
+          tar -xzf py.tar.gz -C "$env:BUNDLE"
+          & "$env:BUNDLE/python/python.exe" --version
+
+      - name: Installa le dipendenze RUNTIME dentro il Python portatile
+        run: |
+          & "$env:BUNDLE/python/python.exe" -m pip install --upgrade pip
+          & "$env:BUNDLE/python/python.exe" -m pip install -r requirements.txt
+
+      - name: Copia nel bundle SOLO il runtime (non i test)
+        # engine/ e' quello che si dimentica: cielo.py e app/main.py fanno
+        # `from engine.generate import Engine`; senza, l'import spacca (D17).
+        # CREDITI.md NON e' un optional: BSD-2 e OFL obbligano la nota di
+        # copyright anche in forma binaria (D4) -- senza, non e' distribuibile.
+        run: |
+          Copy-Item -Recurse -Force app,compose,strumenti,engine,brand,data "$env:BUNDLE"
+          Copy-Item -Force cielo.py,render.py,validate.py,avvia.py,Avvia.bat,LEGGIMI.txt,CREDITI.md "$env:BUNDLE"
+
+      - name: Togli i __pycache__ dal bundle
+        run: Get-ChildItem -Path "$env:BUNDLE" -Recurse -Directory -Filter __pycache__ | Remove-Item -Recurse -Force
+
+      - name: PROVA R9 - rendi un PNG VERO col Python del bundle
+        # Se resvg (.pyd), de421 (skyfield-data) o i font del brand non
+        # caricassero DENTRO il bundle, questo passo fallirebbe: e' la prova che
+        # il pacchetto e' davvero eseguibile, non solo assemblato.
+        run: |
+          Push-Location "$env:BUNDLE"
+          & ".\python\python.exe" cielo.py --year 2026 --month 8 --format dashboard --png --out ..\_smoke\post.svg
+          Pop-Location
+          & "$env:BUNDLE/python/python.exe" -c "import os,struct; p=os.path.join('dist','_smoke','post.png'); assert os.path.exists(p), 'PNG mancante'; s=os.path.getsize(p); h=open(p,'rb').read(24); assert h[:8]==b'\x89PNG\r\n\x1a\n', 'non e un PNG'; import struct as st; w,hh=st.unpack('>II',h[16:24]); print('PNG',s,'bytes',w,'x',hh); assert s>50000 and (w,hh)==(1080,1080), 'PNG sospetto'"
+          Remove-Item -Recurse -Force dist/_smoke
+
+      - name: Pubblica il bundle come artefatto (.zip)
+        uses: actions/upload-artifact@v7
+        with:
+          name: CieloDelMese-windows
+          path: ${{ env.BUNDLE }}
+          if-no-files-found: error
