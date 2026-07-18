@@ -41,7 +41,6 @@
      "dot":   {"dx": 8, "dy": -4, "r": 6, "fill_planet": true,
                "ring": {"stroke": "moon_lit", "width": 1.3, "rx": 1.7}},
      "name":  {"dx": 30, "fill": "text", "size": 15, "weight": "600", "content": "{name}"},
-     "times": {"dx": 284, "anchor": "end", "fill": "text2", "size": 12, "weight": "500", "content": "{rise}/{set}"},
      "note":  {"dx": 30, "dy": 15, "fill": "text3", "size": 11, "content": "{note_dir}"}},
 
     {"type": "panel", "x": 40, "y": 604, "w": 300, "h": 300, "rx": 18,

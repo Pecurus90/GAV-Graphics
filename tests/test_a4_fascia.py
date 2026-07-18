@@ -31,7 +31,7 @@ def test_parata_e_striscia_lunare_non_si_intersecano():
     par = _block(a4, "planet_parade")
     moon = _block(a4, "moon_calendar")
     par_top = par["cy_dot"] - par["r"]
-    par_bot = par["cy_dot"] + max(par[k]["dy"] for k in ("name", "rise", "set", "note1", "note2"))
+    par_bot = par["cy_dot"] + max(par[k]["dy"] for k in ("name", "rise", "set", "note1", "note2") if k in par)
     moon_top = moon["y0"] - moon["radius"]
     moon_bot = moon["phase_labels"]["y"]
     assert par_top < par_bot <= moon_top < moon_bot, (
