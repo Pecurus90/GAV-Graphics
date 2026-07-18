@@ -35,7 +35,7 @@
     {"type": "text", "x": 784, "y": 76, "fill": "label", "size": 13,
      "weight": "600", "letter_spacing": 2.2, "content": "PIANETI VISIBILI"},
     {"type": "line", "x1": 784, "y1": 88, "x2": 1030, "y2": 88, "stroke": "divider", "stroke_width": 1},
-    {"type": "planet_panel", "from": "planets", "statuses": ["ok", "info"],
+    {"type": "planet_panel", "from": "planets",
      "x0": 784, "y0": 112, "step": 34,
      "dot":   {"dx": 8, "dy": -4, "r": 6, "fill_planet": true,
                "ring": {"stroke": "moon_lit", "width": 1.3, "rx": 1.7}},
