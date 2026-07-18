@@ -520,10 +520,17 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
 .phase.active .dot{border-color:var(--acc);background:rgba(111,137,168,.16)}.phase.active .dot .num{display:none}.phase.active .dot .spin{display:block}.phase.active .nm{color:var(--t1);font-weight:600}.phase.active .pstate{color:var(--acc2);font-weight:600;animation:pulse 1.2s ease-in-out infinite}.phase.active .pstate::after{content:"in corso…"}
 .gen-note{font-size:11.5px;color:var(--t4);line-height:1.5}.gen-note b{color:var(--t3);font-weight:600}
 /* stato anteprima */
-.preview-wrap{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;height:100%;justify-content:center}
-.frames{display:flex;gap:16px;align-items:center;justify-content:center;max-height:64vh}
-.poster-frame{height:min(64vh,640px);aspect-ratio:1/1;border-radius:10px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.55);border:1px solid var(--hair);background:#05070f}
-.poster-frame.a4{aspect-ratio:1/1.414}
+.preview-wrap{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;height:100%}
+.frames{flex:1;min-height:0;width:100%;display:flex;gap:16px;align-items:center;justify-content:center}
+/* L'anteprima riempie il palco: la vera altezza disponibile e' 100% (il flex del
+   palco), il vincolo di LARGHEZZA e' viewport meno la chrome fissa a sinistra
+   (nav 212 + pannello 404 + padding/bordi ~= 704, +8 di margine). Aspetto intatto
+   -> mai stirata; sempre tutto il poster (object-fit:contain). Niente cap a 640. */
+.poster-frame{height:min(100%,100vw - 712px);width:auto;max-width:100%;aspect-ratio:1/1;border-radius:10px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.55);border:1px solid var(--hair);background:#05070f}
+.poster-frame.a4{aspect-ratio:1/1.414;height:min(100%,calc((100vw - 712px) * 1.414))}
+/* Carosello: DUE pagine intere affiancate -> ognuna limitata a META' larghezza
+   (meno il gap 16). Selettore "esattamente due figli", nessun :has. */
+.frames .poster-frame:first-child:nth-last-child(2),.frames .poster-frame:first-child:nth-last-child(2) ~ .poster-frame{height:min(100%,calc((100vw - 728px) / 2))}
 .poster-frame img{width:100%;height:100%;object-fit:contain;display:block}
 .save-row{display:flex;gap:9px;align-items:center;flex-wrap:wrap;justify-content:center}
 .btn{font-family:var(--testo);font-weight:600;font-size:13px;border-radius:7px;padding:10px 16px;cursor:pointer;transition:.14s;display:inline-flex;align-items:center;gap:8px;border:1px solid transparent;text-decoration:none}
