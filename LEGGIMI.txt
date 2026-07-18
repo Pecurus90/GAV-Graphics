@@ -1,0 +1,44 @@
+CIELO DEL MESE - Gruppo Astrofili Vicentini
+============================================
+
+Come si avvia
+-------------
+1. Scompatta questa cartella dove preferisci (per esempio sul Desktop).
+2. Fai doppio clic su "Avvia.bat".
+3. Si apre una finestra nera (e' normale: e' il programma in funzione) e
+   dopo qualche secondo si apre il browser sull'app.
+4. Usa l'app nel browser.
+
+Per CHIUDERE l'app: chiudi la finestra nera.
+
+Non serve installare Python ne' nient'altro: e' gia' tutto dentro la cartella.
+Il programma funziona senza collegamento a internet.
+
+
+Al primo avvio Windows fa due domande. E' tutto normale.
+--------------------------------------------------------
+
+1) "Windows ha protetto il PC" (schermata blu, SmartScreen)
+   Compare perche' il programma non e' firmato con un certificato a pagamento -
+   NON perche' sia pericoloso. Per procedere:
+      - clicca su "Ulteriori informazioni"
+      - poi clicca sul pulsante "Esegui comunque"
+   Lo chiede solo la prima volta.
+
+2) "Consentire l'accesso?" (avviso del Firewall di Windows)
+   Compare perche' l'app apre un piccolo server SUL TUO computer per mostrarti
+   le pagine nel browser. NON manda niente su internet: resta tutto sul tuo PC.
+   Clicca su "Consenti accesso" (basta la spunta su "Reti private").
+   Lo chiede solo la prima volta.
+
+
+Se il browser non si apre da solo
+----------------------------------
+Nella finestra nera c'e' scritto un indirizzo tipo:
+   http://127.0.0.1:53421
+Copialo e incollalo nella barra degli indirizzi del tuo browser.
+(Il numero finale cambia ogni volta: e' normale, il programma sceglie da solo
+una "porta" libera cosi' non va mai in conflitto con altri programmi.)
+
+
+Crediti e licenze: vedi il file CREDITI.md nella cartella.
