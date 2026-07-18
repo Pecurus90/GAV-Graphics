@@ -679,7 +679,12 @@ imprevisto.
      **E ora c'è una RETE, non un'occhiata**: `tests/test_cardinals.py` pretende i
      quattro cardinali dentro il canvas **per ogni formato**; iniettato il guasto
      → `FAILED [zenit]` con `assert 0 <= -43.3`, ripristinato → 5 verdi.
-   - **Cornice: il pallino di Marte è verde. APERTO — va al giro di design.**
+   - **⚠️ CORNICE È STATO RITIRATO (2026-07-18).** Vedi **#7m**: la ricognizione lo
+     mette **primo fra i difetti**, con quattro problemi sommati. Marco: *«ritirarlo»*.
+     Il set finale è **`dashboard · parata · zenit · a4`** (+ `profondo`). Il paragrafo
+     qui sotto resta come **storia della diagnosi** — è il ragionamento che ha portato
+     al ritiro, e vale più della conclusione.
+   - **Cornice: il pallino di Marte è verde. (Chiuso col ritiro.)**
      Usa `"dot": {"fill_status": true}`; dashboard/zenit usano `fill_planet`,
      parata usa `planet_parade`. **Ereditato fedelmente da `editorial`** — non un
      errore dell'esecutore — ma ora Cornice è **l'unico**, ed è *la stessa forma di
@@ -740,6 +745,52 @@ imprevisto.
    *Poi (`4ee6825`): anteprima del poster molto più grande — tolto il cap
    `min(64vh,640px)`, +36% lineare sul singolo. Il carosello resta ~metà per geometria:
    due pagine affiancate si dividono la larghezza.*
+4d. **#7m — La RICOGNIZIONE dei formati, e cosa ne è uscito.** *(2026-07-18.)*
+   Marco, guardando i poster: *«dashboard funziona e non si tocca, è la fonte di verità
+   — il disco ha le tacche dei gradi, gli altri no. Son tutti da ritoccare tranne
+   dashboard.»* Da lì una **ricognizione** (diagnosi, **non** ridisegno) chiesta al
+   designer sui **render veri**, tutti allo stesso cielo (agosto 2026, osservatorio).
+   **Le divergenze, misurate:**
+   | | dashboard | parata | cornice | zenit | a4 |
+   |---|---|---|---|---|---|
+   | Tacche gradi | **sì** 10°/30° | no | no | no | no |
+   | Icone social | 3 | 3 | **0** | **0** | 2 *(manca email)* |
+   | Pianeti | 5 | **7** | 5 | 5 | **7** |
+   | Colore pallino | reale | reale | **osservabilità** | reale | reale |
+   **DECISIONI DI MARCO:**
+   - **`cornice` RITIRATO.** Quattro difetti sommati (Marte verde · niente colonna
+     note · zero icone · testata accorciata): **stesso profilo di `post`** — debito
+     accumulato, non bruttezza. Set finale: **`dashboard · parata · zenit · a4`**
+     (+ `profondo`). Default: `dashboard`.
+   - **SETTE pianeti ovunque, con «Non osservabile».** Era metà e metà (5 filtrati su
+     dashboard/cornice/zenit, 7 su parata/a4): **due scelte editoriali opposte che
+     nessuno aveva mai preso.** La regola scelta: dire *«Giove c'è, ma non stanotte»* è
+     informazione utile; il filtro nasconde e basta.
+     **⚠️ ATTENZIONE ESEGUENDOLO: è la mossa che ha generato R10** — *«il pannello
+     delle fasi si sovrappone a quello dei pianeti, **cresciuto a 7 voci**»*. Il
+     pannello cresce di `2 × step`: va **calcolato prima e GUARDATO dopo**, non
+     affidato alla suite (il golden confronta i byte, non i pixel).
+   - **Le tacche dei gradi restano una domanda aperta** (su Zenit il disco è a tutto
+     campo e non ha un bordo su cui appoggiarle: è geometria, non un interruttore).
+   **⚠️ DIFETTO NUOVO, CONFERMATO SUI PNG — le etichette di ZENIT collidono.**
+   Col disco a tutto campo i nomi delle costellazioni finiscono **sotto i pannelli**
+   («Orsa Maggiore» tagliata a metà dal riquadro pianeti; Thuban/Mizar sul bordo) e
+   **sopra la striscia lunare** («Sagittario» attraversa il pannello; un'etichetta si
+   sovrappone a «20 Primo Q.»; «Scorpione»/«Antares» finiscono sul testo dei contatti).
+   **La causa è ARCHITETTURALE, ed è il punto da ricordare:** il **disco è sigillato
+   (D7) e non sa cosa gli sta sopra** — le etichette le disegna `disc.py`, i pannelli
+   il compositore, e **non si parlano**. Negli altri formati non si vede perché il disco
+   è piccolo e i pannelli stanno fuori; in Zenit il disco è full-bleed e i pannelli ci
+   stanno **sopra**. **Stessa famiglia del bug dei cardinali.** Non si tappa con una
+   toppa: è un giro a sé.
+   **LA LEZIONE, la terza volta che il progetto la impara:** Zenit l'avevano **guardato
+   in tre** — esecutore, Marco, architetto — e nessuno l'aveva vista. Serve un occhio
+   che confronta **cinque poster affiancati**. *Guardare trova solo ciò che stai
+   cercando* (come R10, dieci giri; come i cardinali).
+   **E una lezione sul METODO, pagata cara:** il primo giro di ricognizione è stato
+   **buttato** perché il designer aveva misurato il proprio mockup — l'unica fonte che
+   può vedere — e quel mockup era **più vecchio del programma**. Vedi *«Il confine col
+   designer»* nel Metodo di lavoro.
 5. **Il packaging: l'`.exe` in GitHub Actions (D4 + D15).** *(Anticipato su Pillole —
    deciso da Marco, 2026-07-14: «prima l'exe che funziona e lo condivido, poi
    progettiamo Pillole».)*
@@ -862,6 +913,19 @@ Ordinato per rischio reale.
   *Nota: il rischio temuto (deps native) è filato liscio; l'unico attrito è stato
   ambientale (porta 8000 occupata da un server fantasma) — non un difetto del
   bundle.*
+  **🏁 CHIUSA DEL TUTTO — il pacchetto è stato COSTRUITO DA ACTIONS E USATO DA MARCO
+  (2026-07-18).** Non più «la CI è verde»: workflow `package-windows.yml` eseguito su
+  runner pulito → artefatto `.zip` scaricato → aperto → **poster generati e PNG
+  salvati**. Cioè `de421.bsp` si carica e `resvg` rasterizza **dentro il bundle**,
+  che era *la* domanda di R9. **La distribuzione ai soci è tecnicamente possibile: non
+  è più un dubbio.**
+  *(Non riverificato su questo bundle: la **rilocabilità** — Marco non ha confermato
+  dove l'ha scompattato. Fu provata in Milestone 1 copiando in `%TEMP%\prova_socio\`,
+  quindi il rischio è basso, ma **dedotto ≠ eseguito**.)*
+  **La porta non è più cablata** (`a787545`): il launcher ne cerca una libera da solo e
+  apre il browser su quella. Non era teoria — **la 8000 era occupata sul PC di Marco**
+  da un'altra sua app, e un socio avrebbe visto solo una pagina bianca, *senza log*:
+  lo scenario che D4 dichiara bloccante.
 - **R10 — L'A4 ha una COLLISIONE, congelata nel golden da dieci giri.**
   *(Trovata 2026-07-15, aprendo l'immagine — NON un test.)* Nel volantino A4 il
   pannello delle **fasi lunari** (4 fasi a tutta larghezza) si sovrappone al
