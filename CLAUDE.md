@@ -817,6 +817,73 @@ imprevisto.
    in più e non trovarlo avrebbe fatto concludere che il fix non era entrato.
    *Principio confermato: ci si ferma quando **non torna il conto**, non quando torna
    per una strada diversa da quella prevista.*
+4f. **#7o — FASE 2: la GEOMETRIA.** *(FATTO, 2026-07-18.)* Marco: *«portare la mappa
+   il più grande possibile negli altri; Zenit perde leggibilità con le stelle e i
+   pianeti sopra»*. **Un solo problema visto da due lati:** più il disco cresce, più i
+   pannelli gli finiscono **sopra** invece che **accanto**. Le due disposizioni che non
+   collidono mai — dashboard **affianca**, a4 **impila** — non mettono **mai** pannelli
+   sul disco.
+   **Il principio, dal designer:** *il 50% di dashboard è il tetto di **una
+   disposizione**, non un numero universale.*
+   | | prima | dopo |
+   |---|---|---|
+   | dashboard | 50% | **50%** *(fonte di verità, disco intatto)* |
+   | parata | 36% | **46%** (r250) |
+   | zenit | 104% | **82%** (r445) |
+   | a4 | 85% | **85%** — *già al massimo, misurato* |
+   - **Via gli orari da TUTTI** (`↑10:23`/`↓21:50`): restano nota e direzione. Il poster
+     è **mensile**, gli orari valgono per il ~15 e **derivano di ore** lungo il mese —
+     falsa precisione. *(L'architetto voleva tenerli sull'A4: incoerente, corretto da
+     Marco.)* **Due conseguenze impreviste, trovate dall'esecutore:** la didascalia
+     «alzata ↑ / tramonto ↓» diventava **una legenda di simboli inesistenti** (tolta), e
+     restava un **buco di ~62 px** fra nome e nota (chiuso, e lo spazio è andato al disco).
+   - **Zenit: direzione A del designer, ma solo in parte — e il taglio l'ha deciso la
+     misura.** Disco a r445 + etichette 31→22 **hanno chiuso due collisioni su tre da
+     sole**. I **pannelli agli angoli no**: i suoi rettangoli **non contengono il
+     contenuto** (sottotitolo che sfora di 75 px, sei campioni in 180 px), e farceli
+     stare significa decidere **corpi e trattamenti** = progettare. *Lui stesso aveva
+     avvisato: «anche a 82% gli angoli restano stretti».* Si è fatto il **tocco leggero**:
+     pannello pianeti spostato quanto basta a liberare «Orsa Maggiore», e `cardinal_gap`
+     ritarato — **col segno opposto**: a r445 il disco **rientra nel canvas**, quindi i
+     cardinali vanno spinti **fuori** (`-27` → **`+65`**). La stima del designer (−21) li
+     tirava **sotto i pannelli**.
+   - **A4: FERMATO al 90%.** Misurato: 8 px dalla testata sopra, **2,5 px dalla legenda
+     sotto**; per il 90% servirebbero 32 px inesistenti. **La legenda vince** — è quella
+     appena rimessa (coda #7h), barattarla per +1,4% di disco è un cattivo affare.
+   - **Tacche dei gradi: sì dashboard, NO a4.** Il designer aveva detto sì a entrambi;
+     rendendo, la tacca **Sud taglia in due «≈ 7.000 K»** — le tacche escono di **17 px**
+     e la striscia libera è di **16**. Ritirate dall'A4; il golden è tornato
+     **byte-identico** a prima (aggiunta e rimozione, giro esatto).
+   - **Riequilibrio del dashboard:** coi 7 pianeti il pannello andava a passo 30 mentre
+     la legenda restava a 36 — **stessa altezza di contenuto (180 px), ritmo diverso**.
+     La legenda cede spazio ai pianeti: la griglia torna uniforme.
+   **⚠️ SCOPERTA GRAVE — due decisioni di Marco erano DOCUMENTATE ma MAI ESEGUITE.**
+   `cornice` risultava ritirato e i pianeti «sette per tutti» **solo in questo file**: sul
+   disco `cornice.json` c'era ancora, e dashboard/zenit filtravano a 5. Il prompt che le
+   conteneva si era perso fra un giro e l'altro, e **l'architetto ha registrato l'esito
+   senza verificare l'esecuzione**. *Lezione, ed è dell'architetto: **«deciso» non è
+   «fatto»**. Questo file deve registrare ciò che è **verificato nel codice**; una
+   decisione presa e non eseguita va segnata come tale, o il file diventa il README
+   inaffidabile contro cui mette in guardia alla prima riga.* *(Entrambe poi eseguite:
+   `cbe87ba` cornice, `6b277eb`+`3faaecb` i sette pianeti.)*
+   **DUE LEZIONI SUL METODO, che valgono oltre questo giro:**
+   1. **«Conta il golden» e «guarda l'immagine» NON sono ridondanti: sono reti con
+      maglie di forma diversa.** La tacca dentro «≈ 7.000 K» è sfuggita all'occhio
+      dell'esecutore (che cercava collisioni *sul bordo del disco*) ed è stata presa
+      dall'architetto **leggendo le coordinate del golden** (`y884→901` attraversa
+      `y891`), con l'immagine a confermare **dopo**. Serviva l'incrocio.
+   2. **Il designer risponde su un bersaglio che si muove.** Due sue risposte sbagliate
+      — «a4 può salire al 90%» e «sì tacche sull'A4» — avevano **la stessa causa**: la
+      legenda dell'A4 **non c'era** quando le ha date, l'abbiamo rimessa noi in Fase 1.
+      Non è un suo errore: è l'effetto del lavorare in parallelo. *Quando gli si chiede
+      qualcosa, va detto cosa è cambiato da ieri.*
+   **La rete dei cardinali è stata ESTESA** (`test_cardinals.py`): non più solo «dentro
+   il canvas», ma **«non sotto un pannello»** — perché a r445 la `S` finiva **sopra la
+   striscia lunare** e il test **passava lo stesso**. *Il buco aveva la stessa forma del
+   bug che la rete doveva sorvegliare.* Iniettato il guasto → rosso su **N**, ripristinato
+   → verde. *(Proposta non fatta, giro a sé: una rete che pretenda che nessuna tacca
+   attraversi un blocco di testo. Difficoltà nota: la larghezza del testo non sta
+   nell'SVG.)*
 5. **Il packaging: l'`.exe` in GitHub Actions (D4 + D15).** *(Anticipato su Pillole —
    deciso da Marco, 2026-07-14: «prima l'exe che funziona e lo condivido, poi
    progettiamo Pillole».)*
