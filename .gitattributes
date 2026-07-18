@@ -10,3 +10,10 @@
 # Forzando LF ovunque (blob e working tree), il riferimento golden è identico
 # su ogni piattaforma e coincide con l'output del motore su Linux/CI.
 tests/golden/*.svg text eol=lf
+
+# I file batch di Windows vanno estratti con CRLF, SEMPRE e su OGNI macchina
+# (indipendente da core.autocrlf del runner che costruisce il bundle). Avvia.bat
+# e' l'UNICO file che il socio tocca e il suo fallimento e' invisibile a noi
+# (nessun log): e' lo scenario che D4 dichiara bloccante. Un batch con LF-only
+# quasi sempre funziona -- ma "quasi" qui non basta. (Deciso da Marco, 2026-07-18.)
+*.bat text eol=crlf
