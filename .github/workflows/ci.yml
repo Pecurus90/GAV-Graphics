@@ -19,9 +19,9 @@ jobs:
         os: [windows-latest, macos-latest]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -63,7 +63,7 @@ jobs:
       # (un PNG da 2 KB o coi font di sistema e' un fallimento, non un successo).
       - name: Carica il PNG come artefatto
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ci_post-${{ matrix.os }}
           path: out/ci_post.png
