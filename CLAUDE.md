@@ -471,9 +471,21 @@ descrive lo fa scollare al primo cambiamento.
   basso e nessuno osserva — e sul telefono sono illeggibili.
   Il dizionario dei 44 nomi **resta scritto** (`CONST_IT_MINORI`, fonte UAI): si
   riaccende con una parola nel file di layout. È un dato, non codice.
-- **D17 — Distribuzione: Python PORTATILE per-OS, non PyInstaller. E deve girare
-  su Windows E Mac.** *(Deciso da Marco, 2026-07-15: «deve funzionare su windows e
-  mac». Modello scelto dall'architetto sotto quel vincolo.)*
+- **D17 — Distribuzione: Python PORTATILE per-OS, non PyInstaller.**
+  **⚠️ REVISIONE 2026-07-18 — SOLO WINDOWS, per ora.** *(Marco: «facciamo solo per
+  Windows intanto; se ci sarà necessità faremo per Mac».)* Il **pacchetto Mac è
+  sospeso**, non cancellato: la ricetta è già provata (R9 chiuso su Mac), riaccenderla
+  costerà un pomeriggio, non un giro di scoperta.
+  **MA la CI su macOS RESTA** (`ci.yml` ha `matrix.os: [windows-latest, macos-latest]`,
+  e non si tocca). **Spedire su Mac e TESTARE su Mac sono due cose diverse:** quel
+  runner è ciò che ha stanato l'`argsort` instabile — il bug che rendeva il motore
+  **non deterministico fra macchine** e che su Windows da solo non sarebbe mai emerso.
+  È la rete dell'invariante #6. Si toglie il pacchetto, non la prova.
+  Decadono col pacchetto Mac: Gatekeeper, la firma Apple, l'`Avvia.command`, e la
+  verifica della cartella-dati OS-condizionale (D18) — che resta **non provata** su Mac.
+  *(Testo originale, per memoria: «E deve girare su Windows E Mac», deciso da Marco
+  2026-07-15: «deve funzionare su windows e mac». Modello scelto dall'architetto sotto
+  quel vincolo.)*
   Non un `.exe` PyInstaller, ma **una cartella** per OS con dentro un **Python
   portatile** (Windows: embeddable; Mac: python-build-standalone) + **tutte le
   librerie già installate** (pip prende il wheel nativo giusto per OS: resvg_py
@@ -551,6 +563,18 @@ descrive lo fa scollare al primo cambiamento.
   se il socio copia la cartella su un altro PC.
   **Non verificato:** su **Mac** la cartella dati e il render con palette utente non
   sono provati (codice OS-condizionale, eseguito solo su Windows) — da coprire in B2.
+- **D19 — La palette è del POSTER, non dell'APP.** *(Marco, 2026-07-18; forma con
+  l'architetto.)* Le sei palette (D13) vestono l'**output**. Il **guscio**
+  dell'applicazione è un'altra cosa e **non** si veste col tema del poster: sarebbe
+  assurdo che cambiare l'oro del GAV ripitturasse la UI.
+  **L'argomento non è estetico, è strutturale:** dentro il guscio vive l'**anteprima
+  del poster**, e l'editor (D18) mostra **cieli di sei colori diversi** — verde
+  aurora, viola nebulosa, ottone, blu-argento. Un guscio dipinto con **uno** dei sei
+  **litiga con gli altri cinque**. Un'interfaccia neutra non è gusto: è l'unica che
+  non combatte col contenuto che deve ospitare.
+  *Applicato in #7l: guscio acciaio (`--acc #6f89a8`), zero token del poster nel
+  chrome. I due colori del poster compaiono solo COME CONTENUTO — i pallini delle
+  palette e i campioni dell'editor.*
 - **D15 — L'`.exe` apre il browser; e cosa manca DAVVERO per averlo.**
   *(Deciso da Marco, 2026-07-14.)* Doppio clic ⇒ il programma parte in silenzio e
   **apre il browser** sull'interfaccia dell'app. Niente terminale, niente Python
@@ -688,6 +712,34 @@ imprevisto.
    giri di gente che guardava). La conclusione non è «guarda meglio»: è che quel
    controllo va reso **una rete** — un test che pretenda i cardinali **dentro il
    canvas**, con l'iniezione del guasto.
+4c. **#7l — Il GUSCIO dell'app rifatto (design «1c Scheda tecnica»).**
+   *(FATTO, 2026-07-18.)* Marco, guardando l'app: *«la sidebar e tutto lo stile sono
+   da rivedere, da app più seria. Non deve usare una palette colori come quella dei
+   post»*. **Aveva ragione su una cosa che nessuno aveva visto: il guscio indossava
+   l'identità del CONTENUTO** — `--oro #e4ac4a` e `--neon #45c8ff`, i colori del
+   poster, erano i colori della UI. E non era una nostra deriva: **l'aveva disegnato
+   così il designer** (verificato: valori identici fra il suo file e l'app).
+   **Perché è sbagliato per costruzione, non «meno bello»:** dentro il guscio c'è
+   l'anteprima del poster, e l'editor mostra **cieli di sei colori diversi**. Un
+   guscio dipinto con uno dei sei **litiga con gli altri cinque**.
+   → **D19.** Il designer ha consegnato **tre direzioni** (Console · Editoriale ·
+   Scheda tecnica); Marco ha scelto **1c**. Guscio ora **acciaio neutro**
+   (`--acc #6f89a8`, `--prim #3f5f83`): zero oro/neon nel chrome.
+   **Il riordino (l'altra metà della richiesta):** la toolbar con «Genera» è salita
+   **in cima** al pannello — prima l'azione principale stava **in fondo a uno scroll**.
+   Formato = controllo segmentato con glifi; palette = riga con 4 pallini (token veri).
+   **La regola che ha salvato l'implementazione:** *«prendi il suo CSS, NON il suo
+   JavaScript»*. Il mockup ha logica **simulata** (`setInterval` a 850 ms per le fasi,
+   anteprima fatta di `div`); l'app ha logica **vera**. Importarla sarebbe stata
+   un'app più bella che **mente** — ciò che D11 vieta. Verificato sull'HTML servito:
+   niente `setInterval`, niente switcher da mockup, niente Google Fonts.
+   **Tre correzioni al designer, obbligatorie perché non vede il repo:** i colori di
+   stelle/pianeti nella sua anteprima erano **hex cablati e non i nostri** (invariante
+   #2); la sua anteprima è uno **schema CSS** mentre la nostra è il **cielo vero**
+   (implementarla sarebbe stata una **regressione**); mancava il campo **descrizione**.
+   *Poi (`4ee6825`): anteprima del poster molto più grande — tolto il cap
+   `min(64vh,640px)`, +36% lineare sul singolo. Il carosello resta ~metà per geometria:
+   due pagine affiancate si dividono la larghezza.*
 5. **Il packaging: l'`.exe` in GitHub Actions (D4 + D15).** *(Anticipato su Pillole —
    deciso da Marco, 2026-07-14: «prima l'exe che funziona e lo condivido, poi
    progettiamo Pillole».)*
@@ -959,6 +1011,36 @@ Tre ruoli. Un ciclo: `prompt → esecuzione → report → allineamento → prom
   l'architettura. Se un task richiede una scelta architetturale non coperta qui,
   **fermati e proponi 2-3 opzioni con il trade-off reale.**
 - **Product owner** (Marco): arbitra le scelte irreversibili o estetiche.
+- **Designer** (Claude Design, progetto `claude.ai/design` «Infografica cielo del
+  mese»): **NON vede il repo.** Riceve brief autonomi e consegna proposte.
+
+### Il confine col designer — pagato caro il 2026-07-18
+
+**Il designer può misurare SOLO ciò che sta nel progetto design.** L'architetto gli
+ha chiesto di verificare dei conteggi che vivono in `brand/layouts/*.json`, e lui —
+non potendo — ha misurato l'unica fonte a sua disposizione: il proprio mockup
+(`Cielo Post.dc.html`). Che era **più vecchio del programma**.
+Ne è uscita una tabella sbagliata su tre punti (icone di Cornice e Parata, e un
+«disco segnaposto» che **da noi non esiste**: gli SVG veri hanno ~1350 stelle e
+~360 linee di costellazione). Se fosse partita, avremmo chiesto una diagnosi su una
+**realtà immaginaria** — il terzo giro bruciato per numeri sbagliati.
+**La colpa era del brief, non di lui**: aveva perfino marcato le divergenze con ⚠ e
+scritto «da confermare insieme, non è una sentenza». *(L'architetto in prima battuta
+ha incolpato l'esecutore, e ha dovuto ritrattare: l'output era del designer.)*
+
+**Le regole che ne discendono:**
+1. **La verità è ciò che il motore GENERA** (i PNG/SVG in `out/`) **e ciò che il
+   motore LEGGE** (`brand/layouts/`). Tutto ciò che sta nel progetto design è **una
+   proposta**, mai una misura.
+2. **Al designer non si chiede MAI di misurare il repo**: i numeri glieli si porta
+   già contati, insieme ai **render veri**.
+3. **Il materiale stale nel progetto design è una MINA**, non disordine: lui lo tratta
+   come verità perché non ha modo di sapere che è vecchio. *(Pulito il 2026-07-18:
+   rimossi il mockup col disco segnaposto, le palette ritirate `notte-blu`/`petrolio`
+   — che lui aveva appena usato per rendere —, i formati morti `editorial`/`rail`, e
+   `logo-white.png`, il logo di **provenienza ignota** già purgato da git in #7c.
+   Depositati al loro posto i cinque render veri + `LEGGIMI-fonte-di-verita.md`.)*
+4. **Prima il sostituto, poi la cancellazione**: mai un momento senza riferimento.
 
 ### Regole di ingaggio — sempre attive
 
