@@ -16,8 +16,18 @@ doveva sorvegliare:
    LAYOUT (li vede tutti), quindi non e' vincolato dal sigillo del disco (D7): il
    disco non sa dove sono i pannelli, il test si'.
 
-Entrambi i difetti sono sopravvissuti a occhi che GUARDAVANO i PNG: guardare trova
-solo cio' che cerchi (come R10). Per questo li sorveglia un test, non lo sguardo.
+3. NON IN UN'ALTRA BANDA. Terzo buco della stessa forma: Parata NON ha pannelli
+   -- le sue corsie (pianeti sopra, luna sotto) sono delimitate da 'line' a tutta
+   larghezza, non da 'panel'. Il criterio #2 cercava solo 'panel', non trovava
+   nulla, e passava a vuoto MENTRE N cadeva dentro il testo «Telescopico / a Est»
+   della banda pianeti (y333,6) e S nella striscia lunare (y862,2). Un divisore a
+   tutta larghezza e' un CONFINE DICHIARATO fra zone di contenuto: il cardinale
+   deve restare dalla parte del disco. Se un divisore che copre la sua x sta fra
+   il cardinale e il centro del disco, il cardinale e' finito in un'altra banda.
+
+Tutti e tre i difetti sono sopravvissuti a occhi che GUARDAVANO i PNG: guardare
+trova solo cio' che cerchi (come R10). Per questo li sorveglia un test, non lo
+sguardo.
 """
 import json
 import os
@@ -35,6 +45,33 @@ _CARD = re.compile(r'<text x="([\-\d.]+)" y="([\-\d.]+)"[^>]*'
 def _theme(root):
     return json.load(open(os.path.join(root, "brand", "palettes", "osservatorio.json"),
                           encoding="utf-8"))
+
+
+def _disc_cy(layout):
+    for b in layout["blocks"]:
+        if b.get("type") == "disc":
+            return b["cy"]
+    return None
+
+
+def _dividers_a_tutta_larghezza(layout):
+    """I divisori orizzontali a (quasi) tutta larghezza: i confini fra le bande di
+    contenuto. Ritorna (x0, x1, y) per ognuno. Ignora le 'line' corte (divisori
+    INTERNI a un pannello, es. sotto un titolo) che non separano bande."""
+    w = layout["canvas"]["w"]
+    out = []
+    for b in layout["blocks"]:
+        if b.get("type") != "line":
+            continue
+        x1, y1, x2, y2 = b.get("x1"), b.get("y1"), b.get("x2"), b.get("y2")
+        if None in (x1, y1, x2, y2):
+            continue
+        if abs(y1 - y2) > 1:                    # dev'essere orizzontale
+            continue
+        if abs(x2 - x1) < 0.7 * w:              # a tutta (o quasi) larghezza
+            continue
+        out.append((min(x1, x2), max(x1, x2), y1))
+    return out
 
 
 @pytest.mark.parametrize("fmt", FORMATI)
@@ -59,3 +96,20 @@ def test_cardinali_dentro_il_canvas(eng, root, tmp_path, fmt):
             assert not (px0 <= x <= px1 and py0 <= y <= py1), \
                 f"{fmt}: cardinale {lab} ({x:.0f},{y:.0f}) SOTTO il pannello " \
                 f"({px0},{py0})-({px1},{py1}): nel canvas ma nascosto."
+    # criterio 3: non oltre un divisore a tutta larghezza (in un'altra banda).
+    # Le corsie di Parata sono delimitate da 'line', non da 'panel': e' il buco
+    # che il criterio 2 non vedeva.
+    cy = _disc_cy(layout)
+    dividers = _dividers_a_tutta_larghezza(layout)
+    if cy is not None:
+        for lab, (x, y) in card.items():
+            for (dx0, dx1, dy) in dividers:
+                if not (dx0 <= x <= dx1):
+                    continue
+                # dy STRETTAMENTE fra il cardinale e il centro del disco -> il
+                # cardinale ha attraversato il confine, e' in un'altra banda.
+                if (dy - y) * (dy - cy) < 0:
+                    pytest.fail(
+                        f"{fmt}: cardinale {lab} ({x:.0f},{y:.0f}) oltre il divisore "
+                        f"y={dy:.0f}: e' in una banda di altro contenuto, non in "
+                        f"quella del disco (cy={cy:.0f}).")
