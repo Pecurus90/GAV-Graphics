@@ -116,9 +116,14 @@ class DiscMixin:
             # (cardinal_gap>0, come A4/dashboard/parata) il box cade oltre la zona
             # delle etichette (rad-3) e non cambia NESSUN piazzamento; conta solo
             # dove i cardinali stanno DENTRO (gap negativo, Zenit rientrato).
-            card_boxes = self._cardinal_boxes(cx, cy, rad, k, cardinals, cardinal_gap)
+            # Ostacoli dell'anti-collisione: cardinali + TACCHE (anch'esse le
+            # disegna il disco: una tacca sopra un nome e' il disco che si scrive
+            # addosso). Le tacche stanno FUORI dal bordo (rad..rad+len): contano
+            # solo per le etichette che arrivano fin li' col loro riquadro.
+            avoid = (self._cardinal_boxes(cx, cy, rad, k, cardinals, cardinal_gap)
+                     + self._tick_boxes(cx, cy, rad, k, ticks))
             a(self._disc_labels_declutter(cx, cy, rad, k, lst, lat_rad, theme,
-                                          ramp, labels, marquee, star_names, card_boxes))
+                                          ramp, labels, marquee, star_names, avoid))
         # tacche di azimut (corona SOLO tacche, niente numeri: a 1080 i numeri
         # sono rumore). Default SPENTA -> l'A4 non la disegna. `ticks` e' un dict
         # {"minor":10,"major":30}: una tacca ogni `minor` gradi, piu' lunga ogni
@@ -175,6 +180,25 @@ class DiscMixin:
             ax = cx - rr * np.sin(np.radians(ang)); ay = cy - rr * np.cos(np.radians(ang))
             by = ay + 6 * k
             boxes.append((ax - hw, by - s * 0.85, ax + hw, by + s * 0.15))
+        return boxes
+
+    @staticmethod
+    def _tick_boxes(cx, cy, rad, k, ticks, margin=2.0):
+        """I riquadri delle tacche (dai loro estremi in _disc_ticks), con un piccolo
+        margine, per l'anti-collisione. Vuoto se non ci sono tacche. Stanno FUORI
+        dal bordo (rad..rad+len): toccano solo le etichette che arrivano al bordo."""
+        if not ticks:
+            return []
+        minor = ticks.get("minor", 10); major = ticks.get("major", 30)
+        minl = ticks.get("minor_len", 9.0) * k; majl = ticks.get("major_len", 17.0) * k
+        boxes = []
+        for az in range(0, 360, minor):
+            t = majl if az % major == 0 else minl
+            ar = np.radians(az)
+            x1 = cx - rad * np.sin(ar); y1 = cy - rad * np.cos(ar)
+            x2 = cx - (rad + t) * np.sin(ar); y2 = cy - (rad + t) * np.cos(ar)
+            boxes.append((min(x1, x2) - margin, min(y1, y2) - margin,
+                          max(x1, x2) + margin, max(y1, y2) + margin))
         return boxes
 
     def _disc_labels_declutter(self, cx, cy, rad, k, lst, lat_rad, theme, ramp,
