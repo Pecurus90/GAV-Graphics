@@ -982,6 +982,57 @@ imprevisto.
    com'è** finché non risponde: funziona, ha le collisioni, e nessuno ci stampa.
    **Restano bloccate su questo giro** le due feature mancanti di Zenit (**tacche** e
    **icone social**): entrambe dipendono da dove finiscono i pannelli.
+   **🏁 CHIUSO (2026-07-19, `6b90896` + `b3b6690` + `966dc49`).** Il designer ha proposto
+   la **direzione B portata fino in fondo**: testata compatta in cima, **tutto** il
+   contenuto in una fascia in fondo, il disco **fra** le due senza toccarle → **zero
+   etichette sepolte PER COSTRUZIONE**, non per statistica. *Marco ha trovato il 66%
+   troppo piccolo*; misurando si è arrivati a **71%** (rad 384) comprimendo i **34 px di
+   spazio morto** dentro la fascia — il tetto vero, oltre il quale le **etichette delle
+   fasi lunari escono dal canvas** *(difetto trovato dall'esecutore rendendo a −38 px, non
+   dedotto)*.
+   **La leva 3 (disco 80%) è stata misurata e scartata da Marco**, ma il suo costo è
+   registrato perché la domanda tornerà: costa **Scorpione + Antares** (estate),
+   **Sagittario**, **Fomalhaut** (autunno) — tutti a dec −17°…−30°, la fascia d'orizzonte
+   che **D9 già sacrifica**. *E ha smontato un sospetto dell'architetto:* a novembre i
+   gioielli invernali **non** sono in basso — **sorgono a Est**, sopra la fascia. Avevo
+   dedotto «inverno = basso» senza guardare l'ora.
+   **IL DIFETTO CHE HO APPROVATO GUARDANDO, E LA LEZIONE.** Ho dato il via libera al
+   render 71% **senza vedere che la «N» era scritta sopra «Boote»** — si leggeva
+   letteralmente **«BoNte»**, due testi illeggibili al posto di due leggibili. L'avevo
+   guardato **ridotto a 560 px**, chiedendomi *«il disco riempie la tela?»*: e a **quella**
+   domanda la risposta era sì. **L'esecutore si è fermato e non ha committato**, citando
+   il mio stesso «fermati se lo trovi». *È la quarta volta che questo progetto impara che
+   **guardare trova solo ciò che stai cercando** — e stavolta a cascarci è stato
+   l'architetto, che la regola l'aveva scritta.* **Conseguenza operativa, non morale: i
+   render si guardano RITAGLIATI AL 3× sulle zone critiche**, non interi e rimpiccioliti.
+   **IL FIX, e perché NON tocca D7** *(l'argomento che rende la modifica dovuta invece che
+   un'estensione di scope)*: **cardinali e tacche li disegna `disc.py` — sono PARTE del
+   disco**. Insegnare all'anti-collisione a schivarli non è «il disco che impara cosa gli
+   sta sopra» (quello sarebbe stato il caso dei pannelli, ed è la ragione per cui l'abbiamo
+   scartato): è **il disco che smette di scriversi addosso**. Un bug in casa propria.
+   **Due commit, due previsioni falsificabili, entrambe verificate:**
+   - **cardinali** → golden A4 **fermo di un byte**, come previsto: sui 4 formati stanno a
+     `rad+22`, **fuori** dalla zona delle etichette (`rad−3`) — non si incontrano mai.
+   - **tacche** → **l'architetto prevedeva che il golden si MUOVESSE** (l'A4 ha 2
+     tacca-testo nella ricognizione). **Sbagliato, e l'esecutore l'ha corretto con la
+     misura:** quelle due tacche sono a **febbraio e aprile**, e **il golden è agosto** —
+     dove l'etichetta più esterna (Antares) sta 10 px dentro il bordo. *Previsione
+     dell'architetto smentita da una domanda che non si era posto: «in QUALE mese?».*
+   **Risultato sui 60 poster** — e va oltre Zenit: **sotto-pannello, banda, cardinale e
+   tacca-testo sono ZERO su dashboard, parata, zenit e a4**. Zenit passa da **63 a 14**
+   collisioni l'anno, **tutte quasi-contatti** etichetta↔etichetta. Il fix delle tacche ha
+   chiuso **anche i 2+2+2 degli altri tre formati** — cioè **parte di R13 su tre formati**,
+   che non era nemmeno l'obiettivo.
+   **Riga pianeti:** il riquadro è stato allargato a 784 px (opzione 1, rubando al riquadro
+   colori) — «Telescopico, a fine notte» ha ora **9 px di margine**, e le note **non sono
+   state accorciate** (D6).
+   **DUE CODE APERTE, dichiarate:**
+   - **`deep-space` ha ancora 15 tacca-testo**: i suoi nomi li disegna **`messier.py`**,
+     che non passa dal declutter — **altro percorso di codice, giro a sé**. Da decidere:
+     fix in `messier.py`, oppure togliere le tacche da deep-space (aggiunte in #6).
+   - **Le icone social di Zenit**: lo spazio ora c'è (la riga contatti è libera), ma è
+     **un'unità di lavoro diversa** e non è stata fatta qui. *È l'ultima casella rossa
+     della matrice di allineamento chiesta da Marco.*
    **SEGUITO — l'ALLINEAMENTO dei nomi di stelle (Marco, 2026-07-19): «*valutiamo di
    aggiungere qualche nome in più… poi un check completo: tutti i formati, anche in modo
    diverso, devono avere le stesse feature*».**
