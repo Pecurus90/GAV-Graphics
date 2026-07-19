@@ -1030,9 +1030,21 @@ imprevisto.
    - **`deep-space` ha ancora 15 tacca-testo**: i suoi nomi li disegna **`messier.py`**,
      che non passa dal declutter — **altro percorso di codice, giro a sé**. Da decidere:
      fix in `messier.py`, oppure togliere le tacche da deep-space (aggiunte in #6).
-   - **Le icone social di Zenit**: lo spazio ora c'è (la riga contatti è libera), ma è
-     **un'unità di lavoro diversa** e non è stata fatta qui. *È l'ultima casella rossa
-     della matrice di allineamento chiesta da Marco.*
+   - ~~**Le icone social di Zenit**~~ **FATTO (2026-07-19).** Le 3 icone (instagram ·
+     facebook · email) col **trattamento copiato** da dashboard/parata/a4 — *copiato, non
+     reinventato*, perché lo scopo era **l'allineamento**, non «Zenit ha delle icone».
+     Stanno in testata a destra (la fascia bassa è piena): misurato che ci stanno anche
+     col titolo più lungo (SETTEMBRE → 94 px di margine), verificato **rendendo settembre**
+     e non solo novembre. Collisioni di Zenit: **tutte le categorie restano a zero**.
+   **🟩 LA MATRICE DI ALLINEAMENTO È TUTTA VERDE** — è ciò che Marco aveva chiesto col
+   «check completo» (*«tutti i formati, anche in modo diverso, devono avere le stesse
+   feature»*). I quattro formati «cielo» hanno gli stessi 23 nomi di stelle, le stesse 22
+   costellazioni, tacche, legenda, luna, pianeti e **3 icone social**. Deep Space resta
+   diverso **dove è giusto** (è il formato Messier).
+   **⚠️ Ma l'allineamento è garantito dalla DISCIPLINA, non da una rete: vedi R14.** È
+   stato disallineato per mesi senza che nessun test lo dicesse, e oggi lo è di nuovo per
+   scelta di nessuno — solo perché qualcuno ha costruito la matrice a mano. *La prossima
+   volta che si aggiunge un formato o una feature, il buco si riapre in silenzio.*
    **SEGUITO — l'ALLINEAMENTO dei nomi di stelle (Marco, 2026-07-19): «*valutiamo di
    aggiungere qualche nome in più… poi un check completo: tutti i formati, anche in modo
    diverso, devono avere le stesse feature*».**
