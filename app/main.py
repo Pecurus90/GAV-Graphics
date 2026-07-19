@@ -55,6 +55,10 @@ _GLYPH = {
  "parata": '<rect x="3" y="5" width="18" height="14" rx="1"/><line x1="6" y1="9" x2="18" y2="9"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="6" y1="15" x2="18" y2="15"/>',
  "zenit": '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/>',
  "a4": '<rect x="6" y="3" width="12" height="18" rx="1"/><circle cx="12" cy="10" r="4"/><line x1="8" y1="17" x2="16" y2="17"/>',
+ # Deep Space: i simboli degli atlanti che il formato USA - galassia (ellisse
+ # inclinata) + ammasso aperto (cerchio tratteggiato). Unico glifo con ellisse,
+ # rotazione e tratteggio: non si confonde con lo zenit (due cerchi concentrici).
+ "deep-space": '<ellipse cx="10" cy="14" rx="8" ry="3.4" transform="rotate(-26 10 14)"/><circle cx="17.5" cy="7" r="3" stroke-dasharray="1.7 1.9"/>',
 }
 _GLYPH_GEN = '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>'
 
