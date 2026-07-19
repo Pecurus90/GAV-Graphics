@@ -884,6 +884,64 @@ imprevisto.
    → verde. *(Proposta non fatta, giro a sé: una rete che pretenda che nessuna tacca
    attraversi un blocco di testo. Difficoltà nota: la larghezza del testo non sta
    nell'SVG.)*
+4g. **#7p — LA RICOGNIZIONE SISTEMATICA (60 poster) e l'A4 sull'anti-collisione.**
+   *(2026-07-19.)* Marco: *«genera le 12 immagini per i 5 formati, analizzale e fammi
+   un report generale»* — per chiudere le collisioni **una volta per tutte**, invece di
+   rammendare il mese che si sta guardando.
+   **Lo strumento, non l'occhio:** `tools/collisioni.py` (committato) legge i layout e
+   i 60 SVG di `out/sweep/` e misura cinque categorie. **È diagnosi, non un test**, e non
+   corregge nulla. Il punto duro dichiarato: *la larghezza del testo non sta nell'SVG* —
+   stimata `n_char × corpo × fattore`, col fattore **calibrato rendendo stringhe isolate
+   e misurandole dal raster** (0,40 per le etichette — Barlow è condensato; ~0,50 per il
+   tutto-maiuscolo). Errore ±1 px su soglie di 3-4 px: le collisioni grosse sono robuste,
+   i quasi-contatti si confermano a occhio (ed è ciò che si è fatto).
+   **Calibrato su tre difetti VERI e ritrovati tutti e tre** (Auriga↔Capella, zenit-nov,
+   parata N/S pre-fix): *se non li avesse ritrovati, lo strumento era rotto.*
+   | | sotto-pann. | banda | etich↔etich | cardin. | tacca-testo |
+   |---|---|---|---|---|---|
+   | dashboard | 0 | 0 | 31 *(quasi)* | 0 | 2 |
+   | parata | 0 | 0 | 18 *(quasi)* | 0 | 2 |
+   | **zenit** | **56** | 0 | 7 | 0 | 0 |
+   | a4 | 0 | 0 | 19 *(**15 VERE**)* | 0 | 2 |
+   | deep-space | 0 | 0 | 9 *(quasi)* | 0 | 15 *(lievi)* |
+   **I fix di ieri hanno TENUTO su un anno intero**, non solo sul mese guardato: banda e
+   cardinali sono **0 su tutti e 60**. È la prima volta che il progetto lo sa invece di
+   sperarlo.
+   **Due problemi strutturali, di natura diversa — ed è la scoperta che conta:**
+   - **zenit (56/anno) — il D7 puro.** Il disco full-bleed passa sotto i pannelli e
+     **non sa che ci sono**. *Prova numerica che il rammendo è morto:* **Mizar è pulito
+     ad agosto — il mese su cui era stato rammendato (`4090986`) — e sepolto al 100% a
+     novembre**; le etichette sepolte oscillano **3/32 (9%) ad agosto → 11/33 (33%) a
+     novembre**. I colpevoli di novembre non sono quelli di agosto. **Giro a sé, aperto.**
+   - **a4 — 15 sovrapposizioni VERE, ed erano CONGELATE NEL GOLDEN.** L'A4 era l'unico
+     formato **senza anti-collisione**. E la cosa da ricordare è che *il codice lo diceva
+     a voce alta* (`disc.py:88`: «*le etichette sono piazzate ingenuamente (le
+     sovrapposizioni restano); è ciò che il golden A4 sorveglia*») e **nessuno l'aveva
+     letto come un difetto per dieci giri**. È **R10 nella stessa identica forma**: il
+     golden dice che l'output non è cambiato, non che è giusto.
+   **FATTO (`805cfe1`): l'A4 passa a `declutter` — UNA RIGA nel layout.** 15 → **0** su
+   tutti i 12 mesi. Le stelle-guida **non spariscono** (senza `star_names` il declutter
+   ripiega su `MARQUEE`, come parata): Capella/Vega/Antares/Deneb/Altair/Arturo restano.
+   **Il golden mosso, contato dall'architetto per una strada indipendente:** 17 `<text>`
+   fuori / 17 dentro, **zero elementi non-testo** → disco intatto. **Ma delle 17 solo
+   DUE si sono spostate davvero** — `Auriga` (y188,9→194,5, si stacca da Capella a
+   y181,5) e `Scorpione` (y751,6→740,3, si stacca da Antares a y752,5): le altre 15 hanno
+   **coordinate identiche**, il declutter le emette solo in **ordine** diverso nel file.
+   *L'esecutore aveva riportato «34 righe, TUTTE riposizionate»: **il conto tornava, la
+   spiegazione no**.* E la strada vera è **una prova migliore** di quella portata: agosto
+   ha **esattamente 2** collisioni nella ricognizione e il declutter ha mosso
+   **esattamente 2** etichette, che sono **i difetti calibratori**. *Principio confermato
+   (già scritto in #7n): ci si ferma quando **non torna il conto**, non quando torna per
+   una strada diversa da quella prevista — e qui fermarsi ha fatto emergere la prova
+   forte.*
+   **La rete che seguiva il cambiamento è VIVA, provata dall'architetto e non
+   sull'asserzione dell'esecutore:** `test_disc_e_fetta_dell_a4` è stato aggiornato a
+   `declutter=True` (obbligato: il frammento deve restare una **fetta verbatim** dell'A4,
+   D7). Iniettato il guasto — frammento rimesso naive — → **rosso** con l'asserzione vera
+   («*Il disco non è più una fetta VERBATIM dell'A4, invariante D7*»), ripristinato →
+   verde, repo pulito. *Il test insegue la realtà; non è stato annacquato per passare.*
+   **⚠️ E GUARDANDO IL PNG è uscita una SESTA categoria che lo strumento non può vedere
+   — vedi R13.**
 5. **Il packaging: l'`.exe` in GitHub Actions (D4 + D15).** *(Anticipato su Pillole —
    deciso da Marco, 2026-07-14: «prima l'exe che funziona e lo condivido, poi
    progettiamo Pillole».)*
@@ -1148,6 +1206,30 @@ Ordinato per rischio reale.
   Costo ~1-2 MB. **`.gitignore` non è né CLAUDE.md né `docs/`: non è roba
   dell'architetto** — va nel prompt dell'esecutore.
   *Marco (2026-07-16): «fermati, ne parliamo dopo» — si decide a coda vuota.*
+
+- **R13 — LE LINEE DELLE COSTELLAZIONI ATTRAVERSANO LE ETICHETTE. La sesta categoria,
+  che nessuna rete vede.** *(Trovata 2026-07-19 dall'architetto **guardando il PNG**
+  dell'A4 di marzo, subito dopo che `tools/collisioni.py` aveva dichiarato quel poster
+  privo di sovrapposizioni.)* Sull'A4 di marzo la linea della figura passa **in mezzo
+  alla parola** «Cassiopea» e «Cefeo». Non è testo↔testo, non è testo↔pannello, non è
+  tacca↔testo: **è una linea di costellazione contro un'etichetta**, e sta fuori da
+  tutte e cinque le categorie dello strumento.
+  **NON è una regressione del declutter, ed è dimostrato dal diff del golden**, non
+  dedotto: `Cassiopea` è fra le 15 etichette a **coordinate identiche** prima/dopo — non
+  si è mossa. Il difetto **c'era già**, congelato nel golden come le 15 sovrapposizioni.
+  **Quarta volta che il progetto impara la stessa cosa** *(dopo i cardinali fuori dal
+  canvas → il cardinale sotto un pannello → la banda che non è un `panel`)*: **le reti
+  hanno buchi della stessa forma del bug**. Lo strumento modella *testi e rettangoli*;
+  le linee delle figure attraversano tutto il disco e non erano nel modello. E le due
+  reti si sono comportate esattamente come previsto: *«conta il golden» e «guarda
+  l'immagine» non sono ridondanti* — lo strumento ha dato 0, l'occhio ha trovato il
+  difetto, e **il golden ha poi provato che non l'avevamo introdotto noi**.
+  **Non corretto** (regola #4: riportare, non correggere): il commit dell'A4 era pulito
+  e a scopo unico. Prima di decidere un fix va **misurata l'estensione** sui 60 poster —
+  una linea che sfiora il bordo di un'etichetta non è «Cassiopea tagliata in due», e
+  senza quella distinzione si finisce a inseguire rumore. *Costo noto della misura: le
+  linee delle figure sono già nell'SVG (`<polyline>`/`<path>`), quindi è geometria
+  segmento↔bbox — la stessa che cat.5 fa già per le tacche.*
 
 **Mai verificato:** la correttezza astronomica dell'output. Sappiamo che il
 codice produce un SVG. Non sappiamo che sia giusto.
