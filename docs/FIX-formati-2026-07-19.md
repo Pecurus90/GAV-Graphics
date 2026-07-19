@@ -17,10 +17,13 @@ chiamato **Deep Space**, generato **singolarmente e non in abbinata**.
 
 Il set passa a **cinque**: `dashboard · parata · zenit · a4 · deep-space`.
 
-**Da decidere prima di eseguire (domanda per Marco):** il **carosello a due pagine
-sparisce del tutto**, oppure resta come opzione accanto ai cinque? Oggi la UI ha un
-pulsante «Genera il carosello» e l'app produce due PNG: se il carosello sparisce, va
-tolto anche quello; se resta, i due percorsi convivono.
+**DECISO (Marco, 2026-07-18): il carosello a due pagine SPARISCE.** Cinque formati,
+**uno alla volta**. Va tolto anche il pulsante «Genera il carosello» dalla UI e il
+percorso a due PNG.
+*La ragione, e non è solo semplicità:* oggi il carosello accoppia **sempre** la pagina 2
+alla pagina 1 «cielo». Da formato libero, **Deep Space si abbina a quello che si vuole**
+— dashboard, zenit o parata — e la scelta si fa al momento di pubblicare. Mese e luogo
+restano nel modulo, quindi generare due volte non rischia disallineamenti.
 
 ---
 
