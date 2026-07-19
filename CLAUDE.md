@@ -1073,6 +1073,41 @@ imprevisto.
    *La ragione dell'ordine è del progetto, non del gusto:* aggiungere etichette a Zenit
    mentre ne seppellisce 11 vuol dire non sapere più se un difetto è **dei nomi** o
    **della struttura**. Due variabili, nessuna diagnosi.
+4h. **#7q — L'AUDIT DI PULIZIA, e la RETE che ne è il vero prodotto.** *(2026-07-19,
+   chiesto da Marco: «rimuovere codice, ottimizzare, portare DRY le funzioni».)*
+   **Il verdetto è che non c'era un audit da fare: c'era mezz'ora di lavoro.** Registrato
+   perché la domanda tornerà, e la risposta misurata vale più di una seconda ricognizione.
+   **PRIMA la rete, poi il refactor** — stesso criterio di #7e (*output identico byte per
+   byte*), e per la stessa ragione: **un refactor non aggiunge niente, quindi se rompe
+   qualcosa non c'è nessuna funzione nuova da provare che lo riveli.**
+   `tools/fotografia.py` (+ `fotografia_sha256.txt`): **20 SVG = 5 formati × 4 mesi**, uno
+   per stagione. **Copre deliberatamente il buco dei golden**, che sorvegliano solo
+   **l'A4 di agosto** — lo stesso buco che in #7e lasciò i test verdi con un `import`
+   dimenticato. *Resta come rete permanente per ogni giro futuro.*
+   **Cosa è stato tolto — poco, ed è il punto:**
+   - **`moon_panel`** (~22 righe): l'unico **morto davvero** (nessun layout, nessun test).
+   - **una formula sola per cardinali e tacche**: la duplicazione era *giusta da unire*
+     perché i due usi **cambierebbero insieme** (posizione disegnata ↔ box-ostacolo). *E
+     qui la fotografia si è guadagnata lo stipendio:* su Zenit i cardinali stanno **dentro**
+     il disco, quindi una fattorizzazione sbagliata avrebbe mosso le etichette — e
+     **nessun test se ne sarebbe accorto**. 20 hash identici lo escludono.
+   - **3 commenti che il codice smentiva** (l'A4 non è più naive, `moon_panel` non esiste,
+     `MARQUEE` è test-only).
+   **Cosa NON è stato toccato, e la ragione che vale oltre questo giro:** `MARQUEE` e il
+   percorso naive sono **test-only, non morti** — la distinzione che salva dal churn
+   («non chiamato» ≠ «morto»); le **6 basi di percorso** non si unificano perché il
+   coupling **non esiste ancora** (D17 ha reso `resource_path` inutile, R9 è chiuso) — è
+   l'astrazione-troppo-presto che è già costata `brand/formats.py`; il **ponte**
+   `engine/generate.py` è indirezione voluta (D14) e tocca 8 import.
+   **⚠️ IL PRODOTTO PIÙ UTILE DELL'AUDIT NON È CODICE: È CHE QUESTO FILE ERA SBAGLIATO.**
+   La **tabella dell'architettura era stale su 8 file su 12** — `validate.py` dichiarato
+   205 righe, ne ha **355**. Cioè: *la tabella che esiste per descrivere il codice* era la
+   cosa più divergente dal codice. **Settima smentita di questo file per misura**, e la
+   più imbarazzante. Corretta, e ora la riga dice **quando** è stata ricontata, così la
+   prossima deriva si vede invece di marcire.
+   **Nessun bug funzionale trovato.** *Lezione da tenere: la risposta «il codice è già
+   abbastanza pulito» è un risultato valido, e l'esecutore ha avuto ragione a darla invece
+   di trovarsi qualcosa da fare.*
 5. **Il packaging: l'`.exe` in GitHub Actions (D4 + D15).** *(Anticipato su Pillole —
    deciso da Marco, 2026-07-14: «prima l'exe che funziona e lo condivido, poi
    progettiamo Pillole».)*
