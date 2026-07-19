@@ -138,9 +138,8 @@ class DiscMixin:
             # lo mette NEGATIVO per portarle appena DENTRO il canvas (invariante #3:
             # N in alto, E a sinistra = orientamento, identita' visiva). Non tocca
             # la proiezione: solo dove finisce la lettera.
-            for lab,ang in (('N',0),('E',90),('S',180),('O',270)):
-                rr=rad+cardinal_gap*k; ax=cx-rr*np.sin(np.radians(ang)); ay=cy-rr*np.cos(np.radians(ang))
-                a(f'<text x="{ax:.1f}" y="{ay+6*k:.1f}" fill="{theme["cardinal"]}" font-size="{19*k:.1f}" font-weight="bold" text-anchor="middle">{self._esc(lab)}</text>')
+            for lab, ax, by in self._cardinal_positions(cx, cy, rad, k, cardinal_gap):
+                a(f'<text x="{ax:.1f}" y="{by:.1f}" fill="{theme["cardinal"]}" font-size="{19*k:.1f}" font-weight="bold" text-anchor="middle">{self._esc(lab)}</text>')
         return '\n'.join(s)
 
     def _disc_ticks(self, cx, cy, rad, k, theme, ticks):
@@ -150,56 +149,61 @@ class DiscMixin:
         vedono benissimo): `grid` non ha contrasto col fondo. Dimensioni tarate
         per VEDERSI a 1080 (rad ~270): minore ~1.1px×6px, maggiore ~1.7px×12px —
         mai sotto il pixel. Tutto sovrascrivibile dal file."""
-        minor=ticks.get("minor",10); major=ticks.get("major",30)
         col=theme[ticks.get("stroke","cardinal")]
-        minl=ticks.get("minor_len",9.0)*k;   majl=ticks.get("major_len",17.0)*k
         minw=ticks.get("minor_width",1.6)*k;  majw=ticks.get("major_width",2.4)*k
         mino=ticks.get("minor_op",0.5);       majo=ticks.get("major_op",0.9)
         out=[]
-        for az in range(0,360,minor):
-            long=(az%major==0); ar=np.radians(az)
-            t=majl if long else minl; w=majw if long else minw; op=majo if long else mino
-            x1=cx-rad*np.sin(ar); y1=cy-rad*np.cos(ar)
-            x2=cx-(rad+t)*np.sin(ar); y2=cy-(rad+t)*np.cos(ar)
+        for x1,y1,x2,y2,long in self._tick_segments(cx, cy, rad, k, ticks):
+            w=majw if long else minw; op=majo if long else mino
             out.append(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" '
                        f'stroke="{col}" stroke-width="{w:.2f}" opacity="{op}"/>')
         return '\n'.join(out)
 
     @staticmethod
-    def _cardinal_boxes(cx, cy, rad, k, cardinals, cardinal_gap):
-        """I riquadri (x0,y0,x1,y1) dei 4 cardinali, alle STESSE coordinate a cui
-        li disegna sky_disc_svg (ancora middle, corpo 19k, baseline a ay+6k). Servono
-        all'anti-collisione come ostacoli: cosi' le etichette non finiscono sotto
-        N/E/S/O. Vuoto se `cardinals` e' spento."""
-        if not cardinals:
-            return []
-        s = 19 * k; hw = s * 0.55          # mezza larghezza: lettera + margine
-        boxes = []
-        for ang in (0, 90, 180, 270):
-            rr = rad + cardinal_gap * k
-            ax = cx - rr * np.sin(np.radians(ang)); ay = cy - rr * np.cos(np.radians(ang))
-            by = ay + 6 * k
-            boxes.append((ax - hw, by - s * 0.85, ax + hw, by + s * 0.15))
-        return boxes
+    def _tick_segments(cx, cy, rad, k, ticks):
+        """(x1,y1,x2,y2,long) di ogni tacca. UNA formula: la usano SIA il disegno
+        (_disc_ticks) SIA i box-ostacolo (_tick_boxes), cosi' non possono divergere
+        (una tacca spostata di un pixel non la vedrebbe nessun test)."""
+        minor=ticks.get("minor",10); major=ticks.get("major",30)
+        minl=ticks.get("minor_len",9.0)*k;   majl=ticks.get("major_len",17.0)*k
+        out=[]
+        for az in range(0,360,minor):
+            long=(az%major==0); ar=np.radians(az)
+            t=majl if long else minl
+            x1=cx-rad*np.sin(ar); y1=cy-rad*np.cos(ar)
+            x2=cx-(rad+t)*np.sin(ar); y2=cy-(rad+t)*np.cos(ar)
+            out.append((x1,y1,x2,y2,long))
+        return out
 
     @staticmethod
-    def _tick_boxes(cx, cy, rad, k, ticks, margin=2.0):
-        """I riquadri delle tacche (dai loro estremi in _disc_ticks), con un piccolo
-        margine, per l'anti-collisione. Vuoto se non ci sono tacche. Stanno FUORI
-        dal bordo (rad..rad+len): toccano solo le etichette che arrivano al bordo."""
+    def _cardinal_positions(cx, cy, rad, k, cardinal_gap):
+        """(lab, x, baseline_y) dei 4 cardinali. UNA formula: la usano SIA il
+        disegno (sky_disc_svg) SIA i box-ostacolo (_cardinal_boxes), cosi' non
+        possono divergere. baseline_y = ay+6k (dove finisce la lettera)."""
+        rr=rad+cardinal_gap*k
+        out=[]
+        for lab,ang in (('N',0),('E',90),('S',180),('O',270)):
+            ax=cx-rr*np.sin(np.radians(ang)); ay=cy-rr*np.cos(np.radians(ang))
+            out.append((lab, ax, ay+6*k))
+        return out
+
+    def _cardinal_boxes(self, cx, cy, rad, k, cardinals, cardinal_gap):
+        """I riquadri dei 4 cardinali (dalle loro posizioni), per l'anti-collisione:
+        cosi' le etichette non finiscono sotto N/E/S/O. Vuoto se `cardinals` spento."""
+        if not cardinals:
+            return []
+        s = 19*k; hw = s*0.55          # mezza larghezza: lettera + margine
+        return [(ax-hw, by-s*0.85, ax+hw, by+s*0.15)
+                for _lab, ax, by in self._cardinal_positions(cx, cy, rad, k, cardinal_gap)]
+
+    def _tick_boxes(self, cx, cy, rad, k, ticks, margin=2.0):
+        """I riquadri delle tacche (dai loro segmenti), con un piccolo margine, per
+        l'anti-collisione. Vuoto se non ci sono tacche. Stanno FUORI dal bordo
+        (rad..rad+len): toccano solo le etichette che arrivano al bordo."""
         if not ticks:
             return []
-        minor = ticks.get("minor", 10); major = ticks.get("major", 30)
-        minl = ticks.get("minor_len", 9.0) * k; majl = ticks.get("major_len", 17.0) * k
-        boxes = []
-        for az in range(0, 360, minor):
-            t = majl if az % major == 0 else minl
-            ar = np.radians(az)
-            x1 = cx - rad * np.sin(ar); y1 = cy - rad * np.cos(ar)
-            x2 = cx - (rad + t) * np.sin(ar); y2 = cy - (rad + t) * np.cos(ar)
-            boxes.append((min(x1, x2) - margin, min(y1, y2) - margin,
-                          max(x1, x2) + margin, max(y1, y2) + margin))
-        return boxes
+        return [(min(x1,x2)-margin, min(y1,y2)-margin, max(x1,x2)+margin, max(y1,y2)+margin)
+                for x1,y1,x2,y2,_long in self._tick_segments(cx, cy, rad, k, ticks)]
 
     def _disc_labels_declutter(self, cx, cy, rad, k, lst, lat_rad, theme, ramp,
                                labels, marquee, star_names, card_boxes=()):
