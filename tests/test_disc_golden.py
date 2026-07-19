@@ -43,6 +43,15 @@ LABELS22 = ["UMa", "UMi", "Cas", "Cep", "Dra", "Cyg", "Lyr", "Aql", "Her",
             "CrB", "Boo", "Sco", "Sgr", "Peg", "And", "Per", "Aur", "Ori",
             "Tau", "Gem", "Leo", "CMa"]
 
+# I 23 nomi di stelle-guida (la lista di dashboard): dal 2026-07-19 anche a4 e
+# parata li dichiarano (prima ripiegavano su MARQUEE, 14 nomi, senza Sirio). Il
+# frammento naive deve usarli per restare una fetta VERBATIM dell'A4.
+STAR_NAMES23 = ["Sirio", "Vega", "Altair", "Deneb", "Arturo", "Capella",
+                "Rigel", "Betelgeuse", "Aldebaran", "Pollux", "Regolo",
+                "Antares", "Spica", "Fomalhaut", "Polare",
+                "Mizar", "Schedar", "Thuban", "Alphecca", "Kaus Australis",
+                "Mirach", "Algol", "Enif"]
+
 
 def _theme(root):
     return json.load(open(os.path.join(root, "brand", "palettes", "osservatorio.json"),
@@ -62,7 +71,8 @@ def _fragment(eng, theme, social=False):
         return eng.sky_disc_svg(DISC["cx"], DISC["cy"], DISC["rad"], lst, lat_rad, theme,
                                 declutter=True, ticks=TICKS)
     return eng.sky_disc_svg(DISC["cx"], DISC["cy"], DISC["rad"], lst, lat_rad, theme,
-                            declutter=True, ticks=TICKS, labels=LABELS22)
+                            declutter=True, ticks=TICKS, labels=LABELS22,
+                            star_names=STAR_NAMES23)
 
 
 def disc_document(eng, theme):

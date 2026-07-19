@@ -11,7 +11,12 @@
      "ticks": {"minor": 10, "major": 30}, "declutter": true,
      "labels": ["UMa", "UMi", "Cas", "Cep", "Dra", "Cyg", "Lyr", "Aql", "Her",
                 "CrB", "Boo", "Sco", "Sgr", "Peg", "And", "Per", "Aur", "Ori",
-                "Tau", "Gem", "Leo", "CMa"]},
+                "Tau", "Gem", "Leo", "CMa"],
+     "star_names": ["Sirio", "Vega", "Altair", "Deneb", "Arturo", "Capella",
+                    "Rigel", "Betelgeuse", "Aldebaran", "Pollux", "Regolo",
+                    "Antares", "Spica", "Fomalhaut", "Polare",
+                    "Mizar", "Schedar", "Thuban", "Alphecca", "Kaus Australis",
+                    "Mirach", "Algol", "Enif"]},
 
     {"type": "image", "href": "brand/logo/logo-emblema.png",
      "x": 60, "y": 30, "w": 82, "h": 82},

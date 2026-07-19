@@ -1646,22 +1646,49 @@
 </g>
 <circle cx="486.1" cy="524.5" r="6.6" fill="#c3d2ff" opacity="0.30" filter="url(#softglow)"/>
 <circle cx="486.1" cy="524.5" r="2.4" fill="#c3d2ff"/>
-<circle cx="395.5" cy="494.4" r="6.6" fill="#d3ddff" opacity="0.30" filter="url(#softglow)"/>
-<circle cx="395.5" cy="494.4" r="2.4" fill="#d3ddff"/>
 <circle cx="420.9" cy="645.7" r="6.6" fill="#e8ecfd" opacity="0.30" filter="url(#softglow)"/>
 <circle cx="420.9" cy="645.7" r="2.4" fill="#e8ecfd"/>
+<circle cx="395.5" cy="494.4" r="6.6" fill="#d3ddff" opacity="0.30" filter="url(#softglow)"/>
+<circle cx="395.5" cy="494.4" r="2.4" fill="#d3ddff"/>
 <circle cx="718.6" cy="477.4" r="6.6" fill="#ffbc7e" opacity="0.30" filter="url(#softglow)"/>
 <circle cx="718.6" cy="477.4" r="2.4" fill="#ffbc7e"/>
-<circle cx="654.2" cy="757.2" r="6.6" fill="#ff8e51" opacity="0.30" filter="url(#softglow)"/>
-<circle cx="654.2" cy="757.2" r="2.4" fill="#ff8e51"/>
 <circle cx="326.5" cy="186.2" r="6.6" fill="#ffdfaa" opacity="0.30" filter="url(#softglow)"/>
 <circle cx="326.5" cy="186.2" r="2.4" fill="#ffdfaa"/>
+<circle cx="654.2" cy="757.2" r="6.6" fill="#ff8e51" opacity="0.30" filter="url(#softglow)"/>
+<circle cx="654.2" cy="757.2" r="2.4" fill="#ff8e51"/>
+<circle cx="446.9" cy="321.3" r="6.6" fill="#ffefcb" opacity="0.30" filter="url(#softglow)"/>
+<circle cx="446.9" cy="321.3" r="2.4" fill="#ffefcb"/>
+<circle cx="603.6" cy="347.1" r="6.6" fill="#cedaff" opacity="0.30" filter="url(#softglow)"/>
+<circle cx="603.6" cy="347.1" r="2.4" fill="#cedaff"/>
+<circle cx="309.9" cy="367.8" r="6.6" fill="#ffc183" opacity="0.30" filter="url(#softglow)"/>
+<circle cx="309.9" cy="367.8" r="2.4" fill="#ffc183"/>
+<circle cx="558.7" cy="352.7" r="6.6" fill="#b4c6ff" opacity="0.30" filter="url(#softglow)"/>
+<circle cx="558.7" cy="352.7" r="2.4" fill="#b4c6ff"/>
+<circle cx="644.5" cy="508.1" r="6.6" fill="#bdcdff" opacity="0.30" filter="url(#softglow)"/>
+<circle cx="644.5" cy="508.1" r="2.4" fill="#bdcdff"/>
+<circle cx="519.1" cy="816.7" r="6.6" fill="#bacaff" opacity="0.30" filter="url(#softglow)"/>
+<circle cx="519.1" cy="816.7" r="2.4" fill="#bacaff"/>
+<circle cx="220.0" cy="394.1" r="6.6" fill="#ffa162" opacity="0.30" filter="url(#softglow)"/>
+<circle cx="220.0" cy="394.1" r="2.4" fill="#ffa162"/>
+<circle cx="236.9" cy="280.7" r="6.6" fill="#b4c6ff" opacity="0.30" filter="url(#softglow)"/>
+<circle cx="236.9" cy="280.7" r="2.4" fill="#b4c6ff"/>
+<circle cx="304.1" cy="616.6" r="6.6" fill="#ffa566" opacity="0.30" filter="url(#softglow)"/>
+<circle cx="304.1" cy="616.6" r="2.4" fill="#ffa566"/>
+<text x="453.4" y="316.6" fill="#eef3ff" font-size="10.8" opacity="0.95">Polare</text>
 <text x="725.2" y="472.7" fill="#eef3ff" font-size="10.8" opacity="0.95">Arturo</text>
 <text x="492.7" y="519.8" fill="#eef3ff" font-size="10.8" opacity="0.95">Vega</text>
 <text x="333.0" y="181.5" fill="#eef3ff" font-size="10.8" opacity="0.95">Capella</text>
 <text x="427.4" y="641.0" fill="#eef3ff" font-size="10.8" opacity="0.95">Altair</text>
 <text x="660.8" y="752.5" fill="#eef3ff" font-size="10.8" opacity="0.95">Antares</text>
 <text x="402.1" y="489.7" fill="#eef3ff" font-size="10.8" opacity="0.95">Deneb</text>
+<text x="525.6" y="812.0" fill="#eef3ff" font-size="10.8" opacity="0.95">Kaus Australis</text>
+<text x="610.2" y="342.4" fill="#eef3ff" font-size="10.8" opacity="0.95">Mizar</text>
+<text x="226.6" y="389.4" fill="#eef3ff" font-size="10.8" opacity="0.95">Mirach</text>
+<text x="243.4" y="276.0" fill="#eef3ff" font-size="10.8" opacity="0.95">Algol</text>
+<text x="651.1" y="503.4" fill="#eef3ff" font-size="10.8" opacity="0.95">Alphecca</text>
+<text x="316.5" y="363.1" fill="#eef3ff" font-size="10.8" opacity="0.95">Schedar</text>
+<text x="310.7" y="611.9" fill="#eef3ff" font-size="10.8" opacity="0.95">Enif</text>
+<text x="565.3" y="348.1" fill="#eef3ff" font-size="10.8" opacity="0.95">Thuban</text>
 <text x="593.2" y="259.2" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Orsa Maggiore</text>
 <text x="265.3" y="543.0" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Pegaso</text>
 <text x="503.5" y="403.3" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Dragone</text>
@@ -1671,12 +1698,12 @@
 <text x="481.1" y="787.3" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Sagittario</text>
 <text x="660.8" y="740.3" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Scorpione</text>
 <text x="414.3" y="516.9" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Cigno</text>
-<text x="265.8" y="270.9" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Perseo</text>
+<text x="265.8" y="259.6" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Perseo</text>
 <text x="433.0" y="661.2" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Aquila</text>
 <text x="389.0" y="407.8" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Cefeo</text>
 <text x="485.6" y="347.9" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Orsa Minore</text>
 <text x="322.7" y="351.5" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Cassiopea</text>
-<text x="634.6" y="508.4" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Corona Boreale</text>
+<text x="634.6" y="519.7" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Corona Boreale</text>
 <text x="335.8" y="194.5" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Auriga</text>
 <text x="478.7" y="533.5" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Lira</text>
 <line x1="450.0" y1="140.0" x2="450.0" y2="124.1" stroke="#9fb0d8" stroke-width="2.25" opacity="0.9"/>
