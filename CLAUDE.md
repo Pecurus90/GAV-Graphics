@@ -1108,6 +1108,27 @@ imprevisto.
    **Nessun bug funzionale trovato.** *Lezione da tenere: la risposta «il codice è già
    abbastanza pulito» è un risultato valido, e l'esecutore ha avuto ragione a darla invece
    di trovarsi qualcosa da fare.*
+   **CODA DELLO STESSO GIORNO — tre lavori chiesti da Marco, tutti chiusi:**
+   - **Deep Space riconoscibile nella UI.** *Il tasto c'era già* (il layout ha la sua
+     scheda): mancava il **glifo**, quindi ripiegava su `_GLYPH_GEN` — **due cerchi
+     concentrici, cioè quasi lo stesso disegno di Zenit**. Ora ha ellisse inclinata
+     (galassia) + cerchio tratteggiato (ammasso aperto): **i simboli d'atlante che il
+     formato già usa**, non un'icona inventata. *Diagnosi utile oltre il caso: «non c'è il
+     pulsante» voleva dire «non si riconosce».*
+   - **Le 7 costellazioni ZODIACALI** (Ariete · Cancro · Vergine · Bilancia · Capricorno ·
+     Acquario · Pesci) sui quattro formati cielo: 22 → **29** etichette. Motivo (D16): *un
+     principiante non cerca la Lince, ma cerca il **proprio segno** — spesso l'unica
+     costellazione che sa di dover cercare.*
+     **IL RISULTATO CHE VALE LA PENA RICORDARE: 28 etichette in più e le collisioni NON si
+     sono mosse di un'unità** (29 · 34 · 14 · 18, identiche prima e dopo, verificate
+     dall'architetto). *Non è fortuna: è l'anti-collisione. Se le zodiacali fossero state
+     aggiunte **prima** del declutter sull'A4 — cioè stamattina — l'A4 sarebbe peggiorato.
+     L'ordine dei giri ha protetto il risultato.*
+     Golden A4: **+6 `<text>`, non 7 — Cancro ad agosto è sotto l'orizzonte**. È la
+     verifica incrociata che il conto torna **per la ragione giusta**.
+   - **La rete sull'allineamento**: vedi **R14, risolta**.
+   *(E l'ultimo residuo del carosello — una regola CSS morta — è sparito: Marco aveva
+   chiesto «l'eliminazione del carosello», quindi era **dentro** la richiesta.)*
 5. **Il packaging: l'`.exe` in GitHub Actions (D4 + D15).** *(Anticipato su Pillole —
    deciso da Marco, 2026-07-14: «prima l'exe che funziona e lo condivido, poi
    progettiamo Pillole».)*
@@ -1407,7 +1428,23 @@ Ordinato per rischio reale.
   sfortuna: è geometria, e rende R13 **prevedibile e circoscritto** invece che diffuso —
   si può misurare quali figure sono concave prima ancora di rendere.
 
-- **R14 — NESSUNA RETE SORVEGLIA L'ALLINEAMENTO FRA I FORMATI.** *(2026-07-19. Il buco
+- **R14 — RISOLTA (2026-07-19): `tests/test_allineamento_formati.py`.** Cinque test:
+  stesse feature · stessi `star_names` · stesse costellazioni · stesse icone sui quattro
+  formati «cielo», **+ una guardia** che pretende che *ogni* layout sia classificato
+  «cielo» **oppure eccezione motivata** — così un formato nuovo non può scivolare fuori
+  dalla rete per distrazione. **L'eccezione `deep-space` è dichiarata in UN SOLO POSTO,
+  con scritto il perché** (è il formato Messier): era il punto che distingueva una rete da
+  un placebo. **Iniezione del guasto rifatta dall'architetto**, non presa sulla parola:
+  tolto Sirio da `parata.json` → **rosso** su `test_star_names_allineati` con il messaggio
+  che nomina formato e feature; ripristinato → 5 verdi.
+  **Limite dichiarato, ed è quello GIUSTO:** confronta le liste **fra loro** (unione), non
+  contro un contenuto assoluto. Se un giorno si togliesse Sirio da **tutti e quattro**, la
+  rete resterebbe verde — perché è una rete di **allineamento**, non di **contenuto**. Un
+  presidio «Sirio obbligatorio» proteggerebbe una scelta editoriale con un test, e il
+  giorno che il GAV vuole cambiare le stelle da nominare troverebbe un rosso senza capire
+  perché. *(Proposto dall'esecutore, accettato: la distinzione è sua.)*
+  *(Testo originale del debito, per memoria:)*
+  **R14 — NESSUNA RETE SORVEGLIAVA L'ALLINEAMENTO FRA I FORMATI.** *(2026-07-19. Il buco
   previsto dall'architetto e **confermato dall'esecutore**; e prima ancora è il modo in
   cui il difetto era entrato.)*
   Per mesi **due formati hanno usato 23 nomi di stelle e due ne hanno usati 14** — con
