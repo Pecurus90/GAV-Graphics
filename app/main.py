@@ -479,9 +479,6 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
    -> mai stirata; sempre tutto il poster (object-fit:contain). Niente cap a 640. */
 .poster-frame{height:min(100%,100vw - 712px);width:auto;max-width:100%;aspect-ratio:1/1;border-radius:10px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.55);border:1px solid var(--hair);background:#05070f}
 .poster-frame.a4{aspect-ratio:1/1.414;height:min(100%,calc((100vw - 712px) * 1.414))}
-/* Carosello: DUE pagine intere affiancate -> ognuna limitata a META' larghezza
-   (meno il gap 16). Selettore "esattamente due figli", nessun :has. */
-.frames .poster-frame:first-child:nth-last-child(2),.frames .poster-frame:first-child:nth-last-child(2) ~ .poster-frame{height:min(100%,calc((100vw - 728px) / 2))}
 .poster-frame img{width:100%;height:100%;object-fit:contain;display:block}
 .save-row{display:flex;gap:9px;align-items:center;flex-wrap:wrap;justify-content:center}
 .btn{font-family:var(--testo);font-weight:600;font-size:13px;border-radius:7px;padding:10px 16px;cursor:pointer;transition:.14s;display:inline-flex;align-items:center;gap:8px;border:1px solid transparent;text-decoration:none}
