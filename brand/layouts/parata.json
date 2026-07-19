@@ -30,8 +30,12 @@
     {"type": "line", "x1": 40, "y1": 316, "x2": 1040, "y2": 316,
      "stroke": "divider", "stroke_width": 1},
 
-    {"type": "disc", "cx": 540, "cy": 576, "rad": 250, "labels": false, "cardinal_gap": 14,
-     "ticks": {"minor": 10, "major": 30}},
+    {"type": "disc", "cx": 540, "cy": 576, "rad": 250, "cardinal_gap": 14,
+     "ticks": {"minor": 10, "major": 30},
+     "declutter": true,
+     "labels": ["UMa", "UMi", "Cas", "Cep", "Dra", "Cyg", "Lyr", "Aql", "Her",
+                "CrB", "Boo", "Sco", "Sgr", "Peg", "And", "Per", "Aur", "Ori",
+                "Tau", "Gem", "Leo", "CMa"]},
 
     {"type": "text", "x": 44, "y": 434, "fill": "label", "size": 13,
      "weight": "600", "letter_spacing": 2.2, "content": "TEMPERATURA STELLE"},

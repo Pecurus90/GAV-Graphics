@@ -36,6 +36,13 @@ DISC = dict(year=2026, month=8, lat=45.5455, lon=11.5353, cx=450.0, cy=500.0, ra
 # cambiano SOLO etichette e tacche, non le posizioni di stelle/linee.
 TICKS = {"minor": 10, "major": 30}
 
+# Le 22 costellazioni curate (la lista di dashboard): dal 2026-07-19 anche l'A4 le
+# restringe a queste (prima mostrava tutte le principali sopra l'orizzonte, ~27).
+# Il frammento naive deve usarle per restare una fetta VERBATIM dell'A4.
+LABELS22 = ["UMa", "UMi", "Cas", "Cep", "Dra", "Cyg", "Lyr", "Aql", "Her",
+            "CrB", "Boo", "Sco", "Sgr", "Peg", "And", "Per", "Aur", "Ori",
+            "Tau", "Gem", "Leo", "CMa"]
+
 
 def _theme(root):
     return json.load(open(os.path.join(root, "brand", "palettes", "osservatorio.json"),
@@ -55,7 +62,7 @@ def _fragment(eng, theme, social=False):
         return eng.sky_disc_svg(DISC["cx"], DISC["cy"], DISC["rad"], lst, lat_rad, theme,
                                 declutter=True, ticks=TICKS)
     return eng.sky_disc_svg(DISC["cx"], DISC["cy"], DISC["rad"], lst, lat_rad, theme,
-                            ticks=TICKS)
+                            ticks=TICKS, labels=LABELS22)
 
 
 def disc_document(eng, theme):

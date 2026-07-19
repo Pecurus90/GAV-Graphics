@@ -8,7 +8,10 @@
                    "op_min": 0.15, "op_max": 0.5, "fill": "bgstar"}},
 
     {"type": "disc", "cx": 450.0, "cy": 500.0, "rad": 360.0,
-     "ticks": {"minor": 10, "major": 30}},
+     "ticks": {"minor": 10, "major": 30},
+     "labels": ["UMa", "UMi", "Cas", "Cep", "Dra", "Cyg", "Lyr", "Aql", "Her",
+                "CrB", "Boo", "Sco", "Sgr", "Peg", "And", "Per", "Aur", "Ori",
+                "Tau", "Gem", "Leo", "CMa"]},
 
     {"type": "image", "href": "brand/logo/logo-emblema.png",
      "x": 60, "y": 30, "w": 82, "h": 82},
