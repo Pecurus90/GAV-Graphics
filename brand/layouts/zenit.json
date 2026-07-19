@@ -8,6 +8,7 @@
                    "op_min": 0.12, "op_max": 0.5, "fill": "bgstar"}},
 
     {"type": "disc", "cx": 540, "cy": 540, "rad": 445, "declutter": true, "cardinal_gap": 65,
+     "ticks": {"minor": 10, "major": 30},
      "labels": ["UMa", "UMi", "Cas", "Cep", "Dra", "Cyg", "Lyr", "Aql", "Her",
                 "CrB", "Boo", "Sco", "Sgr", "Peg", "And", "Per", "Aur", "Ori",
                 "Tau", "Gem", "Leo", "CMa"],

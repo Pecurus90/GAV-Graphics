@@ -1690,6 +1690,42 @@
 <text x="593.2" y="259.2" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Orsa Maggiore</text>
 <text x="485.6" y="347.9" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Orsa Minore</text>
 <text x="767.6" y="543.6" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Vergine</text>
+<line x1="450.0" y1="140.0" x2="450.0" y2="124.1" stroke="#9fb0d8" stroke-width="2.25" opacity="0.9"/>
+<line x1="387.5" y1="145.5" x2="386.0" y2="137.2" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="326.9" y1="161.7" x2="324.0" y2="153.8" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="270.0" y1="188.2" x2="262.0" y2="174.4" stroke="#9fb0d8" stroke-width="2.25" opacity="0.9"/>
+<line x1="218.6" y1="224.2" x2="213.2" y2="217.8" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="174.2" y1="268.6" x2="167.8" y2="263.2" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="138.2" y1="320.0" x2="124.4" y2="312.0" stroke="#9fb0d8" stroke-width="2.25" opacity="0.9"/>
+<line x1="111.7" y1="376.9" x2="103.8" y2="374.0" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="95.5" y1="437.5" x2="87.2" y2="436.0" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="90.0" y1="500.0" x2="74.1" y2="500.0" stroke="#9fb0d8" stroke-width="2.25" opacity="0.9"/>
+<line x1="95.5" y1="562.5" x2="87.2" y2="564.0" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="111.7" y1="623.1" x2="103.8" y2="626.0" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="138.2" y1="680.0" x2="124.4" y2="688.0" stroke="#9fb0d8" stroke-width="2.25" opacity="0.9"/>
+<line x1="174.2" y1="731.4" x2="167.8" y2="736.8" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="218.6" y1="775.8" x2="213.2" y2="782.2" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="270.0" y1="811.8" x2="262.0" y2="825.6" stroke="#9fb0d8" stroke-width="2.25" opacity="0.9"/>
+<line x1="326.9" y1="838.3" x2="324.0" y2="846.2" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="387.5" y1="854.5" x2="386.0" y2="862.8" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="450.0" y1="860.0" x2="450.0" y2="875.9" stroke="#9fb0d8" stroke-width="2.25" opacity="0.9"/>
+<line x1="512.5" y1="854.5" x2="514.0" y2="862.8" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="573.1" y1="838.3" x2="576.0" y2="846.2" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="630.0" y1="811.8" x2="638.0" y2="825.6" stroke="#9fb0d8" stroke-width="2.25" opacity="0.9"/>
+<line x1="681.4" y1="775.8" x2="686.8" y2="782.2" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="725.8" y1="731.4" x2="732.2" y2="736.8" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="761.8" y1="680.0" x2="775.6" y2="688.0" stroke="#9fb0d8" stroke-width="2.25" opacity="0.9"/>
+<line x1="788.3" y1="623.1" x2="796.2" y2="626.0" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="804.5" y1="562.5" x2="812.8" y2="564.0" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="810.0" y1="500.0" x2="825.9" y2="500.0" stroke="#9fb0d8" stroke-width="2.25" opacity="0.9"/>
+<line x1="804.5" y1="437.5" x2="812.8" y2="436.0" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="788.3" y1="376.9" x2="796.2" y2="374.0" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="761.8" y1="320.0" x2="775.6" y2="312.0" stroke="#9fb0d8" stroke-width="2.25" opacity="0.9"/>
+<line x1="725.8" y1="268.6" x2="732.2" y2="263.2" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="681.4" y1="224.2" x2="686.8" y2="217.8" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="630.0" y1="188.2" x2="638.0" y2="174.4" stroke="#9fb0d8" stroke-width="2.25" opacity="0.9"/>
+<line x1="573.1" y1="161.7" x2="576.0" y2="153.8" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
+<line x1="512.5" y1="145.5" x2="514.0" y2="137.2" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
 <text x="450.0" y="125.0" fill="#9fb0d8" font-size="17.8" font-weight="bold" text-anchor="middle">N</text>
 <text x="69.4" y="505.6" fill="#9fb0d8" font-size="17.8" font-weight="bold" text-anchor="middle">E</text>
 <text x="450.0" y="886.2" fill="#9fb0d8" font-size="17.8" font-weight="bold" text-anchor="middle">S</text>

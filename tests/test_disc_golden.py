@@ -44,15 +44,18 @@ def _theme(root):
 
 def _fragment(eng, theme, social=False):
     """Il frammento del SOLO disco, agli stessi parametri del golden A4. Con
-    social=True accende anti-collisione + tacche (cio' che il disc-golden ora
-    sorveglia); senza, e' il disco ingenuo che resta una fetta VERBATIM dell'A4.
-    (Le tacche furono aggiunte all'A4 in commit 5 e TOLTE subito dopo: sulla
-    striscia di 16 px la tacca Sud tagliava la legenda -- vedi CLAUDE.md.)"""
+    social=True accende l'anti-collisione delle etichette; senza, e' il disco
+    ingenuo (etichette naive) che resta una fetta VERBATIM dell'A4. In ENTRAMBI
+    i casi con le TACCHE: erano state tolte dall'A4 (sulla striscia di 16 px la
+    tacca Sud tagliava la legenda), ma col giro dei formati 2026-07-19 l'A4 e'
+    stato rimpicciolito (rad 384->360) e la legenda spostata piu' in basso -- la
+    striscia si e' allargata e le tacche ci stanno (vedi CLAUDE.md)."""
     lst, lat_rad, _ = eng.sky_context(DISC["year"], DISC["month"], DISC["lat"], DISC["lon"])
     if social:
         return eng.sky_disc_svg(DISC["cx"], DISC["cy"], DISC["rad"], lst, lat_rad, theme,
                                 declutter=True, ticks=TICKS)
-    return eng.sky_disc_svg(DISC["cx"], DISC["cy"], DISC["rad"], lst, lat_rad, theme)
+    return eng.sky_disc_svg(DISC["cx"], DISC["cy"], DISC["rad"], lst, lat_rad, theme,
+                            ticks=TICKS)
 
 
 def disc_document(eng, theme):

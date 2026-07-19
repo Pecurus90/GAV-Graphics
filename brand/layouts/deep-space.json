@@ -22,7 +22,8 @@
      "stroke": "divider", "stroke_width": 1},
 
     {"type": "disc", "cx": 300, "cy": 572, "rad": 246,
-     "figure_stars": true, "labels": false, "marquee": false, "cardinals": true},
+     "figure_stars": true, "labels": false, "marquee": false, "cardinals": true,
+     "ticks": {"minor": 10, "major": 30}},
     {"type": "messier_symbols", "cx": 300, "cy": 572, "rad": 246,
      "size": 4.6, "stroke_width": 1.15, "fill": "gold",
      "label_size": 11, "label_fill": "gold",
