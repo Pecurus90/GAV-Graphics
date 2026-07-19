@@ -85,9 +85,11 @@ class DiscMixin:
         a('</g>')
         # ---- ETICHETTE (stelle-guida + costellazioni) ----
         if not declutter:
-            # PERCORSO STORICO (A4): invariato, byte per byte. Le etichette sono
-            # piazzate ingenuamente (le sovrapposizioni restano); e' cio' che il
-            # golden A4 sorveglia.
+            # PERCORSO NAIVE: etichette al punto naturale, sovrapposizioni ammesse.
+            # Era il rendering dell'A4, che dal 2026-07-19 usa l'anti-collisione
+            # (declutter, come i quadrati). Oggi NESSUN formato lo usa per le
+            # etichette: deep-space entra in questo ramo ma con marquee/labels
+            # spenti. Resta esercitato solo da tests/test_disc_extras.
             if marquee:
                 for nm,ra,dec,bv in MARQUEE:
                     al,zz=self.altaz(ra,dec,lst,lat_rad)

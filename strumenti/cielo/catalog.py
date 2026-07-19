@@ -50,7 +50,9 @@ MARQUEE = [("Vega",279.234,38.784,0.00),("Deneb",310.358,45.280,0.09),
 # nome -> (RA deg, Dec deg, B-V, magnitudine). Superset del MARQUEE con l'aggiunta
 # di Sirio (la piu' brillante) e della Polare (fioca ma serve a orientarsi). La
 # magnitudine pilota la PRIORITA' dell'anti-collisione (piu' brillante = prima).
-# MARQUEE resta separato e intatto: e' cio' che l'A4 disegna di default.
+# MARQUEE e' il FALLBACK (percorso naive + anti-collisione senza `star_names`):
+# dal 2026-07-19 NESSUN formato lo usa - tutti dichiarano `star_names`, Sirio
+# incluso - resta esercitato solo da due test (test_disc_extras, test_disc_golden).
 STARS = {
  "Sirio":(101.287,-16.716,0.00,-1.46), "Arturo":(213.915,19.182,1.23,-0.05),
  "Vega":(279.234,38.784,0.00,0.03), "Capella":(79.172,45.998,0.80,0.08),

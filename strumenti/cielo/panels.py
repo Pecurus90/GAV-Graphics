@@ -133,10 +133,9 @@ class PanelsMixin:
             luce oltre il centro) o `base` se falce (frac<0.5, scava la luce).
         A frac=0.5 rx=0: resta il semidisco netto. A frac→0 l'ellisse scura
         copre tutto (novilunio); a frac→1 l'ellisse chiara riempie (plenilunio).
-
-        NUOVO codice, di proposito NON condiviso con _render_moon_panel (che
-        disegna le 4 fasi discrete con path ad arco): unificarli ora muoverebbe
-        la stringa del golden. La duplicazione è voluta e temporanea — vedi report."""
+        La usa _render_moon_calendar. (Prima esisteva anche _render_moon_panel,
+        le 4 fasi discrete dei formati ritirati: era codice separato, tolto perche'
+        morto il 2026-07-19.)"""
         sweep=1 if waxing else 0
         half=(f'<path d="M{cx:.2f},{cy-r:.2f} A{r:.2f},{r:.2f} 0 0 {sweep} '
               f'{cx:.2f},{cy+r:.2f} Z" fill="{lit}"/>')
