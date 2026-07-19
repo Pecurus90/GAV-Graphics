@@ -942,6 +942,46 @@ imprevisto.
    verde, repo pulito. *Il test insegue la realtà; non è stato annacquato per passare.*
    **⚠️ E GUARDANDO IL PNG è uscita una SESTA categoria che lo strumento non può vedere
    — vedi R13.**
+   **ZENIT — le tre strade misurate e CHIUSE, e il vincolo geometrico che le governa.**
+   *(2026-07-19. Misure pure: nessun commit su layout/motore/golden.)*
+   - **(a) le etichette schivano i pannelli — MORTA.** Simulazione calibrata contro l'SVG
+     vero (scarto max **0,06 px**). Non c'è **un solo mese** in cui entrino tutte: ne
+     restano fuori da 1 a 8 (novembre 8/33). E le scartate non sono «appena fuori»: per
+     entrare dovrebbero allontanarsi **76-139 px** dal proprio oggetto — *Sirio a 139 px
+     da Sirio indica la stella sbagliata*.
+     **⚠️ Ma la premessa del prompt era INCOMPLETA, ed è colpa dell'architetto:** D9 ha
+     già deciso che *«un'etichetta non si scarta mai: si allontana e si collega con una
+     **linea di richiamo**»*, e la tecnica **è già implementata** (`messier.py`:
+     `LEADER_GAP`, `_last_messier_leadered`). Quindi (a) è morta **solo nella variante
+     "sposta e basta"**; la variante **con richiamo resta viva**, al prezzo di ~8 linee
+     di richiamo a novembre e del portare la tecnica da `messier.py` a `disc.py`.
+     *Registrata come viva perché non venga «riscoperta» fra due mesi.*
+   - **(b) rimpicciolire il disco — MORTA, e guardata.** Curva misurata: rad 445→56
+     sepolte/anno, 360→11, 300→4, **220→0**. Il raggio a zero è **220 = 41% del canvas**
+     (oggi 82%): il disco diventa **più piccolo del dashboard** (50%) e galleggia nel
+     vuoto. *L'architetto ha aperto il PNG: confermato, Zenit smette di essere sé stesso.*
+   - **(c) spostare gli stessi pannelli negli angoli — NON BASTA.** Anche a filo
+     d'angolo, i due colpevoli restano a ~300-340 px dal centro, sotto i **>360** che
+     servirebbero. Sono **troppo grandi** (300×300 e 270×320 in un canvas 1080).
+   **IL VINCOLO GEOMETRICO, trovato dall'architetto verificando il brief prima di
+   spedirlo — e che stava per far progettare al designer una cosa impossibile:**
+   **un pannello d'ANGOLO può stare fuori dal cielo; una FASCIA A TUTTA LARGHEZZA no.**
+   La fascia passa **sopra il centro**, quindi la sua distanza dal disco **è la sua
+   altezza**: con disco all'82% (serve >445) nessuna fascia più alta di **~95 px** può
+   stare fuori — e oggi la **testata è 150** e le **fasi lunari 120**. Un riquadro
+   d'angolo 220×140, invece, sta a **~510 px**: ampiamente fuori.
+   *L'esecutore aveva scritto nel brief che «pannelli bassi e distesi» permettono disco
+   all'82% **e** zero collisioni: **vero per gli angoli, falso per le fasce**. Il numero
+   era giusto, la generalizzazione no — e sarebbe stato il **quarto giro bruciato per un
+   numero sbagliato dato al designer**.*
+   **STATO: brief depositato nel progetto design (2026-07-19)** con i tre PNG veri
+   (Zenit-novembre, dashboard di riferimento, la variante rimpicciolita scartata). Al
+   designer si chiede di sciogliere il compromesso fra **fasce ≤95 px**, **disco a un
+   valore intermedio**, e **accettare che le fasce coprano il cielo basso** (l'orizzonte,
+   dove nessuno osserva — ma a novembre lì ci stanno Mizar e Thuban). **Zenit resta
+   com'è** finché non risponde: funziona, ha le collisioni, e nessuno ci stampa.
+   **Restano bloccate su questo giro** le due feature mancanti di Zenit (**tacche** e
+   **icone social**): entrambe dipendono da dove finiscono i pannelli.
    **SEGUITO — l'ALLINEAMENTO dei nomi di stelle (Marco, 2026-07-19): «*valutiamo di
    aggiungere qualche nome in più… poi un check completo: tutti i formati, anche in modo
    diverso, devono avere le stesse feature*».**
