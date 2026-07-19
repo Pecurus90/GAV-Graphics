@@ -110,8 +110,15 @@ class DiscMixin:
         else:
             # PERCORSO SOCIAL: dischi delle stelle nominate + etichette con
             # ANTI-COLLISIONE deterministica (vedi _disc_labels_declutter).
+            # I CARDINALI sono OSTACOLI per l'anti-collisione: il disco non si
+            # scrive addosso. Box calcolato qui (i cardinali si DISEGNANO piu'
+            # sotto, invariati). Quando i cardinali stanno FUORI dal bordo
+            # (cardinal_gap>0, come A4/dashboard/parata) il box cade oltre la zona
+            # delle etichette (rad-3) e non cambia NESSUN piazzamento; conta solo
+            # dove i cardinali stanno DENTRO (gap negativo, Zenit rientrato).
+            card_boxes = self._cardinal_boxes(cx, cy, rad, k, cardinals, cardinal_gap)
             a(self._disc_labels_declutter(cx, cy, rad, k, lst, lat_rad, theme,
-                                          ramp, labels, marquee, star_names))
+                                          ramp, labels, marquee, star_names, card_boxes))
         # tacche di azimut (corona SOLO tacche, niente numeri: a 1080 i numeri
         # sono rumore). Default SPENTA -> l'A4 non la disegna. `ticks` e' un dict
         # {"minor":10,"major":30}: una tacca ogni `minor` gradi, piu' lunga ogni
@@ -153,8 +160,25 @@ class DiscMixin:
                        f'stroke="{col}" stroke-width="{w:.2f}" opacity="{op}"/>')
         return '\n'.join(out)
 
+    @staticmethod
+    def _cardinal_boxes(cx, cy, rad, k, cardinals, cardinal_gap):
+        """I riquadri (x0,y0,x1,y1) dei 4 cardinali, alle STESSE coordinate a cui
+        li disegna sky_disc_svg (ancora middle, corpo 19k, baseline a ay+6k). Servono
+        all'anti-collisione come ostacoli: cosi' le etichette non finiscono sotto
+        N/E/S/O. Vuoto se `cardinals` e' spento."""
+        if not cardinals:
+            return []
+        s = 19 * k; hw = s * 0.55          # mezza larghezza: lettera + margine
+        boxes = []
+        for ang in (0, 90, 180, 270):
+            rr = rad + cardinal_gap * k
+            ax = cx - rr * np.sin(np.radians(ang)); ay = cy - rr * np.cos(np.radians(ang))
+            by = ay + 6 * k
+            boxes.append((ax - hw, by - s * 0.85, ax + hw, by + s * 0.15))
+        return boxes
+
     def _disc_labels_declutter(self, cx, cy, rad, k, lst, lat_rad, theme, ramp,
-                               labels, marquee, star_names):
+                               labels, marquee, star_names, card_boxes=()):
         """Etichette (stelle-guida + costellazioni) con ANTI-COLLISIONE
         deterministica. Niente motore a forze: piazzamento greedy per priorita'.
 
@@ -198,7 +222,7 @@ class DiscMixin:
                          "size":12.5*k,"fill":theme["label"],"opacity":0.82,
                          "pri":100.0+rank,"extra":' letter-spacing="0.5"'})
         # piazzamento greedy
-        placed=[]; dropped=0; dropped_labels=[]; STEP=6*k
+        placed=list(card_boxes); dropped=0; dropped_labels=[]; STEP=6*k
         DIRS=[(0,-1),(1,0),(0,1),(-1,0),(1,-1),(1,1),(-1,1),(-1,-1)]
         cands=[(0,0)]+[(dx*r*STEP, dy*r*STEP) for r in range(1,6) for dx,dy in DIRS]
         for req in sorted(reqs, key=lambda r:r["pri"]):
