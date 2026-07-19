@@ -95,7 +95,6 @@ class Engine(Compositor, MessierMixin, PanelsMixin, DiscMixin, EphemerisMixin):
             if progress: progress(self.FASE_COMPOSIZIONE)  # disco fatto, compongo il resto
             return svg
         if t=="planet_parade":return self._render_planet_parade(b, theme, data)
-        if t=="moon_panel":   return self._render_moon_panel(b, theme, data)
         if t=="moon_calendar":return self._render_moon_calendar(b, theme, data)
         if t=="planet_panel": return self._render_planet_panel(b, theme, data)
         if t=="swatches":     return self._render_swatches(b, theme)

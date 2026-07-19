@@ -122,29 +122,6 @@ class PanelsMixin:
                 out.append(self._render_text(tb, theme, item))
         return '\n'.join(out)
 
-    def _render_moon_panel(self, b, theme, data):
-        """Dischi delle fasi (fila x0 + passo gap). La forma illuminata dipende
-        da `key` (piena=cerchio, primo/ultimo=semicerchio ad arco): logica di
-        disegno, resta qui."""
-        out=[]
-        x0,cy,gap,mr=b["x0"],b["cy"],b["gap"],b["radius"]
-        base=b["base"]; lit=theme[b["lit_fill"]]
-        for i,mp in enumerate(data.moon_phases[:4]):
-            mx=x0+i*gap
-            out.append(f'<circle cx="{mx}" cy="{cy}" r="{mr}" fill="{theme[base["fill"]]}" stroke="{theme[base["stroke"]]}" stroke-width="{base["stroke_width"]}"/>')
-            if mp.key=='full':
-                out.append(f'<circle cx="{mx}" cy="{cy}" r="{mr}" fill="{lit}"/>')
-            elif mp.key=='first':
-                out.append(f'<path d="M{mx},{cy-mr} A{mr},{mr} 0 0 1 {mx},{cy+mr} Z" fill="{lit}"/>')
-            elif mp.key=='last':
-                out.append(f'<path d="M{mx},{cy-mr} A{mr},{mr} 0 0 0 {mx},{cy+mr} Z" fill="{lit}"/>')
-            for part in ("label","date"):
-                p=b[part]
-                tb={"x":mx,"y":cy+p["dy"],"fill":p["fill"],"size":p["size"],
-                    "anchor":"middle","content":p["content"]}
-                out.append(self._render_text(tb, theme, {"label":mp.label,"date":mp.date}))
-        return '\n'.join(out)
-
     @staticmethod
     def _moon_shape_svg(cx, cy, r, frac, waxing, lit, base):
         """Forma CONTINUA della Luna a frazione illuminata `frac` (0..1), col
