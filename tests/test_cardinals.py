@@ -35,8 +35,9 @@ import re
 
 import pytest
 
-# Il set finale dei formati (cornice RITIRATO in X1, D19).
-FORMATI = ["a4", "dashboard", "parata", "zenit"]
+# Il set finale dei formati (cornice RITIRATO in X1, D19; deep-space promosso a
+# formato a se' il 2026-07-19, tolto il carosello).
+FORMATI = ["a4", "dashboard", "parata", "zenit", "deep-space"]
 # I cardinali: <text ... font-weight="bold" text-anchor="middle">N|E|S|O</text>.
 _CARD = re.compile(r'<text x="([\-\d.]+)" y="([\-\d.]+)"[^>]*'
                    r'font-weight="bold" text-anchor="middle">([NESO])</text>')

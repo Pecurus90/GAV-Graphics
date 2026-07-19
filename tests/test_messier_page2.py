@@ -29,7 +29,9 @@ def _inter(a, b):
 
 @pytest.fixture(scope="module")
 def profondo(root):
-    with open(os.path.join(root, "brand", "layouts", "profondo.json"), encoding="utf-8") as fh:
+    # Il file e' 'deep-space.json' (ex 'profondo', promosso a formato a se' il
+    # 2026-07-19); il nome del fixture resta 'profondo' per non toccare 20 call-site.
+    with open(os.path.join(root, "brand", "layouts", "deep-space.json"), encoding="utf-8") as fh:
         layout = json.load(fh)
     with open(os.path.join(root, "brand", "palettes", "osservatorio.json"), encoding="utf-8") as fh:
         theme = json.load(fh)

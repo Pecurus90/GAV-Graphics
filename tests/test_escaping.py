@@ -53,11 +53,11 @@ def test_place_ostile_produce_svg_parsabile(eng, root, tmp_path, fmt):
         "il nome del luogo, ri-parsato, deve tornare grezzo (& come dato, non sintassi)"
 
 
-def test_pagina2_messier_con_place_ostile_parsabile(eng, root, tmp_path):
-    """La pagina 2 (profondo) ha i propri punti d'emissione del testo (nomi Messier,
-    costellazioni, legenda) che BYPASSANO _render_text. Anche con un place ostile
-    l'SVG resta parsabile: la rete copre anche quei punti."""
-    out = str(tmp_path / "profondo.svg")
+def test_deep_space_messier_con_place_ostile_parsabile(eng, root, tmp_path):
+    """Deep Space (ex 'profondo') ha i propri punti d'emissione del testo (nomi
+    Messier, costellazioni, legenda) che BYPASSANO _render_text. Anche con un place
+    ostile l'SVG resta parsabile: la rete copre anche quei punti."""
+    out = str(tmp_path / "deep-space.svg")
     eng.generate(2026, 8, 45.5455, 11.5353, PLACE_OSTILE, _theme(root), out,
-                 layout=_layout(root, "profondo"))
+                 layout=_layout(root, "deep-space"))
     parseString(open(out, encoding="utf-8").read())  # non deve sollevare

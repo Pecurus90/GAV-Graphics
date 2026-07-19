@@ -16,8 +16,8 @@ domani non richiede di toccare la UI.
 - D10: barra laterale, voce attiva + voce "Prossimamente".
 - D11: le QUATTRO FASI REALI riportate MAN MANO via Server-Sent Events. Il motore
   non conosce la UI (invariante #1): riceve un callback e lo chiama.
-- Carosello: UN'AZIONE produce ENTRAMBE le pagine (il cielo + il profondo cielo)
-  con gli STESSI parametri.
+- Cinque formati, UNO ALLA VOLTA (2026-07-19: tolto il carosello a due pagine).
+  Deep Space e' un formato come gli altri; si abbina a mano in pubblicazione.
 - Larghezza PNG per formato: render.png_width, la STESSA logica del CLI.
 Tutto OFFLINE (D4/D15): font e logo locali, nessun CDN.
 """
@@ -65,26 +65,19 @@ def _leggi(dirp, nome):
 
 
 def formati_scheda():
-    """I formati con una 'scheda' (esclusi quelli di solo-carosello, es. profondo),
-    dal disco, ordinati per scheda.ordine. Aggiungere un layout con una scheda =
-    una scheda nella UI, senza toccare qui."""
+    """I formati con una 'scheda', dal disco, ordinati per scheda.ordine.
+    Aggiungere un layout con una scheda = una scheda nella UI, senza toccare qui.
+    (Deep Space ha la sua scheda: e' un formato come gli altri, non piu' la
+    pagina 2 di un carosello - tolto il 2026-07-19.)"""
     out = []
     for f in sorted(x[:-5] for x in os.listdir(LAYOUTS) if x.endswith(".json")):
         d = _leggi(LAYOUTS, f)
-        if d.get("carosello_pagina2") or "scheda" not in d:
+        if "scheda" not in d:
             continue
         s = d["scheda"]
         out.append((s.get("ordine", 99), f, s))
     out.sort()
     return [(f, s) for _o, f, s in out]
-
-
-def _pagina2_formato():
-    """Il formato marcato come pagina 2 del carosello (profondo), dal disco."""
-    for f in sorted(x[:-5] for x in os.listdir(LAYOUTS) if x.endswith(".json")):
-        if _leggi(LAYOUTS, f).get("carosello_pagina2"):
-            return f
-    return None
 
 
 def palette_pastiglie():
@@ -186,48 +179,6 @@ def genera(year=2026, month=8, lat=45.5455, lon=11.5353, place="Vicenza",
         try:
             token = _genera_pagina(q, args, place, formato)
             q.put(("fatto", token))
-        except Exception as e:
-            q.put(("errore", f"Errore imprevisto: {e}"))
-        finally:
-            q.put((None, None))
-    threading.Thread(target=lavora, daemon=True).start()
-    return StreamingResponse(_stream(q), media_type="text/event-stream")
-
-
-@app.get("/carosello")
-def carosello(year=2026, month=8, lat=45.5455, lon=11.5353, place="Vicenza",
-              theme="osservatorio", formato="dashboard", hour=23):
-    """UN'AZIONE, DUE pagine con gli STESSI parametri: il cielo (formato scelto) +
-    il profondo cielo (la pagina 2, marcata sul disco). E' il prodotto mensile."""
-    p2 = _pagina2_formato()
-    if p2 is None:
-        return StreamingResponse(iter([_sse("errore", "Nessuna pagina 2 (profondo) trovata.")]),
-                                 media_type="text/event-stream")
-    try:
-        a1 = _valida(year, month, lat, lon, theme, formato, hour)
-        a2 = _valida(year, month, lat, lon, theme, p2, hour)
-    except validate.InputError as e:
-        return StreamingResponse(iter([_sse("errore", str(e))]), media_type="text/event-stream")
-    # Il carosello vale SOLO fra formati quadrati: Instagram pretende che tutte le
-    # immagini di un carosello abbiano le STESSE proporzioni, altrimenti le ritaglia
-    # (l'A4 verticale accanto al quadrato profondo verrebbe tagliato). L'aspetto e'
-    # un DATO della scheda, non una lista di formati scritta a mano.
-    scheda1 = a1[6].get("scheda", {})
-    if scheda1.get("aspect") != "sq":
-        nome = scheda1.get("nome", formato)
-        return StreamingResponse(iter([_sse("errore",
-            f"Il carosello affianca due pagine e Instagram pretende le stesse "
-            f"proporzioni: «{nome}» e' verticale e verrebbe ritagliato. Scegli un "
-            f"formato quadrato.")]), media_type="text/event-stream")
-    q = queue.Queue()
-
-    def lavora():
-        try:
-            q.put(("pagina", 1))
-            t1 = _genera_pagina(q, a1, place, formato)
-            q.put(("pagina", 2))
-            t2 = _genera_pagina(q, a2, place, p2)
-            q.put(("fatto", f"{t1},{t2}"))
         except Exception as e:
             q.put(("errore", f"Errore imprevisto: {e}"))
         finally:
@@ -424,9 +375,6 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
 .panel-body{flex:1;min-height:0;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:16px}
 .genera{flex:1;background:var(--prim);color:var(--primtx);border:none;border-radius:7px;padding:12px;font-family:var(--display);font-weight:800;font-size:15.5px;letter-spacing:.03em;cursor:pointer;transition:.14s}
 .genera:hover{background:#4a6d96}.genera:disabled{opacity:.55;cursor:not-allowed}
-.carosello-btn{background:var(--surf2);color:var(--t2);border:1px solid var(--hair2);border-radius:7px;padding:12px 14px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;transition:.14s;font-family:var(--testo);display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.1}
-.carosello-btn:hover{border-color:var(--acc);color:var(--t1)}.carosello-btn:disabled{opacity:.5;cursor:not-allowed}
-.carosello-btn small{font-weight:400;color:var(--t4);font-size:9.5px}
 .blk-lbl{font-family:var(--display);font-weight:700;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--t3);margin-bottom:9px}
 .field-lbl{font-size:11.5px;color:var(--t3);margin-bottom:5px;font-weight:500}
 /* Quando · Dove */
@@ -605,7 +553,6 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
   <aside class="panel">
     <div class="panel-toolbar">
       <button class="genera" id="genera">Genera anteprima</button>
-      <button class="carosello-btn" id="carosello">Carosello <small>2 pagine: cielo + profondo</small></button>
     </div>
     <div class="panel-body">
       <div class="qd-card">
@@ -733,13 +680,8 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
    else{st.ora=((st.ora+d)%24+24)%24;$('in-ora').value=(st.ora<10?'0':'')+st.ora+':00';}});});
  $('coord-btn').addEventListener('click',function(){this.classList.toggle('open');$('coord-wrap').classList.toggle('open');$('coord-lbl').textContent=this.classList.contains('open')?'Nascondi coordinate':'Coordinate precise';});
  // selezione schede/pastiglie
- // Il carosello vale SOLO fra formati quadrati (Instagram ritaglia le proporzioni
- // diverse): per un formato verticale il pulsante si spegne e SPIEGA il perche'.
- function updateCarosello(){var sq=st.ar==='sq',c=$('carosello');c.disabled=!sq;
-   c.querySelector('small').textContent=sq?'2 pagine: cielo + profondo'
-     :'solo per i quadrati';}
  function updateFmtSub(b){var el=$('fmt-sub');if(el)el.textContent=b.getAttribute('data-name')+' · '+(b.getAttribute('data-sub')||'');}
- document.querySelectorAll('.fmt').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.fmt').forEach(function(x){x.classList.remove('sel');});b.classList.add('sel');st.fmt=b.getAttribute('data-fmt');st.fmtName=b.getAttribute('data-name');st.ar=b.getAttribute('data-ar');updateFmtSub(b);updateCarosello();});});
+ document.querySelectorAll('.fmt').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.fmt').forEach(function(x){x.classList.remove('sel');});b.classList.add('sel');st.fmt=b.getAttribute('data-fmt');st.fmtName=b.getAttribute('data-name');st.ar=b.getAttribute('data-ar');updateFmtSub(b);});});
  function wirePal(b){b.addEventListener('click',function(){document.querySelectorAll('.pal').forEach(function(x){x.classList.remove('sel');});b.classList.add('sel');st.pal=b.getAttribute('data-pal');st.palName=b.getAttribute('data-name');st.dot=b.getAttribute('data-dot');});}
  document.querySelectorAll('.pal').forEach(wirePal);
  // stati
@@ -752,31 +694,24 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
  function fillCaps(m,a){$('cap-when').textContent=MESI[m-1]+' '+a+' · '+(st.ora<10?'0':'')+st.ora+':00';$('cap-loc').textContent=$('in-loc').value.trim()||'Vicenza';$('cap-fmt').textContent=st.fmtName;$('cap-pal').textContent=st.palName;$('cap-sw').style.background=st.dot;}
  function frame(token,ar){return '<div class="poster-frame'+(ar==='a4'?' a4':'')+'"><img src="/anteprima?token='+token+'&_='+Date.now()+'"></div>';}
  function dlLink(fmt,formato,label,cls,small){var q=params().p;q.set('fmt',fmt);q.set('formato',formato);return '<a class="btn '+cls+'" href="/download?'+q.toString()+'" download>'+label+(small?' <small>'+small+'</small>':'')+'</a>';}
- function busy(b,car){$('genera').disabled=b;$('carosello').disabled=b||st.ar!=='sq';$('genera').textContent=b?'Generazione in corso…':'Genera anteprima';}
+ function busy(b){$('genera').disabled=b;$('genera').textContent=b?'Generazione in corso…':'Genera anteprima';}
  function fail(msg){$('err-msg').textContent=msg;show('error');busy(false);}
- function run(url,carosello){
+ function run(){
    var pr=params();busy(true);show('generating');setPhase(0);
-   $('gen-title').textContent='Sto disegnando il cielo…';$('gen-sub').textContent=carosello?'Pagina 1 di 2 · il cielo':'';
-   var es=new EventSource(url+'?'+pr.p.toString());
+   $('gen-title').textContent='Sto disegnando il cielo…';$('gen-sub').textContent='';
+   var es=new EventSource('/genera?'+pr.p.toString());
    es.addEventListener('fase',function(e){setPhase(+e.data);});
-   es.addEventListener('pagina',function(e){if(e.data==='2'){setPhase(0);$('gen-sub').textContent='Pagina 2 di 2 · il profondo cielo';}});
    es.addEventListener('errore',function(e){es.close();fail(e.data);});
    es.addEventListener('fatto',function(e){es.close();allDone();var toks=e.data.split(',');
      setTimeout(function(){fillCaps(pr.m,pr.a);
-       if(carosello){
-         $('frames').innerHTML=frame(toks[0],st.ar)+frame(toks[1],'sq');
-         $('save-row').innerHTML=dlLink('png',st.fmt,'Salva pagina 1','btn-gold','PNG')+dlLink('png',(window.__p2||'profondo'),'Salva pagina 2','btn-gold','PNG')+'<button class="btn-text" id="regen">↻ Rigenera</button>';
-       }else{
-         $('frames').innerHTML=frame(toks[0],st.ar);
-         $('save-row').innerHTML=dlLink('png',st.fmt,'Salva PNG','btn-gold','per i social')+dlLink('svg',st.fmt,'Salva SVG','btn-ghost','per la stampa')+'<button class="btn-text" id="regen">↻ Rigenera</button>';
-       }
+       $('frames').innerHTML=frame(toks[0],st.ar);
+       $('save-row').innerHTML=dlLink('png',st.fmt,'Salva PNG','btn-gold','per i social')+dlLink('svg',st.fmt,'Salva SVG','btn-ghost','per la stampa')+'<button class="btn-text" id="regen">↻ Rigenera</button>';
        show('preview');busy(false);
-       var rg=$('regen');if(rg)rg.addEventListener('click',function(){run(url,carosello);});
+       var rg=$('regen');if(rg)rg.addEventListener('click',run);
      },420);});
    es.onerror=function(){es.close();fail('Connessione al motore interrotta.');};
  }
- $('genera').addEventListener('click',function(){run('/genera',false);});
- $('carosello').addEventListener('click',function(){run('/carosello',true);});
+ $('genera').addEventListener('click',run);
  $('err-back').addEventListener('click',function(){show('initial');});
 
  // --- D18: editor di palette ---
@@ -874,7 +809,6 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
  $('editor').addEventListener('click',function(e){if(e.target===this)closeEditor();});
 
  var selFmt0=document.querySelector('.fmt.sel');if(selFmt0)updateFmtSub(selFmt0);
- updateCarosello();  // stato iniziale coerente col formato di default
 })();
 </script>
 </body></html>"""

@@ -63,46 +63,27 @@ def test_anteprima_token_ignoto_404():
     assert r.status_code == 404
 
 
-# --- schede dal disco: profondo NON e' una scheda, e' la pagina 2 del carosello ---
-def test_schede_dal_disco_escludono_profondo():
+# --- schede dal disco: il set finale e' CINQUE (Deep Space e' un formato a se',
+#     non piu' la pagina 2 di un carosello - tolto il 2026-07-19) ---
+def test_schede_dal_disco_sono_i_cinque_formati():
     import app.main as A
     nomi = [f for f, _ in A.formati_scheda()]
-    assert "profondo" not in nomi, "profondo non e' un formato-scheda: e' la pagina 2"
-    assert set(nomi) == {"a4", "dashboard", "parata", "zenit"}, nomi
-    assert A._pagina2_formato() == "profondo"
+    assert set(nomi) == {"a4", "dashboard", "parata", "zenit", "deep-space"}, nomi
+    # niente piu' carosello: la funzione _pagina2_formato e l'endpoint sono spariti
+    assert not hasattr(A, "_pagina2_formato"), "il carosello e' stato tolto"
 
 
-# --- il carosello: UN'AZIONE, DUE pagine con gli stessi parametri ---
-def test_carosello_produce_due_pagine():
+def test_niente_endpoint_carosello():
+    """Il carosello e' stato tolto: /carosello non esiste piu' (404)."""
     r = client.get("/carosello?year=2026&month=8&formato=zenit")
+    assert r.status_code == 404
+
+
+def test_deep_space_e_un_formato_generabile():
+    """Deep Space si genera da solo, come gli altri formati quadrati."""
+    r = client.get("/genera?year=2026&month=8&formato=deep-space")
     assert r.status_code == 200
-    assert "event: pagina\ndata: 1" in r.text and "event: pagina\ndata: 2" in r.text
-    # 'fatto' porta DUE token (pagina 1 e pagina 2)
-    import re
-    m = re.search(r"event: fatto\ndata: ([0-9a-f]+),([0-9a-f]+)", r.text)
-    assert m, "il carosello deve finire con due token"
-
-
-# --- il carosello vale SOLO fra formati quadrati (Instagram ritaglia le proporzioni) ---
-def test_carosello_rifiuta_formato_non_quadrato():
-    """L'A4 e' verticale: affiancato al profondo quadrato, Instagram lo ritaglia.
-    Il carosello deve RIFIUTARLO con un errore in italiano che spiega il perche',
-    e NON produrre alcuna pagina."""
-    r = client.get("/carosello?year=2026&month=8&formato=a4")
-    assert r.status_code == 200
-    assert "event: errore" in r.text, "l'A4 doveva essere rifiutato"
-    assert "quadrat" in r.text.lower(), "l'errore deve spiegare che serve un formato quadrato"
-    assert "event: pagina" not in r.text, "nessuna pagina va prodotta per un formato rifiutato"
-
-
-def test_carosello_solo_quadrati_dai_dati():
-    """La regola usa l'ASPETTO della scheda (un dato), non una lista di formati
-    scritta a mano: l'A4 non e' 'sq', tutti gli altri formati-scheda lo sono."""
-    import app.main as A
-    asp = {f: s.get("aspect") for f, s in A.formati_scheda()}
-    assert asp["a4"] != "sq", "l'A4 e' verticale: aspetto != sq"
-    assert all(v == "sq" for f, v in asp.items() if f != "a4"), \
-        f"tutti i formati social sono quadrati: {asp}"
+    assert "event: fatto" in r.text
 
 
 # --- la larghezza PNG e' quella GIUSTA per formato (stessa logica del CLI) ---
@@ -115,6 +96,6 @@ def test_larghezza_png_per_formato():
         return render.png_width(lay)
     assert w("a4") == 1800, "l'A4 (canvas 900) va a 1800"
     assert w("zenit") == 1080, "il quadrato social va a 1080, NON alla misura dell'A4"
-    assert w("profondo") == 1080
+    assert w("deep-space") == 1080
     import cielo
     assert cielo.render.png_width is render.png_width, "il CLI riusa la stessa logica"
