@@ -1482,6 +1482,39 @@ ha incolpato l'esecutore, e ha dovuto ritrattare: l'output era del designer.)*
    Depositati al loro posto i cinque render veri + `LEGGIMI-fonte-di-verita.md`.)*
 4. **Prima il sostituto, poi la cancellazione**: mai un momento senza riferimento.
 
+### «Deciso» non è «fatto», e «fatto» non è «ARRIVATO» — 2026-07-19
+
+Il progetto aveva già imparato la prima metà (#7o: due decisioni di Marco registrate
+come fatte e mai eseguite). Oggi ha imparato la seconda, e **l'ha pagata Marco**.
+
+Marco ha rilanciato il workflow del pacchetto e nel bundle **non c'era il pulsante Deep
+Space**. Diagnosi, in ordine di quanto era sbagliata:
+1. *«sarà l'app»* — no: `deep-space.json` ha la sua scheda, il tasto c'è.
+2. *«sarà la cartella vecchia sul suo PC»* — plausibile (`dist/CieloDelMese` era del 15/07,
+   con `editorial`/`post`/`rail` e senza Zenit), ma **non era quella**: lo zip nuovo era in
+   `Downloads`, scompattato quel giorno.
+3. **La causa vera: 29 commit mai pushati.** Il pacchetto conteneva `profondo.json` — il
+   nome *prima* del rename a Deep Space. **GitHub Actions aveva impacchettato
+   fedelmente ciò che c'era su GitHub**, cioè il codice di quattro giorni prima.
+
+**Il workflow era sano. Erano sani i commit, i test, le verifiche.** Mancava un `git push`.
+
+**La catena ha TRE anelli, e ognuno può rompersi in silenzio:**
+`deciso` → `committato` → **`pushato`** → `impacchettato`.
+Un lavoro verificato, con la suite verde e i golden fermi, **può essere invisibile al
+prodotto** perché il terzo anello non è stato toccato da nessuno.
+
+**Di chi era la colpa, per non impararla storta:** *dell'architetto*. L'esecutore ha fatto
+la cosa giusta a non pushare di sua iniziativa (le regole dicono di committare e basta,
+salvo richiesta). L'architetto ha detto a Marco *«rigenera il pacchetto»* **senza
+verificare che ci fosse qualcosa da rigenerare** — cioè ha dato per scontato l'unico
+anello che nessuno aveva controllato.
+
+**Regola operativa che ne discende:** prima di dire a Marco *«ricostruisci il pacchetto»*,
+si esegue **`git status -sb`** e si guarda `ahead/behind`. Se il ramo è **ahead**, il
+pacchetto che uscirà **non conterrà il lavoro**. E il push, che è l'unica azione che esce
+dal computer di Marco, **si chiede** — non si fa di iniziativa.
+
 ### Regole di ingaggio — sempre attive
 
 1. **Se non l'hai verificato, scrivi che non l'hai verificato.** Mai
