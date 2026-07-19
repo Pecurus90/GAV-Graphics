@@ -36,12 +36,15 @@ DISC = dict(year=2026, month=8, lat=45.5455, lon=11.5353, cx=450.0, cy=500.0, ra
 # cambiano SOLO etichette e tacche, non le posizioni di stelle/linee.
 TICKS = {"minor": 10, "major": 30}
 
-# Le 22 costellazioni curate (la lista di dashboard): dal 2026-07-19 anche l'A4 le
-# restringe a queste (prima mostrava tutte le principali sopra l'orizzonte, ~27).
-# Il frammento naive deve usarle per restare una fetta VERBATIM dell'A4.
-LABELS22 = ["UMa", "UMi", "Cas", "Cep", "Dra", "Cyg", "Lyr", "Aql", "Her",
-            "CrB", "Boo", "Sco", "Sgr", "Peg", "And", "Per", "Aur", "Ori",
-            "Tau", "Gem", "Leo", "CMa"]
+# Le costellazioni curate dell'A4 (la lista di dashboard): 22 + le 7 ZODIACALI
+# aggiunte il 2026-07-19 (Ari, Cnc, Vir, Lib, Cap, Aqr, Psc - un principiante cerca
+# il proprio segno, D16). Il frammento naive deve usarle NELLO STESSO ORDINE dell'A4
+# per restare una fetta VERBATIM (invariante D7): se l'A4 cambia le sue etichette,
+# questa lista va aggiornata di conseguenza (movimento deliberato, non annacquamento).
+LABELS_A4 = ["UMa", "UMi", "Cas", "Cep", "Dra", "Cyg", "Lyr", "Aql", "Her",
+             "CrB", "Boo", "Sco", "Sgr", "Peg", "And", "Per", "Aur", "Ori",
+             "Tau", "Gem", "Leo", "CMa",
+             "Ari", "Cnc", "Vir", "Lib", "Cap", "Aqr", "Psc"]
 
 # I 23 nomi di stelle-guida (la lista di dashboard): dal 2026-07-19 anche a4 e
 # parata li dichiarano (prima ripiegavano su MARQUEE, 14 nomi, senza Sirio). Il
@@ -71,7 +74,7 @@ def _fragment(eng, theme, social=False):
         return eng.sky_disc_svg(DISC["cx"], DISC["cy"], DISC["rad"], lst, lat_rad, theme,
                                 declutter=True, ticks=TICKS)
     return eng.sky_disc_svg(DISC["cx"], DISC["cy"], DISC["rad"], lst, lat_rad, theme,
-                            declutter=True, ticks=TICKS, labels=LABELS22,
+                            declutter=True, ticks=TICKS, labels=LABELS_A4,
                             star_names=STAR_NAMES23)
 
 
