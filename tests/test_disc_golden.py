@@ -50,19 +50,19 @@ def _theme(root):
 
 
 def _fragment(eng, theme, social=False):
-    """Il frammento del SOLO disco, agli stessi parametri del golden A4. Con
-    social=True accende l'anti-collisione delle etichette; senza, e' il disco
-    ingenuo (etichette naive) che resta una fetta VERBATIM dell'A4. In ENTRAMBI
-    i casi con le TACCHE: erano state tolte dall'A4 (sulla striscia di 16 px la
-    tacca Sud tagliava la legenda), ma col giro dei formati 2026-07-19 l'A4 e'
-    stato rimpicciolito (rad 384->360) e la legenda spostata piu' in basso -- la
-    striscia si e' allargata e le tacche ci stanno (vedi CLAUDE.md)."""
+    """Il frammento del SOLO disco, agli stessi parametri del golden A4. ENTRAMBI
+    i rami usano l'ANTI-COLLISIONE (declutter): dal 2026-07-19 anche l'A4 la usa
+    (era l'unico formato "naive", con 15 sovrapposizioni vere di etichette l'anno;
+    portato su declutter come gli altri quattro -> 0). Differenza: social=True usa
+    tutte le costellazioni (istantanea astratta del disc-golden), social=False le
+    22 curate + LE TACCHE, cioe' la configurazione ESATTA dell'A4, cosi' resta una
+    fetta VERBATIM dell'A4 (invariante D7)."""
     lst, lat_rad, _ = eng.sky_context(DISC["year"], DISC["month"], DISC["lat"], DISC["lon"])
     if social:
         return eng.sky_disc_svg(DISC["cx"], DISC["cy"], DISC["rad"], lst, lat_rad, theme,
                                 declutter=True, ticks=TICKS)
     return eng.sky_disc_svg(DISC["cx"], DISC["cy"], DISC["rad"], lst, lat_rad, theme,
-                            ticks=TICKS, labels=LABELS22)
+                            declutter=True, ticks=TICKS, labels=LABELS22)
 
 
 def disc_document(eng, theme):

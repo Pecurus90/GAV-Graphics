@@ -1646,39 +1646,39 @@
 </g>
 <circle cx="486.1" cy="524.5" r="6.6" fill="#c3d2ff" opacity="0.30" filter="url(#softglow)"/>
 <circle cx="486.1" cy="524.5" r="2.4" fill="#c3d2ff"/>
-<text x="492.7" y="519.8" fill="#eef3ff" font-size="10.8" opacity="0.95">Vega</text>
 <circle cx="395.5" cy="494.4" r="6.6" fill="#d3ddff" opacity="0.30" filter="url(#softglow)"/>
 <circle cx="395.5" cy="494.4" r="2.4" fill="#d3ddff"/>
-<text x="402.1" y="489.7" fill="#eef3ff" font-size="10.8" opacity="0.95">Deneb</text>
 <circle cx="420.9" cy="645.7" r="6.6" fill="#e8ecfd" opacity="0.30" filter="url(#softglow)"/>
 <circle cx="420.9" cy="645.7" r="2.4" fill="#e8ecfd"/>
-<text x="427.4" y="641.0" fill="#eef3ff" font-size="10.8" opacity="0.95">Altair</text>
 <circle cx="718.6" cy="477.4" r="6.6" fill="#ffbc7e" opacity="0.30" filter="url(#softglow)"/>
 <circle cx="718.6" cy="477.4" r="2.4" fill="#ffbc7e"/>
-<text x="725.2" y="472.7" fill="#eef3ff" font-size="10.8" opacity="0.95">Arturo</text>
 <circle cx="654.2" cy="757.2" r="6.6" fill="#ff8e51" opacity="0.30" filter="url(#softglow)"/>
 <circle cx="654.2" cy="757.2" r="2.4" fill="#ff8e51"/>
-<text x="660.8" y="752.5" fill="#eef3ff" font-size="10.8" opacity="0.95">Antares</text>
 <circle cx="326.5" cy="186.2" r="6.6" fill="#ffdfaa" opacity="0.30" filter="url(#softglow)"/>
 <circle cx="326.5" cy="186.2" r="2.4" fill="#ffdfaa"/>
+<text x="725.2" y="472.7" fill="#eef3ff" font-size="10.8" opacity="0.95">Arturo</text>
+<text x="492.7" y="519.8" fill="#eef3ff" font-size="10.8" opacity="0.95">Vega</text>
 <text x="333.0" y="181.5" fill="#eef3ff" font-size="10.8" opacity="0.95">Capella</text>
-<text x="246.6" y="416.8" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Andromeda</text>
-<text x="433.0" y="661.2" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Aquila</text>
-<text x="335.8" y="188.9" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Auriga</text>
-<text x="667.4" y="443.8" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Boote</text>
-<text x="322.7" y="351.5" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Cassiopea</text>
-<text x="389.0" y="407.8" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Cefeo</text>
-<text x="634.6" y="508.4" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Corona Boreale</text>
-<text x="414.3" y="516.9" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Cigno</text>
-<text x="503.5" y="403.3" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Dragone</text>
-<text x="567.9" y="525.3" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Ercole</text>
-<text x="478.7" y="533.5" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Lira</text>
-<text x="265.3" y="543.0" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Pegaso</text>
-<text x="265.8" y="270.9" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Perseo</text>
-<text x="481.1" y="787.3" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Sagittario</text>
-<text x="660.8" y="751.6" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Scorpione</text>
+<text x="427.4" y="641.0" fill="#eef3ff" font-size="10.8" opacity="0.95">Altair</text>
+<text x="660.8" y="752.5" fill="#eef3ff" font-size="10.8" opacity="0.95">Antares</text>
+<text x="402.1" y="489.7" fill="#eef3ff" font-size="10.8" opacity="0.95">Deneb</text>
 <text x="593.2" y="259.2" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Orsa Maggiore</text>
+<text x="265.3" y="543.0" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Pegaso</text>
+<text x="503.5" y="403.3" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Dragone</text>
+<text x="667.4" y="443.8" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Boote</text>
+<text x="246.6" y="416.8" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Andromeda</text>
+<text x="567.9" y="525.3" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Ercole</text>
+<text x="481.1" y="787.3" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Sagittario</text>
+<text x="660.8" y="740.3" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Scorpione</text>
+<text x="414.3" y="516.9" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Cigno</text>
+<text x="265.8" y="270.9" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Perseo</text>
+<text x="433.0" y="661.2" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Aquila</text>
+<text x="389.0" y="407.8" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Cefeo</text>
 <text x="485.6" y="347.9" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Orsa Minore</text>
+<text x="322.7" y="351.5" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Cassiopea</text>
+<text x="634.6" y="508.4" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Corona Boreale</text>
+<text x="335.8" y="194.5" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Auriga</text>
+<text x="478.7" y="533.5" fill="#7fb6d8" font-size="11.7" opacity="0.82" text-anchor="middle" letter-spacing="0.5">Lira</text>
 <line x1="450.0" y1="140.0" x2="450.0" y2="124.1" stroke="#9fb0d8" stroke-width="2.25" opacity="0.9"/>
 <line x1="387.5" y1="145.5" x2="386.0" y2="137.2" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
 <line x1="326.9" y1="161.7" x2="324.0" y2="153.8" stroke="#9fb0d8" stroke-width="1.50" opacity="0.5"/>
