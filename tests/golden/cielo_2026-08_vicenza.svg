@@ -1711,8 +1711,8 @@
 <text x="655" y="895" fill="#8b98b8" font-size="11">≈ 4.000 K</text>
 <circle cx="752" cy="891" r="4.5" fill="#ff6e3c"/>
 <text x="761" y="895" fill="#8b98b8" font-size="11">sotto 3.000 K</text>
-<line x1="40" y1="900" x2="860" y2="900" stroke="#243055" stroke-width="1"/>
-<text x="40" y="930" fill="#7fb6d8" font-size="15" font-weight="bold" letter-spacing="2.5">PIANETI VISIBILI</text>
+<line x1="40" y1="924" x2="860" y2="924" stroke="#243055" stroke-width="1"/>
+<text x="40" y="948" fill="#7fb6d8" font-size="15" font-weight="bold" letter-spacing="2.5">PIANETI VISIBILI</text>
 <line x1="157.2" y1="952" x2="157.2" y2="1092" stroke="#3a4d7d" stroke-width="1"/>
 <line x1="274.3" y1="952" x2="274.3" y2="1092" stroke="#3a4d7d" stroke-width="1"/>
 <line x1="391.5" y1="952" x2="391.5" y2="1092" stroke="#3a4d7d" stroke-width="1"/>
