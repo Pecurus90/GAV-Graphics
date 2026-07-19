@@ -50,23 +50,23 @@ il compositore senza toccare il cielo.
 
 | File | Righe | Ruolo |
 |---|---|---|
-| `compose/compositor.py` | 143 | **CONDIVISO.** Il compositore: cammina i blocchi di un file di layout ed è **tool-agnostico** (hook `_render_block_tool` per i blocchi propri di uno strumento). Le primitive: testo, riga, pannello, **immagine (base64)**, icona, sfondo. **È ciò che Pillole eredita.** |
+| `compose/compositor.py` | 171 | **CONDIVISO.** Il compositore: cammina i blocchi di un file di layout ed è **tool-agnostico** (hook `_render_block_tool` per i blocchi propri di uno strumento). Le primitive: testo, riga, pannello, **immagine (base64)**, icona, sfondo. **È ciò che Pillole eredita.** |
 | `strumenti/cielo/messier.py` | 518 | Il profondo cielo (pagina 2): simboli, tabella, anti-collisione a tre strati, nomi delle costellazioni. Ospita `CONST_IT_MINORI` (vedi il confine, D14). |
-| `strumenti/cielo/disc.py` | 219 | Il disco sigillato (D7). Legge `CONST_IT`, **non** `CONST_IT_MINORI`. |
-| `strumenti/cielo/panels.py` | 193 | Pannelli: luna, pianeti, colori. |
+| `strumenti/cielo/disc.py` | 288 | Il disco sigillato (D7). Legge `CONST_IT`, **non** `CONST_IT_MINORI`. |
+| `strumenti/cielo/panels.py` | 247 | Pannelli: luna, pianeti, colori. |
 | `strumenti/cielo/catalog.py` | 193 | Dati + funzioni pure: cataloghi, `SkyData`, `bv2hex`, geometria. Ospita `CONST_IT`. |
 | `strumenti/cielo/ephemeris.py` | 184 | Effemeridi, proiezione. **Il cuore astronomico.** |
-| `strumenti/cielo/engine.py` | 102 | L'assemblaggio: init + `generate()` + dispatch. |
+| `strumenti/cielo/engine.py` | 127 | L'assemblaggio: init + `generate()` + dispatch. |
 | `engine/generate.py` | 17 | **Un ponte**, non il motore: re-esporta `Engine`/`bv2hex`/`STARS` perché `cielo.py` e `app/main.py` importavano da lì. Si potrà togliere aggiornando quei due import. |
-| `cielo.py` | 101 | Il CLI (D1). Mappa i formati ai file di layout e **compone** motore + `render`. |
-| `validate.py` | 205 | Validazione input (R4) + contratto del tema (D2). Condiviso da CLI e web, **non** importato dal motore (invariante #1). |
-| `render.py` | 53 | SVG→PNG via resvg. Usato dal CLI **e** dalla web app. |
-| `app/main.py` | 811 | Web app FastAPI: `/`, `/preview`, `/download`, + l'editor di palette (D18). **L'HTML sta dentro il `.py`**, non in template (debito `#7f`) — ma è una **raw string** `PAGINA = r"""…"""` riempita con `.replace()`, **NON una f-string**: le graffe del CSS non sono un problema, il CSS si riscrive libero. **La UI ESPONE i formati** (`<button class="fmt" data-fmt=…>`, riga ~309) + la barra laterale (D10). *(Riga riscritta 2026-07-16: diceva «98 righe» (erano 811), «f-string» (è `r"""`) e «espone solo l'A4, niente selettore di formato» (il selettore c'è). **Tre errori in una riga**: quinta smentita di questo file per misura.)* |
+| `cielo.py` | 90 | Il CLI (D1). Mappa i formati ai file di layout e **compone** motore + `render`. |
+| `validate.py` | 355 | Validazione input (R4) + contratto del tema (D2). Condiviso da CLI e web, **non** importato dal motore (invariante #1). |
+| `render.py` | 68 | SVG→PNG via resvg. Usato dal CLI **e** dalla web app. |
+| `app/main.py` | 814 | Web app FastAPI: `/`, `/preview`, `/download`, + l'editor di palette (D18). **L'HTML sta dentro il `.py`**, non in template (debito `#7f`) — ma è una **raw string** `PAGINA = r"""…"""` riempita con `.replace()`, **NON una f-string**: le graffe del CSS non sono un problema, il CSS si riscrive libero. **La UI ESPONE i formati** (`<button class="fmt" data-fmt=…>`, riga ~309) + la barra laterale (D10). *(Riga riscritta 2026-07-16: diceva «98 righe» (erano 811), «f-string» (è `r"""`) e «espone solo l'A4, niente selettore di formato» (il selettore c'è). **Tre errori in una riga**: quinta smentita di questo file per misura.)* |
 | `brand/layouts/*.json` | — | La composizione come dati. `a4`, `profondo` (pagina 2), + i quattro quadrati `dashboard`/`parata`/`cornice`/`zenit` (set finale; ritirati `post`/`editorial`/`rail`). Aggiungerne uno = aggiungere un file. |
 | `brand/palettes/*.json` | — | I temi. **Non** in `themes/`. |
 | `data/stars6.json` | — | 5044 stelle GeoJSON, tutte con `mag` e `bv`. |
 
-**Nessun file supera 520 righe.** Il problema "apro un file e devo leggere
+**Nessun file supera 520 righe** *(max: `messier.py`, 518 — ricontato 2026-07-19).* Il problema "apro un file e devo leggere
 migliaia di righe" non esiste più.
 
 ---
@@ -1224,7 +1224,9 @@ Ordinato per rischio reale.
   **designer** (brief autonomo), non una toppa copiata dal quadrato — proporzioni
   portrait diverse. Fix in `a4.json` (dati, D6), che **muoverà di nuovo il golden**:
   movimento deliberato e contato, come per il logo (#7g). Non blocca il video ai
-  soci: quello usa il carosello quadrato, che è pulito.
+  soci: quello usa il carosello quadrato, che è pulito. *(Nota 2026-07-19: **il carosello
+  non esiste più** — ritirato in #7m, Deep Space è un formato libero. La frase resta come
+  cronologia della decisione di allora, non come descrizione del programma di oggi.)*
   **ESITO (#7h, in preparazione):** il designer ha consegnato due proposte — vedi
   il progetto claude.ai/design «Infografica cielo del mese», file
   `A4 - Fascia inferiore.html`. **La struttura risolutiva: due CORSIE ORIZZONTALI**
