@@ -15,7 +15,8 @@ riferimento e' forzato a LF da .gitattributes.
 
 Parametri canonici (uguali al golden A4, cosi' il frammento e' letteralmente una
 fetta dell'A4): anno 2026, mese 8, lat 45.5455, lon 11.5353, tema osservatorio,
-disco a (cx,cy,rad)=(450,500,384).
+disco a (cx,cy,rad)=(450,500,360). (rad 384->360 col giro dei formati 2026-07-19:
+l'A4 rimpicciolito per liberare i cardinali N/S -- deciso da Marco.)
 """
 import json
 import os
@@ -27,7 +28,7 @@ from golden_compare import svg_diff  # confronto a TOLLERANZA (D5)
 GOLDEN = os.path.join(os.path.dirname(__file__), "golden", "disc_2026-08_vicenza.svg")
 
 # Parametri canonici del disco. NON cambiarli senza rigenerare il golden apposta.
-DISC = dict(year=2026, month=8, lat=45.5455, lon=11.5353, cx=450.0, cy=500.0, rad=384.0)
+DISC = dict(year=2026, month=8, lat=45.5455, lon=11.5353, cx=450.0, cy=500.0, rad=360.0)
 
 # Corona di tacche del disco social (niente numeri). Il golden del disco ora
 # sorveglia il disco SOCIAL: anti-collisione delle etichette + tacche. Le stelle

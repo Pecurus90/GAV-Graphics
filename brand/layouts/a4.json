@@ -7,7 +7,7 @@
      "starfield": {"seed": 7, "count": 240, "r_min": 0.3, "r_max": 1.0,
                    "op_min": 0.15, "op_max": 0.5, "fill": "bgstar"}},
 
-    {"type": "disc", "cx": 450.0, "cy": 500.0, "rad": 384.0},
+    {"type": "disc", "cx": 450.0, "cy": 500.0, "rad": 360.0},
 
     {"type": "image", "href": "brand/logo/logo-emblema.png",
      "x": 60, "y": 30, "w": 82, "h": 82},
@@ -21,9 +21,9 @@
      "anchor": "middle",
      "content": "Cielo visibile dal Nord Italia · {place} · valido ~15 {month_name}, ore {hour}:00"},
 
-    {"type": "text", "x": 40, "y": 895, "fill": "gold", "size": 10.5,
+    {"type": "text", "x": 40, "y": 904, "fill": "gold", "size": 10.5,
      "letter_spacing": 2, "content": "TEMPERATURA STELLE"},
-    {"type": "swatches", "from": "ramp", "x0": 222, "cy": 891, "step": 106, "r": 4.5,
+    {"type": "swatches", "from": "ramp", "x0": 222, "cy": 900, "step": 106, "r": 4.5,
      "label": {"dx": 9, "dy": 4, "fill": "text3", "size": 11},
      "items": [{"bv": -0.33, "label": "oltre 15.000 K"},
                {"bv": 0.0,   "label": "≈ 10.000 K"},
