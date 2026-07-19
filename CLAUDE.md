@@ -942,6 +942,34 @@ imprevisto.
    verde, repo pulito. *Il test insegue la realtà; non è stato annacquato per passare.*
    **⚠️ E GUARDANDO IL PNG è uscita una SESTA categoria che lo strumento non può vedere
    — vedi R13.**
+   **SEGUITO — l'ALLINEAMENTO dei nomi di stelle (Marco, 2026-07-19): «*valutiamo di
+   aggiungere qualche nome in più… poi un check completo: tutti i formati, anche in modo
+   diverso, devono avere le stesse feature*».**
+   La **matrice feature × formato**, costruita a mano dall'architetto, ha trovato un
+   difetto che nessuno cercava: **`parata` e `a4` mostravano 14 nomi di stelle invece di
+   23**, perché non dichiarano `star_names` e il declutter ripiegava su **`MARQUEE`, una
+   lista CABLATA in `disc.py`**. E la lista cablata era **peggiore**: conteneva *Deneb
+   Kaitos* (β Ceti, sconosciuta) e **non conteneva SIRIO** — la stella più luminosa del
+   cielo notturno **non aveva il nome sul volantino stampato**. Vedi **R14**.
+   **FATTO:** le quattro liste sono ora **identiche** (23, verificato campo per campo, non
+   sulla parola). Golden A4 mosso e contato **per strada indipendente dall'architetto**:
+   `+22/−4 <circle>` e `+11/−2 <text>` = **netto +18 cerchi (9 stelle × 2) + 9 nomi**, i
+   6 tolti sono riordini; **zero righe di disco**. Previsione dell'esecutore (+27) contro
+   reale (+27): **il conto torna**, e stavolta anche la strada.
+   **I quasi-contatti raddoppiano (parata 18→36) ED È CORRETTO, non un difetto** — la
+   causa è geometrica e l'architetto l'ha verificata sull'immagine al 3×: i dieci più
+   stretti sono **tutti** *nome-di-stella contro nome-della-SUA costellazione*
+   (Schedar↔Cassiopea 1,8 px, Mirach↔Andromeda 1,7, Aldebaran↔Toro, Polare↔Orsa Minore).
+   La stella **sta dentro** la sua costellazione e l'etichetta della costellazione sta al
+   baricentro: ogni stella nominata **porta con sé** un quasi-contatto strutturale.
+   **E a 1,8 px sono LEGGIBILI**: la gerarchia di colore (azzurro la costellazione, bianco
+   la stella) li separa meglio della distanza. *Guardato, non dedotto.*
+   **Ordine deciso da Marco:** (1) allineamento ✅ · (2) il giro di Zenit · (3) **solo
+   dopo** le 7 costellazioni **zodiacali** mancanti (Ariete, Cancro, Vergine, Bilancia,
+   Capricorno, Acquario, Pesci — il nome è già in `CONST_IT`, è una riga di layout).
+   *La ragione dell'ordine è del progetto, non del gusto:* aggiungere etichette a Zenit
+   mentre ne seppellisce 11 vuol dire non sapere più se un difetto è **dei nomi** o
+   **della struttura**. Due variabili, nessuna diagnosi.
 5. **Il packaging: l'`.exe` in GitHub Actions (D4 + D15).** *(Anticipato su Pillole —
    deciso da Marco, 2026-07-14: «prima l'exe che funziona e lo condivido, poi
    progettiamo Pillole».)*
@@ -1230,6 +1258,39 @@ Ordinato per rischio reale.
   senza quella distinzione si finisce a inseguire rumore. *Costo noto della misura: le
   linee delle figure sono già nell'SVG (`<polyline>`/`<path>`), quindi è geometria
   segmento↔bbox — la stessa che cat.5 fa già per le tacche.*
+  **LA CAUSA, trovata il 2026-07-19 guardando `parata` dopo l'allineamento dei nomi:
+  sono le figure CONCAVE.** Le vittime non sono casuali — su parata-agosto sono di nuovo
+  **«Cassiopea» e «Cefeo»**, *gli stessi due nomi* trovati sull'A4 di marzo: formato
+  diverso, mese diverso, **stesse vittime**. L'etichetta di una costellazione è piazzata
+  al **baricentro** delle sue stelle; per una figura concava (la **W** di Cassiopea, la
+  casetta di Cefeo) il baricentro cade **dentro la figura**, cioè **sulle linee**. Non è
+  sfortuna: è geometria, e rende R13 **prevedibile e circoscritto** invece che diffuso —
+  si può misurare quali figure sono concave prima ancora di rendere.
+
+- **R14 — NESSUNA RETE SORVEGLIA L'ALLINEAMENTO FRA I FORMATI.** *(2026-07-19. Il buco
+  previsto dall'architetto e **confermato dall'esecutore**; e prima ancora è il modo in
+  cui il difetto era entrato.)*
+  Per mesi **due formati hanno usato 23 nomi di stelle e due ne hanno usati 14** — con
+  **Sirio, la stella più luminosa del cielo, assente dal volantino stampato** — e
+  **nessun test se n'è accorto**. Non l'ha trovato una rete: l'ha trovato l'architetto
+  **costruendo a mano una matrice feature × formato**.
+  Oggi esiste `test_star_names_dei_layout_sono_nel_catalogo` (becca i **refusi**: provata
+  rossa con «Mizzar»), ma **nulla asserisce che le liste COMBACINO fra i formati**. L'A4 è
+  protetto di rimbalzo dal proprio golden; **parata non ha golden**: se domani qualcuno
+  togliesse Sirio da parata, **la suite resterebbe verde** e il disallineamento
+  rientrerebbe dalla porta di servizio.
+  **È il QUINTO buco della stessa famiglia** (cardinali fuori canvas → cardinale sotto un
+  pannello → la banda che non è un `panel` → le linee delle figure → questo). E stavolta
+  il buco non ha la forma del bug: **non c'era proprio la rete**.
+  *Rimedio proposto, non fatto (è un giro a sé): la matrice di allineamento diventa un
+  TEST invece di una tabella che qualcuno rifà a mano ogni volta. Andrebbe scritta come
+  «questi formati dichiarano le stesse feature», con le eccezioni **dichiarate** (zenit
+  senza tacche, deep-space che è il formato Messier) — così un'eccezione nuova va scritta
+  apposta, e non si insinua.*
+  **Coda dello stesso giro:** `MARQUEE` (in `disc.py`) è ora il fallback di **nessun**
+  formato — tutti e cinque dichiarano `star_names`. È codice morto come fallback, e
+  contiene ancora «Deneb Kaitos» (β Ceti, la stella sconosciuta che stava sull'A4 al posto
+  di Sirio). **Non rimossa** (regola #4): resta viva per il ramo naive e per un test.
 
 **Mai verificato:** la correttezza astronomica dell'output. Sappiamo che il
 codice produce un SVG. Non sappiamo che sia giusto.
