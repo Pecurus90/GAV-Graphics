@@ -8,7 +8,7 @@ Poi apri http://localhost:8000
 
 L'interfaccia e' PORTATA dal design "Guscio App 1c" (chrome d'applicazione neutro
 e serio): stessi stili/proporzioni dei componenti (barra laterale, toolbar in
-alto, Quando/Dove compatto, formato segmentato, righe palette, editor slate),
+alto, Quando/Dove compatto, formato segmentato, righe palette),
 RIESPRESSI nel nostro markup con OGNI hook JS preservato. Le schede e le pastiglie
 si popolano DAI FILE su disco (come il CLI): aggiungere un layout o una palette
 domani non richiede di toccare la UI.
@@ -22,7 +22,7 @@ domani non richiede di toccare la UI.
 Tutto OFFLINE (D4/D15): font e logo locali, nessun CDN.
 """
 import json, tempfile, os, uuid, queue, threading
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -200,61 +200,6 @@ def anteprima(token=""):
 
 
 # ---------------------------------------------------------------------------
-# D18 — L'EDITOR DI PALETTE. Anteprima sul cielo VERO + salva-come-palette.
-# ---------------------------------------------------------------------------
-# L'anteprima si rende a LARGHEZZA RIDOTTA: misurato (2026-07-16) che il costo e'
-# quasi tutto rasterizzazione resvg (raster 1080 ~0,93s, geometria ~0), quindi
-# NON serve cachare la geometria — basta rasterizzare piu' piccolo. A 600px
-# l'anteprima e' ~0,8s: buona per un aggiornamento a RILASCIO del colore, non una
-# live-preview per-pixel (che resvg non puo' dare, e non la promettiamo).
-ANTEPRIMA_W = 600
-
-
-def _tema_da_richiesta(body):
-    """Compone il tema dai token di marca del client + astro innestate (validate),
-    poi lo VALIDA. La whitelist e l'innesto sono in validate: qui non si tocca."""
-    theme = validate.componi_palette_utente(body.get("tokens") or {}, "Anteprima", "")
-    validate.valida_tema(theme, "anteprima")
-    return theme
-
-
-@app.post("/palette/anteprima")
-async def palette_anteprima(request: Request):
-    body = await request.json()
-    try:
-        y = validate.valida_anno(body.get("year", 2026))
-        m = validate.valida_mese(body.get("month", 8))
-        la = validate.valida_lat(body.get("lat", 45.5455))
-        lo = validate.valida_lon(body.get("lon", 11.5353))
-        ho = validate.valida_ora(body.get("hour", 23))
-        fo = validate.valida_formato(body.get("formato", "dashboard"))
-        theme = _tema_da_richiesta(body)
-        layout = _leggi(LAYOUTS, fo)
-    except validate.InputError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    place = (body.get("place") or "Vicenza").strip() or "Vicenza"
-    token = uuid.uuid4().hex
-    svg = os.path.join(tempfile.gettempdir(), f"editor_{token}.svg")
-    png = os.path.join(tempfile.gettempdir(), f"editor_{token}.png")
-    engine.generate(y, m, la, lo, place, theme, svg, hour_local=ho, layout=layout)
-    render.svg_file_to_png(svg, png, width=ANTEPRIMA_W)
-    return FileResponse(png, media_type="image/png")
-
-
-@app.post("/palette/salva")
-async def palette_salva(request: Request):
-    body = await request.json()
-    try:
-        slug, theme, _path = validate.salva_palette_utente(
-            body.get("name"), body.get("descrizione"), body.get("tokens") or {})
-    except validate.InputError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    # la pastiglia gia' pronta: il client la infila nella lista e la seleziona
-    return {"slug": slug, "name": theme["name"], "dot": theme["neon"],
-            "pastiglia": _pastiglia_html(slug, theme, sel=True)}
-
-
-# ---------------------------------------------------------------------------
 # La pagina: schede/pastiglie popolate dal disco, poi il markup portato dal design.
 # ---------------------------------------------------------------------------
 def _schede_html(default="dashboard"):
@@ -277,12 +222,10 @@ def _schede_html(default="dashboard"):
 
 
 def _pastiglia_html(p, d, sel=False):
-    """UNA riga palette (design 1c: quattro pallini + nome, compatta). Un solo posto
-    che sa com'e' fatta: la usano sia la pagina iniziale sia la risposta di
-    /palette/salva (cosi' una palette creata compare identica alle altre). I quattro
+    """UNA riga palette (design 1c: quattro pallini + nome, compatta). I quattro
     pallini sono TOKEN VERI della palette — disco, bordo, oro, neon — non colori
-    scritti a mano. La `nota` (ce l'ha solo qualche palette, es. luce-rossa) si
-    preserva: e' contenuto, non decorazione."""
+    scritti a mano. La `nota` (ce l'ha solo qualche palette) si preserva: e'
+    contenuto, non decorazione."""
     disk0 = d["disk"][0]; border = d["border"]; gold = d["gold"]; neon = d["neon"]
     selc = " sel" if sel else ""
     nota = (f'<span class="pnota">◑ {d["nota"]}</span>' if d.get("nota") else "")
@@ -302,21 +245,6 @@ def _pastiglie_html(default="osservatorio"):
                      for p, d in palette_pastiglie())
 
 
-# Token DI MARCA (solo quelli) di ogni palette, per SEMINARE l'editor da una
-# palette esistente. Le 2 chiavi astronomiche NON entrano qui: il client non le
-# vede mai (D2/D18) — l'innesto avviene solo server-side al salvataggio.
-def _brand_tokens(d):
-    bt = {k: d.get(k) for k in validate.STYLE_TOKENS}
-    bt["bg"] = d.get("bg"); bt["disk"] = d.get("disk")
-    bt["status"] = {k: (d.get("status") or {}).get(k) for k in validate.STATUS_KEYS}
-    return bt
-
-
-def _paldata_json():
-    return json.dumps({p: _brand_tokens(d) for p, d in palette_pastiglie()},
-                      ensure_ascii=False)
-
-
 @app.get("/", response_class=HTMLResponse)
 def index():
     mesi = "".join(f'<option value="{i+1}"{" selected" if i==7 else ""}>{i+1:02d} · {n}</option>'
@@ -324,8 +252,7 @@ def index():
     return (PAGINA
             .replace("<!--MESI-->", mesi)
             .replace("<!--SCHEDE-->", _schede_html())
-            .replace("<!--PASTIGLIE-->", _pastiglie_html())
-            .replace("/*PALDATA*/", _paldata_json()))
+            .replace("<!--PASTIGLIE-->", _pastiglie_html()))
 
 
 PAGINA = r"""<!DOCTYPE html><html lang="it"><head><meta charset="utf-8">
@@ -426,9 +353,6 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
 .pal .pnota{display:inline-block;margin-top:4px;font-size:10px;color:#e6b98f;background:rgba(232,180,95,.1);border:1px solid rgba(232,180,95,.24);border-radius:99px;padding:1px 8px;font-weight:600}
 .pal .pactive{display:none;flex:0 0 auto;font-size:11px;font-weight:700;color:var(--acc2)}
 .pal.sel .pactive{display:block}
-.pal-add{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;margin-top:9px;border:1px solid var(--hair2);border-radius:8px;color:var(--t2);font-family:var(--testo);font-size:13px;font-weight:600;cursor:pointer;background:var(--surf);transition:.14s}
-.pal-add:hover{border-color:var(--acc);color:var(--t1)}
-.pal-add .plus{font-family:var(--display);font-weight:800;font-size:16px;line-height:1}
 /* --- stage --- */
 .stage{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;padding:18px 22px;gap:14px;position:relative}
 .meta-chips{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
@@ -492,48 +416,6 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
 .err-title{font-family:var(--display);font-weight:800;font-size:22px;color:#f2d3c9;margin-bottom:11px}
 .err-msg{font-size:15px;color:#f0c6b6;line-height:1.5;font-weight:500;background:rgba(224,102,74,.09);border:1px solid rgba(224,102,74,.22);border-radius:10px;padding:13px 16px;margin-bottom:16px}
 .err-hint{font-size:13px;color:var(--t3);line-height:1.55;margin-bottom:20px}
-/* --- editor --- */
-.editor{position:absolute;inset:0;z-index:40;display:none;align-items:center;justify-content:center;padding:26px;background:rgba(4,6,10,.7)}
-.editor.on{display:flex}
-.ed-card{width:100%;max-width:1120px;height:88vh;background:var(--panel);border:1px solid var(--hair2);border-radius:14px;box-shadow:0 40px 100px rgba(0,0,0,.6);display:flex;flex-direction:column;overflow:hidden}
-.ed-head{flex:0 0 auto;display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:1px solid var(--hair)}
-.ed-head .eh-ic{width:34px;height:34px;border-radius:8px;background:rgba(111,137,168,.14);border:1px solid var(--hair2);display:flex;align-items:center;justify-content:center;color:var(--acc2)}
-.ed-head h2{font-family:var(--display);font-weight:800;font-size:21px;color:var(--t1);line-height:1}
-.ed-head .eh-sub{font-size:12px;color:var(--t3);margin-top:3px}
-.ed-head .eh-x{margin-left:auto;width:34px;height:34px;border-radius:7px;border:1px solid var(--hair2);background:var(--surf2);color:var(--t2);font-size:16px;cursor:pointer}
-.ed-head .eh-x:hover{color:var(--t1)}
-.ed-body{flex:1;min-height:0;display:grid;grid-template-columns:1fr 392px}
-.ed-controls{overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:16px}
-.ed-banner{display:flex;align-items:center;gap:11px;padding:10px 13px;background:rgba(111,137,168,.1);border:1px solid var(--hair2);border-radius:8px}
-.ed-banner svg{flex:0 0 auto;color:var(--acc2)}
-.ed-banner span{font-size:12px;color:var(--t2);line-height:1.4}.ed-banner b{color:var(--t1);font-weight:600}
-.ed-group{}
-.ed-grp-title{display:flex;align-items:center;gap:9px;margin-bottom:10px;font-family:var(--display);font-weight:700;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--t3)}
-.ed-grp-title .line{flex:1;height:1px;background:var(--hair)}
-.ed-grp-title .ed-cnt{font-family:var(--testo);font-size:10.5px;color:var(--t4);letter-spacing:0}
-.ed-sws{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.ed-sw{display:flex;align-items:center;gap:11px;padding:9px 11px;border:1px solid var(--hair);border-radius:8px;background:var(--surf);cursor:pointer}
-.ed-sw .ed-ci{width:26px;height:26px;flex:0 0 26px;border:1px solid var(--hair2);border-radius:6px}
-.ed-sw .ed-meta{flex:1;min-width:0}
-.ed-sw .ed-nm{display:block;font-size:12.5px;font-weight:600;color:var(--t1);line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ed-sw .ed-hex{display:block;font-size:11px;color:var(--t4);font-variant-numeric:tabular-nums;letter-spacing:.02em;text-transform:uppercase}
-.ed-side{border-left:1px solid var(--hair);display:flex;flex-direction:column;background:var(--bg);min-height:0}
-.ed-side-lbl{flex:0 0 auto;padding:16px 18px 0;font-family:var(--display);font-weight:700;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--t3)}
-.ed-prev-wrap{position:relative;display:flex;align-items:center;justify-content:center;flex:1;min-height:200px;padding:16px 18px}
-.ed-frame{height:min(46vh,420px)}
-.ed-load{position:absolute;inset:16px 18px;display:none;align-items:center;justify-content:center;background:rgba(5,7,15,.32);border-radius:10px}
-.ed-load.on{display:flex}
-.ed-load .sp{width:26px;height:26px;border-radius:50%;border:3px solid rgba(143,167,196,.25);border-top-color:var(--acc2);animation:spin .7s linear infinite}
-.ed-load .txt{margin-left:11px;font-size:12.5px;color:var(--t2);font-weight:500}
-.ed-foot{flex:0 0 auto;padding:15px 18px;border-top:1px solid var(--hair);display:flex;flex-direction:column;gap:5px}
-.ed-foot .txt{margin-bottom:8px}
-.ed-foot .opt{color:var(--t4)}
-.txt{width:100%;background:var(--surf);border:1px solid var(--hair2);border-radius:7px;color:var(--t1);font-family:var(--testo);font-size:13px;font-weight:500;padding:9px 11px}
-.txt:focus{outline:none;border-color:var(--acc)}
-.ed-err{display:none;font-size:13px;color:#f0c6b6;background:rgba(224,102,74,.1);border:1px solid rgba(224,102,74,.28);border-radius:8px;padding:9px 12px;margin-bottom:9px;line-height:1.4}
-.ed-err.on{display:block}
-.ed-actions{display:flex;gap:9px;margin-top:5px}
-.ed-actions .btn{justify-content:center}.ed-actions .btn-gold{flex:1}
 </style></head>
 <body>
 <div class="titlebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>
@@ -583,7 +465,6 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
       <div class="pal-block">
         <div class="blk-lbl">Palette</div>
         <div class="palettes" id="palettes"><!--PASTIGLIE--></div>
-        <button type="button" class="pal-add" id="pal-add"><span class="plus">＋</span> Crea la tua palette</button>
       </div>
     </div>
   </aside>
@@ -632,42 +513,6 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
           <button class="btn btn-gold" id="err-back">Torna alle impostazioni</button></div></div>
     </div>
   </main>
-  <div class="editor" id="editor">
-    <div class="ed-card">
-      <div class="ed-head">
-        <span class="eh-ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l2.5 5.3 5.8.7-4.3 3.9 1.1 5.7L12 21l-5.2-2.7 1.1-5.7L3.6 9l5.9-.7z"/></svg></span>
-        <div><h2>Crea una palette</h2>
-          <div class="eh-sub">26 colori di marca in 6 gruppi · l'anteprima si aggiorna al rilascio del colore</div></div>
-        <button class="eh-x" id="ed-x" type="button" aria-label="Chiudi">✕</button>
-      </div>
-      <div class="ed-body">
-        <div class="ed-controls">
-          <div class="ed-banner">
-            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
-            <span><b>Stelle e pianeti</b> restano coi loro colori reali — sono fisica, non gusto, e non si modificano.</span></div>
-          <div id="ed-groups"></div>
-        </div>
-        <div class="ed-side">
-          <div class="ed-side-lbl">Anteprima sul cielo vero</div>
-          <div class="ed-prev-wrap">
-            <div class="poster-frame ed-frame" id="ed-frame"><img id="ed-prev-img" alt="Anteprima"></div>
-            <div class="ed-load" id="ed-prev-load"><span class="sp"></span><span class="txt">aggiorno…</span></div>
-          </div>
-          <div class="ed-foot">
-            <div class="ed-err" id="ed-err"></div>
-            <div class="field-lbl">Nome della palette</div>
-            <input class="txt" id="ed-name" type="text" placeholder="Es. Tramonto adriatico" maxlength="40">
-            <div class="field-lbl">Descrizione <span class="opt">(facoltativa)</span></div>
-            <input class="txt" id="ed-desc" type="text" placeholder="Due parole sul carattere" maxlength="80">
-            <div class="ed-actions">
-              <button class="btn btn-ghost" id="ed-cancel" type="button">Annulla</button>
-              <button class="btn btn-gold" id="ed-save" type="button">Salva palette</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 <script>
 (function(){
@@ -714,100 +559,6 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
  }
  $('genera').addEventListener('click',run);
  $('err-back').addEventListener('click',function(){show('initial');});
-
- // --- D18: editor di palette ---
- // I 20+ token DI MARCA, raggruppati in modo leggibile. Le 2 chiavi astronomiche
- // (star_ramp/planet_colors) NON compaiono: il client non le vede mai (D2/D18).
- var __PAL=/*PALDATA*/;
- var GROUPS=[
-  {t:'Sfondi',items:[['bg.0','Sfondo · cima'],['bg.1','Sfondo · centro'],['bg.2','Sfondo · fondo'],['disk.0','Disco · cima'],['disk.1','Disco · centro'],['disk.2','Disco · fondo']]},
-  {t:'Accenti',items:[['neon','Neon'],['gold','Oro']]},
-  {t:'Struttura',items:[['border','Bordo'],['border2','Bordo forte'],['grid','Griglia'],['divider','Divisori'],['panel','Pannello']]},
-  {t:'Testo',items:[['text','Testo'],['text2','Testo 2'],['text3','Testo 3'],['text4','Testo 4']]},
-  {t:'Etichette e Luna',items:[['moon_lit','Luna illuminata'],['moon_label','Etichetta Luna'],['bgstar','Stelle di sfondo'],['label','Etichette'],['cardinal','Punti cardinali']]},
-  {t:'Stati',items:[['status.ok','Visibile'],['status.info','Informazione'],['status.warn','Attenzione'],['status.muted','Spento']]}
- ];
- function updateHex(inp){var h=inp.parentNode.querySelector('.ed-hex');if(h)h.textContent=(inp.value||'').toUpperCase();}
- var groupsBuilt=false;
- function buildGroups(){
-   if(groupsBuilt)return; groupsBuilt=true;
-   var html='';
-   GROUPS.forEach(function(g){
-     html+='<div class="ed-group"><div class="ed-grp-title">'+g.t+'<span class="line"></span><span class="ed-cnt">'+g.items.length+'</span></div><div class="ed-sws">';
-     g.items.forEach(function(it){
-       html+='<label class="ed-sw"><input type="color" class="ed-ci" data-k="'+it[0]+'"><span class="ed-meta"><span class="ed-nm">'+it[1]+'</span><span class="ed-hex"></span></span></label>';
-     });
-     html+='</div></div>';
-   });
-   $('ed-groups').innerHTML=html;
-   document.querySelectorAll('#ed-groups input[type=color]').forEach(function(inp){
-     inp.addEventListener('input',function(){updateHex(inp);schedulePreview();});
-   });
- }
- function collectTokens(){
-   var t={status:{},bg:[],disk:[]};
-   document.querySelectorAll('#ed-groups input[type=color]').forEach(function(inp){
-     var k=inp.getAttribute('data-k'),v=inp.value;
-     if(k.indexOf('.')<0){t[k]=v;return;}
-     var pp=k.split('.');
-     if(pp[0]==='status'){t.status[pp[1]]=v;}else{t[pp[0]][+pp[1]]=v;}
-   });
-   return t;
- }
- function seed(slug){
-   var d=__PAL[slug]||__PAL['osservatorio'];
-   document.querySelectorAll('#ed-groups input[type=color]').forEach(function(inp){
-     var k=inp.getAttribute('data-k'),v,pp;
-     if(k.indexOf('.')<0){v=d[k];}
-     else{pp=k.split('.');v=(pp[0]==='status')?(d.status||{})[pp[1]]:(d[pp[0]]||[])[+pp[1]];}
-     if(v)inp.value=v;
-     updateHex(inp);
-   });
- }
- var pvSeq=0,pvT;
- function schedulePreview(){clearTimeout(pvT);pvT=setTimeout(updatePreview,220);}
- function updatePreview(){
-   var my=++pvSeq;$('ed-prev-load').classList.add('on');
-   var payload={tokens:collectTokens(),year:$('in-anno').value,month:$('in-mese').value,
-     hour:st.ora,place:$('in-loc').value.trim()||'Vicenza',lat:$('in-lat').value,
-     lon:$('in-lon').value,formato:st.fmt};
-   fetch('/palette/anteprima',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
-    .then(function(r){if(!r.ok)return r.json().then(function(j){throw new Error(j.detail||'Errore');});return r.blob();})
-    .then(function(b){if(my!==pvSeq)return;var u=URL.createObjectURL(b);var img=$('ed-prev-img');
-      if(img.dataset.u)URL.revokeObjectURL(img.dataset.u);img.src=u;img.dataset.u=u;$('ed-prev-load').classList.remove('on');})
-    .catch(function(e){if(my!==pvSeq)return;$('ed-prev-load').classList.remove('on');edErr(e.message);});
- }
- function edErr(msg){var e=$('ed-err');if(msg){e.textContent=msg;e.classList.add('on');}else{e.classList.remove('on');}}
- function openEditor(){
-   buildGroups();seed(st.pal);
-   $('ed-name').value='';$('ed-desc').value='';edErr('');
-   $('ed-frame').className='poster-frame ed-frame'+(st.ar==='a4'?' a4':'');
-   $('editor').classList.add('on');updatePreview();
- }
- function closeEditor(){$('editor').classList.remove('on');}
- function addPastiglia(j){
-   document.querySelectorAll('.pal').forEach(function(x){x.classList.remove('sel');});
-   var tmp=document.createElement('div');tmp.innerHTML=j.pastiglia.trim();var btn=tmp.firstChild;
-   $('palettes').appendChild(btn);wirePal(btn);btn.classList.add('sel');
-   __PAL[j.slug]=collectTokens();
-   st.pal=j.slug;st.palName=j.name;st.dot=j.dot;
- }
- function save(){
-   var name=$('ed-name').value.trim();
-   if(!name){edErr('Serve un nome per la palette.');return;}
-   $('ed-save').disabled=true;edErr('');
-   fetch('/palette/salva',{method:'POST',headers:{'Content-Type':'application/json'},
-     body:JSON.stringify({name:name,descrizione:$('ed-desc').value.trim(),tokens:collectTokens()})})
-    .then(function(r){if(!r.ok)return r.json().then(function(j){throw new Error(j.detail||'Errore');});return r.json();})
-    .then(function(j){addPastiglia(j);closeEditor();})
-    .catch(function(e){edErr(e.message);})
-    .then(function(){$('ed-save').disabled=false;});
- }
- $('pal-add').addEventListener('click',openEditor);
- $('ed-x').addEventListener('click',closeEditor);
- $('ed-cancel').addEventListener('click',closeEditor);
- $('ed-save').addEventListener('click',save);
- $('editor').addEventListener('click',function(e){if(e.target===this)closeEditor();});
 
  var selFmt0=document.querySelector('.fmt.sel');if(selFmt0)updateFmtSub(selFmt0);
 })();
