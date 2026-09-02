@@ -12,12 +12,11 @@ Uso:
   python cielo.py --year 2026 --month 8 --place Vicenza                       # A4, SVG
   python cielo.py --year 2026 --month 8 --place Vicenza --png                 # A4, SVG + PNG
   python cielo.py --year 2026 --month 8 --format zenit --png                  # quadrato 1080, SVG + PNG
-  python cielo.py --year 2026 --month 8 --format parata --palette aurora-boreale # design social
+  python cielo.py --year 2026 --month 8 --format parata --png                 # design social
 
-Formato e palette si scelgono per NOME, non per percorso: i nomi validi sono i
-file in brand/layouts/ (a4, dashboard, parata, zenit, ...) e in
-brand/palettes/ (osservatorio, luce-rossa, aurora-boreale, nebulosa,
-ottone-antico, cielo-di-ghiaccio).
+Il formato si sceglie per NOME, non per percorso: i nomi validi sono i file in
+brand/layouts/ (a4, dashboard, parata, zenit, deep-space). La PALETTE non si
+sceglie: e' una sola, l'identita' visiva del GAV (brand/palettes/gav.json).
 """
 import os, json, argparse
 
@@ -39,8 +38,6 @@ def main():
     p.add_argument('--lat', default='45.5455')
     p.add_argument('--lon', default='11.5353')
     p.add_argument('--place', default='Vicenza')
-    p.add_argument('--palette', default='osservatorio',
-                   help="nome della palette in brand/palettes/ (default: osservatorio)")
     p.add_argument('--format', default='a4',
                    help="nome del layout in brand/layouts/ (a4, dashboard, parata, zenit, ...)")
     p.add_argument('--out', default=None,
@@ -58,13 +55,10 @@ def main():
         lat = validate.valida_lat(args.lat)
         lon = validate.valida_lon(args.lon)
         fmt = validate.valida_formato(args.format)
-        palette = validate.valida_palette(args.palette)
         with open(os.path.join(LAYOUTS_DIR, f"{fmt}.json"), encoding="utf-8") as fh:
             layout = json.load(fh)
-        # La palette si legge dall'UNIONE (di serie + create dal socio, D18): cosi'
-        # una palette dell'editor si usa da CLI 'come le altre'.
-        theme = validate.carica_palette(palette)
-        validate.valida_tema(theme, f"{palette}.json")
+        theme = validate.carica_palette()
+        validate.valida_tema(theme, f"{validate.PALETTE}.json")
     except validate.InputError as e:
         raise SystemExit(f"Errore: {e}")
     # Default: out/ e' la cartella dei prodotti (usa-e-getta, gitignored). Con

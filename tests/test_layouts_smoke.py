@@ -46,4 +46,7 @@ def test_i_tre_quadrati_del_set_finale():
     nomi = set(_ids(LAYOUTS))
     assert {"dashboard", "parata", "zenit"} <= nomi, f"quadrati mancanti: {nomi}"
     assert {"post", "editorial", "rail", "cornice"}.isdisjoint(nomi), f"ritirati ancora presenti: {nomi}"
-    assert len(PALETTES) >= 4, f"attese >=4 palette, trovate {len(PALETTES)}"
+    # UNA sola palette, ed e' l'identita' GAV: se un giorno ne ricompare una
+    # seconda dev'essere una decisione, non una ricaduta.
+    assert len(PALETTES) == 1, f"attesa 1 sola palette, trovate {len(PALETTES)}"
+    assert os.path.basename(PALETTES[0]) == "gav.json", PALETTES

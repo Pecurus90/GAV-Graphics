@@ -13,7 +13,7 @@ Uso:
   python tools/fotografia.py            # rigenera e CONFRONTA con la fotografia
                                         # (exit 1 e diff se anche un byte cambia)
 
-Parametri canonici (come i golden): 2026, Vicenza (45.5455, 11.5353), osservatorio.
+Parametri canonici (come i golden): 2026, Vicenza (45.5455, 11.5353), palette GAV.
 Deterministico: seed fisso del rumore di sfondo + matematica deterministica
 (la stessa proprieta' che regge il golden).
 """
@@ -34,13 +34,13 @@ SNAPSHOT = os.path.join(HERE, "fotografia_sha256.txt")
 
 FORMATI = ["dashboard", "parata", "zenit", "a4", "deep-space"]
 MESI = [2, 5, 8, 11]   # una per stagione: inverno, primavera, estate, autunno
-ANNO, LAT, LON, LUOGO, PALETTE = 2026, 45.5455, 11.5353, "Vicenza", "osservatorio"
+ANNO, LAT, LON, LUOGO = 2026, 45.5455, 11.5353, "Vicenza"
 
 
 def _hash_tutti():
     """Ritorna {'<fmt>_<mm>': sha256hex} per ogni (formato, mese)."""
     eng = Engine(datadir=os.path.join(ROOT, "data"))
-    theme = validate.carica_palette(PALETTE)
+    theme = validate.carica_palette()
     out = {}
     with tempfile.TemporaryDirectory() as d:
         for fmt in FORMATI:

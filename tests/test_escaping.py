@@ -25,7 +25,7 @@ PLACE_OSTILE = "Bassano & Dintorni <Test> \"quote\" 'apos'"
 
 
 def _theme(root):
-    return json.load(open(os.path.join(root, "brand", "palettes", "osservatorio.json"),
+    return json.load(open(os.path.join(root, "brand", "palettes", "gav.json"),
                           encoding="utf-8"))
 
 

@@ -16,7 +16,6 @@ client = TestClient(app)
     ("/preview?month=13", "Mese"),
     ("/preview?lat=abc", "Latitudine"),
     ("/preview?year=3000", "Anno"),
-    ("/preview?theme=arcobaleno", "Palette sconosciuta"),
     ("/download?fmt=gif", "Formato di uscita"),
 ])
 def test_input_sbagliato_da_400_in_italiano(url, frammento):

@@ -24,7 +24,7 @@ def _palette(root, name):
 
 
 def test_image_incorporata_come_base64(eng, root, tmp_path):
-    theme = _palette(root, "osservatorio")
+    theme = _palette(root, "gav")
     svg = _gen(eng, tmp_path, [
         {"type": "image", "href": "brand/logo/logo-emblema.png", "x": 10, "y": 10, "w": 80, "h": 80}
     ], theme)
@@ -33,21 +33,25 @@ def test_image_incorporata_come_base64(eng, root, tmp_path):
 
 
 def test_icona_colorata_dal_tema(eng, root, tmp_path):
-    """La stessa icona in due palette deve avere fill DIVERSO (colore dal token,
-    non cablato)."""
+    """La stessa icona con due VALORI del token 'gold' deve avere fill DIVERSO:
+    il colore viene dal tema, non e' cablato (invariante #2).
+
+    La palette e' ORA UNA SOLA (l'identita' GAV), quindi il secondo tema si
+    costruisce in memoria variando quell'unico token: la rete sorveglia il
+    DIFETTO (un hex cablato), non l'esistenza di due file su disco."""
     blocks = [{"type": "icon", "name": "instagram", "x": 10, "y": 10, "size": 24, "fill": "gold"}]
-    a = _gen(eng, tmp_path, blocks, _palette(root, "osservatorio"))
-    b = _gen(eng, tmp_path, blocks, _palette(root, "luce-rossa"))
-    gold_oss = _palette(root, "osservatorio")["gold"]
-    gold_rossa = _palette(root, "luce-rossa")["gold"]
-    assert f'fill="{gold_oss}"' in a
-    assert f'fill="{gold_rossa}"' in b
-    assert gold_oss != gold_rossa  # le due palette hanno gold diverso: prova reale
+    gav = _palette(root, "gav")
+    altro = dict(gav, gold="#ff00aa")            # un solo token cambiato
+    assert gav["gold"] != altro["gold"]
+    a = _gen(eng, tmp_path, blocks, gav)
+    b = _gen(eng, tmp_path, blocks, altro)
+    assert f'fill="{gav["gold"]}"' in a
+    assert f'fill="{altro["gold"]}"' in b
 
 
 def test_icona_fill_rule_envelope(eng, root, tmp_path):
     """L'envelope usa fill-rule evenodd (per il lembo): deve finire nell'output."""
     svg = _gen(eng, tmp_path, [
         {"type": "icon", "name": "email", "x": 10, "y": 10, "size": 24, "fill": "text"}
-    ], _palette(root, "osservatorio"))
+    ], _palette(root, "gav"))
     assert 'fill-rule="evenodd"' in svg

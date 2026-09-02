@@ -14,7 +14,7 @@ import os
 import re
 
 
-def _theme(root, name="osservatorio"):
+def _theme(root, name="gav"):
     return json.load(open(os.path.join(root, "brand", "palettes", f"{name}.json"), encoding="utf-8"))
 
 

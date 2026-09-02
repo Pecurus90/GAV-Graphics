@@ -33,7 +33,7 @@ def profondo(root):
     # 2026-07-19); il nome del fixture resta 'profondo' per non toccare 20 call-site.
     with open(os.path.join(root, "brand", "layouts", "deep-space.json"), encoding="utf-8") as fh:
         layout = json.load(fh)
-    with open(os.path.join(root, "brand", "palettes", "osservatorio.json"), encoding="utf-8") as fh:
+    with open(os.path.join(root, "brand", "palettes", "gav.json"), encoding="utf-8") as fh:
         theme = json.load(fh)
     sym_block = next(b for b in layout["blocks"] if b["type"] == "messier_symbols")
     return layout, theme, sym_block

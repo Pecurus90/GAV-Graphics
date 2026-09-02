@@ -14,7 +14,7 @@ Confronto in modalita' testo (newline universali) come test_golden; il blob del
 riferimento e' forzato a LF da .gitattributes.
 
 Parametri canonici (uguali al golden A4, cosi' il frammento e' letteralmente una
-fetta dell'A4): anno 2026, mese 8, lat 45.5455, lon 11.5353, tema osservatorio,
+fetta dell'A4): anno 2026, mese 8, lat 45.5455, lon 11.5353, tema gav,
 disco a (cx,cy,rad)=(450,500,360). (rad 384->360 col giro dei formati 2026-07-19:
 l'A4 rimpicciolito per liberare i cardinali N/S -- deciso da Marco.)
 """
@@ -57,7 +57,7 @@ STAR_NAMES23 = ["Sirio", "Vega", "Altair", "Deneb", "Arturo", "Capella",
 
 
 def _theme(root):
-    return json.load(open(os.path.join(root, "brand", "palettes", "osservatorio.json"),
+    return json.load(open(os.path.join(root, "brand", "palettes", "gav.json"),
                           encoding="utf-8"))
 
 

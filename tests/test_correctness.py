@@ -218,7 +218,7 @@ def test_bv2hex_monotonia_fisica_temperatura(root):
     REALE del tema (non sull'output del nostro codice: e' una legge fisica)."""
     import json
     import os
-    ramp = json.load(open(os.path.join(root, "brand", "palettes", "osservatorio.json"),
+    ramp = json.load(open(os.path.join(root, "brand", "palettes", "gav.json"),
                           encoding="utf-8"))["star_ramp"]
     caldo = _rgb(bv2hex(ramp, -0.2))
     freddo = _rgb(bv2hex(ramp, 1.9))

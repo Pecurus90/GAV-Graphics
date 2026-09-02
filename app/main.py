@@ -8,10 +8,11 @@ Poi apri http://localhost:8000
 
 L'interfaccia e' PORTATA dal design "Guscio App 1c" (chrome d'applicazione neutro
 e serio): stessi stili/proporzioni dei componenti (barra laterale, toolbar in
-alto, Quando/Dove compatto, formato segmentato, righe palette),
+alto, Quando/Dove compatto, formato segmentato),
 RIESPRESSI nel nostro markup con OGNI hook JS preservato. Le schede e le pastiglie
-si popolano DAI FILE su disco (come il CLI): aggiungere un layout o una palette
-domani non richiede di toccare la UI.
+si popolano DAI FILE su disco (come il CLI): aggiungere un layout domani non
+richiede di toccare la UI. La palette e' UNA SOLA (l'identita' GAV): non si
+sceglie, quindi non ha un controllo.
 
 - D10: barra laterale, voce attiva + voce "Prossimamente".
 - D11: le QUATTRO FASI REALI riportate MAN MANO via Server-Sent Events. Il motore
@@ -84,31 +85,20 @@ def formati_scheda():
     return [(f, s) for _o, f, s in out]
 
 
-def palette_pastiglie():
-    """Le palette dal disco (di serie + create dal socio, UNIONE via validate): nome,
-    descrizione, e i colori VERI (bg, neon) per il campione. Nessun colore scritto a
-    mano nella UI: viene dalla palette."""
-    out = []
-    for p in validate.palette_disponibili():
-        out.append((p, validate.carica_palette(p)))
-    return out
-
-
 # ---------------------------------------------------------------------------
 # Generazione condivisa (validazione R4 + contratto D2/D13 + larghezza per formato).
 # ---------------------------------------------------------------------------
-def _valida(year, month, lat, lon, theme, formato, hour):
+def _valida(year, month, lat, lon, formato, hour):
     y = validate.valida_anno(year); m = validate.valida_mese(month)
     la = validate.valida_lat(lat); lo = validate.valida_lon(lon)
-    ho = validate.valida_ora(hour)
-    pal = validate.valida_palette(theme); fo = validate.valida_formato(formato)
-    th = validate.carica_palette(pal); validate.valida_tema(th, f"{pal}.json")
+    ho = validate.valida_ora(hour); fo = validate.valida_formato(formato)
+    th = validate.carica_palette(); validate.valida_tema(th, f"{validate.PALETTE}.json")
     layout = _leggi(LAYOUTS, fo)
     return y, m, la, lo, ho, th, layout, fo
 
 
-def _render(year, month, lat, lon, place, theme, formato="a4", hour=23, progress=None):
-    y, m, la, lo, ho, th, layout, _fo = _valida(year, month, lat, lon, theme, formato, hour)
+def _render(year, month, lat, lon, place, formato="a4", hour=23, progress=None):
+    y, m, la, lo, ho, th, layout, _fo = _valida(year, month, lat, lon, formato, hour)
     out = os.path.join(tempfile.gettempdir(), "cielo.svg")
     engine.generate(y, m, la, lo, place, th, out, hour_local=ho, layout=layout, progress=progress)
     return out, layout
@@ -116,9 +106,9 @@ def _render(year, month, lat, lon, place, theme, formato="a4", hour=23, progress
 
 @app.get("/preview")
 def preview(year=2026, month=8, lat=45.5455, lon=11.5353, place="Vicenza",
-            theme="osservatorio", formato="a4", hour=23):
+            formato="a4", hour=23):
     try:
-        svg, _ = _render(year, month, lat, lon, place, theme, formato, hour)
+        svg, _ = _render(year, month, lat, lon, place, formato, hour)
     except validate.InputError as e:
         raise HTTPException(status_code=400, detail=str(e))
     return FileResponse(svg, media_type="image/svg+xml")
@@ -126,12 +116,12 @@ def preview(year=2026, month=8, lat=45.5455, lon=11.5353, place="Vicenza",
 
 @app.get("/download")
 def download(fmt="svg", year=2026, month=8, lat=45.5455, lon=11.5353,
-             place="Vicenza", theme="osservatorio", formato="a4", hour=23):
+             place="Vicenza", formato="a4", hour=23):
     if fmt not in ("svg", "png"):
         raise HTTPException(status_code=400,
                             detail=f"Formato di uscita sconosciuto: '{fmt}'. Ammessi: svg, png.")
     try:
-        svg, layout = _render(year, month, lat, lon, place, theme, formato, hour)
+        svg, layout = _render(year, month, lat, lon, place, formato, hour)
     except validate.InputError as e:
         raise HTTPException(status_code=400, detail=str(e))
     if fmt == "svg":
@@ -172,9 +162,9 @@ def _stream(q):
 
 @app.get("/genera")
 def genera(year=2026, month=8, lat=45.5455, lon=11.5353, place="Vicenza",
-           theme="osservatorio", formato="a4", hour=23):
+           formato="a4", hour=23):
     try:
-        args = _valida(year, month, lat, lon, theme, formato, hour)
+        args = _valida(year, month, lat, lon, formato, hour)
     except validate.InputError as e:
         return StreamingResponse(iter([_sse("errore", str(e))]), media_type="text/event-stream")
     q = queue.Queue()
@@ -221,38 +211,13 @@ def _schede_html(default="dashboard"):
     return "\n".join(out)
 
 
-def _pastiglia_html(p, d, sel=False):
-    """UNA riga palette (design 1c: quattro pallini + nome, compatta). I quattro
-    pallini sono TOKEN VERI della palette — disco, bordo, oro, neon — non colori
-    scritti a mano. La `nota` (ce l'ha solo qualche palette) si preserva: e'
-    contenuto, non decorazione."""
-    disk0 = d["disk"][0]; border = d["border"]; gold = d["gold"]; neon = d["neon"]
-    selc = " sel" if sel else ""
-    nota = (f'<span class="pnota">◑ {d["nota"]}</span>' if d.get("nota") else "")
-    return (
-        f'<button type="button" class="pal{selc}" data-pal="{p}" '
-        f'data-name="{d["name"]}" data-dot="{neon}">'
-        f'<span class="dots"><i style="background:{disk0}"></i>'
-        f'<i style="background:{border}"></i><i style="background:{gold}"></i>'
-        f'<i style="background:{neon}"></i></span>'
-        f'<span class="pmeta"><span class="pname">{d["name"]}</span>'
-        f'<span class="ptag">{d.get("descrizione","")}</span>{nota}</span>'
-        f'<span class="pactive">attiva</span></button>')
-
-
-def _pastiglie_html(default="osservatorio"):
-    return "\n".join(_pastiglia_html(p, d, sel=(p == default))
-                     for p, d in palette_pastiglie())
-
-
 @app.get("/", response_class=HTMLResponse)
 def index():
     mesi = "".join(f'<option value="{i+1}"{" selected" if i==7 else ""}>{i+1:02d} · {n}</option>'
                    for i, n in enumerate(MESI))
     return (PAGINA
             .replace("<!--MESI-->", mesi)
-            .replace("<!--SCHEDE-->", _schede_html())
-            .replace("<!--PASTIGLIE-->", _pastiglie_html()))
+            .replace("<!--SCHEDE-->", _schede_html()))
 
 
 PAGINA = r"""<!DOCTYPE html><html lang="it"><head><meta charset="utf-8">
@@ -339,20 +304,6 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
 .fmt .fl{font-size:9.5px;font-weight:700;letter-spacing:.01em}
 .fmt.sel{background:var(--acc);color:#0b0e13}.fmt.sel:hover{background:var(--acc)}
 .fmt-sub{font-size:11.5px;color:var(--t3);margin-top:8px;line-height:1.35}
-/* Palette righe */
-.palettes{border:1px solid var(--hair);border-radius:9px;overflow:hidden}
-.pal{position:relative;width:100%;text-align:left;display:flex;align-items:center;gap:11px;padding:10px 12px;cursor:pointer;background:none;border:none;border-bottom:1px solid var(--hair);transition:.13s;font-family:var(--testo)}
-.pal:last-child{border-bottom:none}
-.pal:hover{background:rgba(132,158,192,.05)}
-.pal.sel{background:var(--surf2);box-shadow:inset 3px 0 0 var(--acc)}
-.pal .dots{display:flex;gap:3px;flex:0 0 auto}
-.pal .dots i{width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.35)}
-.pal .pmeta{flex:1;min-width:0}
-.pal .pname{display:block;font-size:13.5px;font-weight:600;color:var(--t1);line-height:1.2}
-.pal .ptag{display:block;font-size:11px;color:var(--t4);margin-top:2px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pal .pnota{display:inline-block;margin-top:4px;font-size:10px;color:#e6b98f;background:rgba(232,180,95,.1);border:1px solid rgba(232,180,95,.24);border-radius:99px;padding:1px 8px;font-weight:600}
-.pal .pactive{display:none;flex:0 0 auto;font-size:11px;font-weight:700;color:var(--acc2)}
-.pal.sel .pactive{display:block}
 /* --- stage --- */
 .stage{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;padding:18px 22px;gap:14px;position:relative}
 .meta-chips{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
@@ -462,10 +413,6 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
         <div class="formats" id="formats"><!--SCHEDE--></div>
         <div class="fmt-sub" id="fmt-sub"></div>
       </div>
-      <div class="pal-block">
-        <div class="blk-lbl">Palette</div>
-        <div class="palettes" id="palettes"><!--PASTIGLIE--></div>
-      </div>
     </div>
   </aside>
   <main class="stage" id="stage">
@@ -473,7 +420,6 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
       <span class="chip"><b id="cap-when">Agosto 2026</b></span>
       <span class="chip">📍 <b id="cap-loc">Vicenza</b></span>
       <span class="chip"><b id="cap-fmt">Dashboard</b></span>
-      <span class="chip"><span class="sw" id="cap-sw" style="background:#45c8ff"></span><b id="cap-pal">Osservatorio</b></span>
     </div>
     <div class="stage-box">
       <div class="state active" id="s-initial">
@@ -518,7 +464,7 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
 (function(){
  var MESI=["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
  var $=function(id){return document.getElementById(id);};
- var st={fmt:"dashboard",fmtName:"Dashboard",ar:"sq",pal:"osservatorio",palName:"Osservatorio",dot:"#45c8ff",ora:23};
+ var st={fmt:"dashboard",fmtName:"Dashboard",ar:"sq",ora:23};
  // stepper
  document.querySelectorAll('[data-step]').forEach(function(btn){btn.addEventListener('click',function(){
    var w=btn.getAttribute('data-step'),d=parseInt(btn.getAttribute('data-d'),10);
@@ -528,16 +474,14 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
  // selezione schede/pastiglie
  function updateFmtSub(b){var el=$('fmt-sub');if(el)el.textContent=b.getAttribute('data-name')+' · '+(b.getAttribute('data-sub')||'');}
  document.querySelectorAll('.fmt').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.fmt').forEach(function(x){x.classList.remove('sel');});b.classList.add('sel');st.fmt=b.getAttribute('data-fmt');st.fmtName=b.getAttribute('data-name');st.ar=b.getAttribute('data-ar');updateFmtSub(b);});});
- function wirePal(b){b.addEventListener('click',function(){document.querySelectorAll('.pal').forEach(function(x){x.classList.remove('sel');});b.classList.add('sel');st.pal=b.getAttribute('data-pal');st.palName=b.getAttribute('data-name');st.dot=b.getAttribute('data-dot');});}
- document.querySelectorAll('.pal').forEach(wirePal);
  // stati
  var S={initial:'s-initial',generating:'s-generating',preview:'s-preview',error:'s-error'};
  function show(n){Object.keys(S).forEach(function(k){$(S[k]).classList.toggle('active',k===n);});}
  function setPhase(i){document.querySelectorAll('#phases .phase').forEach(function(p,k){p.classList.toggle('done',k<i);p.classList.toggle('active',k===i);});}
  function allDone(){document.querySelectorAll('#phases .phase').forEach(function(p){p.classList.remove('active');p.classList.add('done');});}
  function params(){var m=parseInt($('in-mese').value,10),a=parseInt($('in-anno').value,10);
-   return{p:new URLSearchParams({year:$('in-anno').value,month:$('in-mese').value,hour:st.ora,place:$('in-loc').value.trim()||'Vicenza',lat:$('in-lat').value,lon:$('in-lon').value,theme:st.pal,formato:st.fmt}),m:m,a:a};}
- function fillCaps(m,a){$('cap-when').textContent=MESI[m-1]+' '+a+' · '+(st.ora<10?'0':'')+st.ora+':00';$('cap-loc').textContent=$('in-loc').value.trim()||'Vicenza';$('cap-fmt').textContent=st.fmtName;$('cap-pal').textContent=st.palName;$('cap-sw').style.background=st.dot;}
+   return{p:new URLSearchParams({year:$('in-anno').value,month:$('in-mese').value,hour:st.ora,place:$('in-loc').value.trim()||'Vicenza',lat:$('in-lat').value,lon:$('in-lon').value,formato:st.fmt}),m:m,a:a};}
+ function fillCaps(m,a){$('cap-when').textContent=MESI[m-1]+' '+a+' · '+(st.ora<10?'0':'')+st.ora+':00';$('cap-loc').textContent=$('in-loc').value.trim()||'Vicenza';$('cap-fmt').textContent=st.fmtName;}
  function frame(token,ar){return '<div class="poster-frame'+(ar==='a4'?' a4':'')+'"><img src="/anteprima?token='+token+'&_='+Date.now()+'"></div>';}
  function dlLink(fmt,formato,label,cls,small){var q=params().p;q.set('fmt',fmt);q.set('formato',formato);return '<a class="btn '+cls+'" href="/download?'+q.toString()+'" download>'+label+(small?' <small>'+small+'</small>':'')+'</a>';}
  function busy(b){$('genera').disabled=b;$('genera').textContent=b?'Generazione in corso…':'Genera anteprima';}

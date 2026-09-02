@@ -40,18 +40,20 @@ def formati_disponibili():
     return sorted(f[:-5] for f in os.listdir(LAYOUTS_DIR) if f.endswith(".json"))
 
 
-def palette_disponibili():
-    """Le palette in brand/palettes/: la cartella E' l'elenco."""
-    return sorted(f[:-5] for f in os.listdir(PALETTES_DIR) if f.endswith(".json"))
+# UNA SOLA PALETTE: l'identita' visiva del GAV (manuale, edizione agosto 2026;
+# copia in docs/GAV-design-system.pdf). Non e' una preferenza dell'utente e non e'
+# un parametro: e' il marchio. Chi vuole cambiare i colori cambia il manuale, e
+# poi questo file. Non c'e' piu' nulla da VALIDARE sul nome della palette perche'
+# non c'e' piu' un nome da passare - l'input piu' sicuro e' quello che non esiste.
+PALETTE = "gav"
 
 
-def carica_palette(name):
-    """Legge una palette per nome. Alza InputError in italiano se il nome non esiste
-    (mai un traceback: invariante #5)."""
-    f = os.path.join(PALETTES_DIR, f"{name}.json")
+def carica_palette():
+    """La palette del GAV. Alza InputError in italiano (mai un traceback:
+    invariante #5) se il file manca: succede solo con un pacchetto incompleto."""
+    f = os.path.join(PALETTES_DIR, f"{PALETTE}.json")
     if not os.path.exists(f):
-        disp = palette_disponibili()
-        raise InputError(f"Palette sconosciuta: '{name}'. Disponibili: {', '.join(disp)}.")
+        raise InputError(f"Manca la palette del GAV ({f}): il pacchetto e' incompleto.")
     with open(f, encoding="utf-8") as fh:
         return json.load(fh)
 
@@ -115,13 +117,6 @@ def valida_formato(fmt):
     if fmt not in disp:
         raise InputError(f"Formato sconosciuto: '{fmt}'. Disponibili: {', '.join(disp)}.")
     return fmt
-
-
-def valida_palette(name):
-    disp = palette_disponibili()
-    if name not in disp:
-        raise InputError(f"Palette sconosciuta: '{name}'. Disponibili: {', '.join(disp)}.")
-    return name
 
 
 # ---------------------------------------------------------------------------

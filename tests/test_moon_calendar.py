@@ -159,7 +159,7 @@ def test_cinque_fasi_non_escono_dalla_tela(eng, root, tmp_path):
                          "content": "{day} {name}",
                          "names": {"new": "Luna Nuova", "first": "Primo Q.",
                                    "full": "Luna Piena", "last": "Ultimo Q."}}}]}
-    theme = json.load(open(os.path.join(root, "brand", "palettes", "osservatorio.json"), encoding="utf-8"))
+    theme = json.load(open(os.path.join(root, "brand", "palettes", "gav.json"), encoding="utf-8"))
     out = str(tmp_path / "maggio.svg")
     eng.generate(2026, 5, 45.5455, 11.5353, "Vicenza", theme, out, layout=layout)
     svg = open(out, encoding="utf-8").read()

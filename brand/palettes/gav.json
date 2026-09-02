@@ -1,0 +1,95 @@
+{
+  "name": "Identita GAV",
+  "descrizione": "Blu notte, giallo stella e neutri - dal manuale d'identita visiva",
+  "bg": [
+    "#002936",
+    "#01141d",
+    "#010b12"
+  ],
+  "disk": [
+    "#012c3e",
+    "#01141d",
+    "#012231"
+  ],
+  "neon": "#9dccdc",
+  "gold": "#fde875",
+  "border": "#005d7c",
+  "border2": "#005d7c",
+  "grid": "#024f6d",
+  "divider": "#00465e",
+  "panel": "#013247",
+  "moon_lit": "#f6f5f4",
+  "moon_label": "#9dccdc",
+  "bgstar": "#cbe4ed",
+  "text": "#ffffff",
+  "text2": "#ddedf3",
+  "text3": "#9dccdc",
+  "text4": "#53a6c2",
+  "label": "#9dccdc",
+  "cardinal": "#cbe4ed",
+  "status": {
+    "ok": "#9dccdc",
+    "info": "#53a6c2",
+    "warn": "#fde875",
+    "muted": "#7c7e80"
+  },
+  "planet_colors": {
+    "Mercurio": "#8f8a86",
+    "Venere": "#e8dcb0",
+    "Marte": "#b8532f",
+    "Giove": "#d8b98a",
+    "Saturno": "#e2c886",
+    "Urano": "#aadde0",
+    "Nettuno": "#3f6cb5"
+  },
+  "star_ramp": [
+    [
+      -0.33,
+      "#96aaff"
+    ],
+    [
+      -0.1,
+      "#a5b9ff"
+    ],
+    [
+      0.0,
+      "#c3d2ff"
+    ],
+    [
+      0.2,
+      "#e6ebff"
+    ],
+    [
+      0.4,
+      "#fff8eb"
+    ],
+    [
+      0.59,
+      "#fff0cd"
+    ],
+    [
+      0.8,
+      "#ffdfaa"
+    ],
+    [
+      1.0,
+      "#ffce91"
+    ],
+    [
+      1.3,
+      "#ffb778"
+    ],
+    [
+      1.6,
+      "#ff9f60"
+    ],
+    [
+      2.0,
+      "#ff8246"
+    ],
+    [
+      3.3,
+      "#ff6e3c"
+    ]
+  ]
+}

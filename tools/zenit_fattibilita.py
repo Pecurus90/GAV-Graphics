@@ -147,7 +147,7 @@ def calibra(eng, disc):
     """Rende Zenit di agosto col motore vero, estrae le posizioni delle etichette,
     e le confronta con la simulazione (evita_pannelli=False). Se combaciano, la
     riproduzione e' fedele e la misura col vincolo-pannelli e' affidabile."""
-    theme = json.load(open(os.path.join(ROOT, "brand", "palettes", "osservatorio.json"),
+    theme = json.load(open(os.path.join(ROOT, "brand", "palettes", "gav.json"),
                            encoding="utf-8"))
     lay = json.load(open(os.path.join(ROOT, "brand", "layouts", "zenit.json"),
                          encoding="utf-8"))

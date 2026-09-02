@@ -18,7 +18,7 @@ e' un vero cambiamento di output: passare a un confronto strutturale / con
 tolleranza numerica. Vedi "Decisioni per l'architetto" nel report del task.
 
 Parametri canonici del riferimento (devono combaciare con chi ha generato il
-golden): anno 2026, mese 8, lat 45.5455, lon 11.5353, Vicenza, tema osservatorio.
+golden): anno 2026, mese 8, lat 45.5455, lon 11.5353, Vicenza, tema gav.
 """
 import json
 import os
@@ -34,7 +34,7 @@ PARAMS = dict(year=2026, month=8, lat=45.5455, lon=11.5353, place="Vicenza")
 
 
 def _genera_svg(eng, root, tmp_path):
-    theme = json.load(open(os.path.join(root, "brand", "palettes", "osservatorio.json"),
+    theme = json.load(open(os.path.join(root, "brand", "palettes", "gav.json"),
                            encoding="utf-8"))
     out = str(tmp_path / "cielo.svg")
     eng.generate(PARAMS["year"], PARAMS["month"], PARAMS["lat"], PARAMS["lon"],

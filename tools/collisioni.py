@@ -350,7 +350,7 @@ def sweep_completo():
 
 
 def stampa_tabella(ris):
-    print("\n=== COLLISIONI: 12 mesi x 5 formati (osservatorio, Vicenza, 2026) ===\n")
+    print("\n=== COLLISIONI: 12 mesi x 5 formati (gav, Vicenza, 2026) ===\n")
     intest = f"{'formato':<11}" + "".join(f"{MESI_IT[m]:>4}" for m in MESI) + f"{'  tot':>6}{'  media':>7}"
     print(intest)
     print("-" * len(intest))

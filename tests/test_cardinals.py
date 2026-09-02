@@ -44,7 +44,7 @@ _CARD = re.compile(r'<text x="([\-\d.]+)" y="([\-\d.]+)"[^>]*'
 
 
 def _theme(root):
-    return json.load(open(os.path.join(root, "brand", "palettes", "osservatorio.json"),
+    return json.load(open(os.path.join(root, "brand", "palettes", "gav.json"),
                           encoding="utf-8"))
 
 

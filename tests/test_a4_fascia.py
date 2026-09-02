@@ -43,7 +43,7 @@ def test_striscia_lunare_a4_rende_31_giorni(eng, root, tmp_path):
     """La striscia lunare dell'A4 e' il blocco moon_calendar (lo stesso del
     dashboard) adattato alla larghezza: agosto ha 31 giorni, deve disegnare 31
     numeri 1..31. Test sul conteggio, non a occhio."""
-    theme = json.load(open(os.path.join(root, "brand", "palettes", "osservatorio.json"),
+    theme = json.load(open(os.path.join(root, "brand", "palettes", "gav.json"),
                            encoding="utf-8"))
     a4 = _a4()
     out = str(tmp_path / "a4.svg")

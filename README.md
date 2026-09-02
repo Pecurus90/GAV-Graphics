@@ -4,8 +4,8 @@ Genera il volantino **"Cielo del Mese"**: una mappa del cielo notturno per un da
 **mese, anno e località**, con **fasi lunari**, **pianeti** e **stelle nei loro
 colori reali**, più una seconda pagina di **profondo cielo** (oggetti del catalogo
 di Messier). Output: **SVG** (stampa) e **PNG** (social), generati dallo stesso
-motore. I colori arrivano da una **palette a token**, intercambiabile senza
-toccare il codice.
+motore. I colori arrivano da **una sola palette a token** — l'identità visiva del
+GAV, tradotta dal manuale (`docs/GAV-design-system.pdf`).
 
 > Fonte di verità del progetto: **`CLAUDE.md`**. Questo README descrive l'uso;
 > le decisioni architetturali e lo stato reale stanno lì.
@@ -33,8 +33,9 @@ pip install -r requirements.txt
 
 ## Uso da riga di comando (CLI)
 
-Il punto d'ingresso è **`cielo.py`**. Formato e palette si scelgono **per nome**
-(i nomi validi sono i file in `brand/layouts/` e `brand/palettes/`).
+Il punto d'ingresso è **`cielo.py`**. Il formato si sceglie **per nome** (i nomi
+validi sono i file in `brand/layouts/`). La palette **non si sceglie**: è una
+sola, l'identità del GAV.
 
 ```bash
 # A4 in SVG (default)
@@ -49,8 +50,8 @@ python cielo.py --year 2026 --month 8 --format post --png
 # Pagina 2: profondo cielo (oggetti Messier)
 python cielo.py --year 2026 --month 8 --format profondo --png
 
-# Un design social con una palette diversa
-python cielo.py --year 2026 --month 8 --format dashboard --palette aurora-boreale --png
+# Un design social
+python cielo.py --year 2026 --month 8 --format dashboard --png
 ```
 
 L'output finisce in `out/` (cartella usa-e-getta, non versionata).
@@ -64,12 +65,14 @@ Scoperti dai file in `brand/layouts/`:
 - **`profondo`** — pagina 2 quadrata: profondo cielo, oggetti Messier.
 - **`dashboard`**, **`editorial`**, **`rail`** — tre design social alternativi.
 
-### Palette disponibili (`--palette`, default `osservatorio`)
+### La palette
 
-Scoperte dai file in `brand/palettes/`:
+**Una sola**: `brand/palettes/gav.json` — l'identità visiva del Gruppo Astrofili
+Vicentini (blu notte, giallo stella, neutri), tradotta dal manuale d'identità in
+`docs/GAV-design-system.pdf`. Non è un'opzione da riga di comando: è il marchio.
 
-- **`osservatorio`** (default), **`luce-rossa`**, **`aurora-boreale`**,
-  **`nebulosa`**, **`ottone-antico`**, **`cielo-di-ghiaccio`**.
+Fanno eccezione i colori delle **stelle** e dei **pianeti**, che restano quelli
+reali in ogni caso: sono fisica, non gusto.
 
 ## Web app
 
