@@ -651,8 +651,42 @@ descrive lo fa scollare al primo cambiamento.
     portava una **funzione** (`nota: "si guarda stando al telescopio"`: il poster che
     non rovina l'adattamento al buio). Marco l'ha scelto sapendolo. Resta nella
     storia: `git show 80ed047^:brand/palettes/luce-rossa.json`.
+  **SECONDO GIRO, 2026-09-02 — «allinea tutto al documento» (Marco).** Il primo giro
+  aveva lasciato **3 colori su 26 fuori dal manuale**: gli stop dei gradienti, che
+  l'esecutore aveva **interpolato** fra due passi della scala invece di usare i passi.
+  Verificato **estraendo i colori dagli oggetti vettoriali del PDF** (non letti da uno
+  screenshot: `page.get_drawings()` dà i valori veri) e confrontandoli uno per uno.
+  **Ora 26 su 26 vengono dal manuale.** E la distinzione trovata misurando vale oltre
+  il caso: due dei tre (`disk[0]`, `disk[2]`) erano **punti interni** al segmento fra
+  due passi — cioè colori che il gradiente **attraversa comunque**, scritti come stop
+  o no. Solo `bg[2]` usciva davvero (più scuro del blu 950 su tutti i canali). *«Non è
+  nel manuale» e «esce dalla tavolozza» non sono la stessa cosa.*
+  **E il disallineamento peggiore non era un colore.** Controllando *tutte* le
+  prescrizioni, non solo §3:
+  - **Il TITOLO era tutto maiuscolo su tutti e 5 i formati** (`IL CIELO DI AGOSTO
+    2026`, corpo 30-56). Il §4 dice *«testo in sentence case, MAIUSCOLO solo per
+    piccole etichette»*, e i mockup del manuale stesso scrivono i titoli in sentence
+    case (*«Il cielo dei Colli Berici»*). Tre conferme indipendenti nello stesso
+    documento. Ora è `Il cielo di {month_name} {year}`, e la gerarchia è finalmente
+    quella che il §4 descrive: **etichetta maiuscola piccola → titolo grande → testo**.
+    *Le etichette (`FASI LUNARI · AGOSTO`, `PIANETI VISIBILI`, corpo 11-15) restano
+    maiuscole: il manuale le ammette. La regola non è «via il maiuscolo», è «il
+    maiuscolo solo dove è piccolo».*
+  - **`GAV · Vicenza` nel piedino di deep-space**: il §1 vieta la sigla *«da sola come
+    firma»*. Tolta — stessa ragione per cui #7n l'aveva già tolta dall'A4 (ripete la
+    testata, che porta la denominazione per esteso).
+  **La leggibilità non è peggiorata, ed è stato MISURATO prima di consigliare:** il
+  fondo pagina si schiarisce di 11-22 livelli, ma il contrasto stelle↔cielo dentro il
+  disco resta identico (196,4 → 198,3) — perché ciò che cambia è il fondo *pagina*,
+  dove di stelle vere non ce n'è. *L'architetto aveva sconsigliato la variante chiara
+  temendo la leggibilità: **ritrattato dopo la misura**.*
+  **Golden mosso, e la previsione era diversa per i due:** il **disco** solo colori
+  (scheletro identico, il titolo non ci sta dentro); l'**A4** colori **+ UNA sola riga
+  non-colore**, e stessa `x`, stessa `y`, stesso corpo — solo il testo. Verificato
+  prima di rigenerare.
   **⚠️ IL MANUALE E IL REPO NON SONO ALLINEATI SUI FONT — vedi R16.** Il giro dei
-  colori si è fermato lì apposta.
+  colori si è fermato lì apposta: è il disallineamento **più visibile che resta**
+  (la tipografia si riconosce prima del colore), ma costa un giro intero.
 - **D15 — L'`.exe` apre il browser; e cosa manca DAVVERO per averlo.**
   *(Deciso da Marco, 2026-07-14.)* Doppio clic ⇒ il programma parte in silenzio e
   **apre il browser** sull'interfaccia dell'app. Niente terminale, niente Python

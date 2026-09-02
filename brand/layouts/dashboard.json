@@ -12,7 +12,7 @@
     {"type": "text", "x": 180, "y": 84, "fill": "gold", "size": 16,
      "weight": "600", "letter_spacing": 3.6, "content": "GRUPPO ASTROFILI VICENTINI"},
     {"type": "text", "x": 178, "y": 150, "fill": "text", "size": 56,
-     "weight": "800", "letter_spacing": 0.5, "content": "IL CIELO DI {month_upper} {year}"},
+     "weight": "800", "letter_spacing": 0.5, "content": "Il cielo di {month_name} {year}"},
     {"type": "text", "x": 180, "y": 184, "fill": "text3", "size": 15,
      "content": "Cielo visibile dal Nord Italia · {place} · valido ~15 {month_name}, ore {hour}:00"},
     {"type": "line", "x1": 56, "y1": 206, "x2": 1024, "y2": 206,

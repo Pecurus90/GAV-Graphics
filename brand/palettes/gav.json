@@ -2,14 +2,14 @@
   "name": "Identita GAV",
   "descrizione": "Blu notte, giallo stella e neutri - dal manuale d'identita visiva",
   "bg": [
+    "#013247",
     "#002936",
-    "#01141d",
-    "#010b12"
+    "#01141d"
   ],
   "disk": [
-    "#012c3e",
+    "#002936",
     "#01141d",
-    "#012231"
+    "#002936"
   ],
   "neon": "#9dccdc",
   "gold": "#fde875",

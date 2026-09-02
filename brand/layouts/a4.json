@@ -26,7 +26,7 @@
      "content": "GRUPPO ASTROFILI VICENTINI"},
     {"type": "text", "x": 450.0, "y": 86, "fill": "text", "size": 30,
      "weight": "bold", "anchor": "middle", "letter_spacing": 1.5,
-     "content": "IL CIELO DI {month_upper} {year}"},
+     "content": "Il cielo di {month_name} {year}"},
     {"type": "text", "x": 450.0, "y": 108, "fill": "text3", "size": 12.5,
      "anchor": "middle",
      "content": "Cielo visibile dal Nord Italia · {place} · valido ~15 {month_name}, ore {hour}:00"},

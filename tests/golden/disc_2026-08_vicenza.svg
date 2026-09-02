@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="950" viewBox="0 0 900 950" font-family="Helvetica,Arial,sans-serif">
 <defs>
-<radialGradient id="bg" cx="50%" cy="38%" r="75%"><stop offset="0%" stop-color="#002936"/><stop offset="55%" stop-color="#01141d"/><stop offset="100%" stop-color="#010b12"/></radialGradient>
-<radialGradient id="disk" cx="50%" cy="46%" r="55%"><stop offset="0%" stop-color="#012c3e"/><stop offset="80%" stop-color="#01141d"/><stop offset="100%" stop-color="#012231"/></radialGradient>
+<radialGradient id="bg" cx="50%" cy="38%" r="75%"><stop offset="0%" stop-color="#013247"/><stop offset="55%" stop-color="#002936"/><stop offset="100%" stop-color="#01141d"/></radialGradient>
+<radialGradient id="disk" cx="50%" cy="46%" r="55%"><stop offset="0%" stop-color="#002936"/><stop offset="80%" stop-color="#01141d"/><stop offset="100%" stop-color="#002936"/></radialGradient>
 <filter id="glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
 <filter id="softglow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="3.4"/></filter>
 </defs>
