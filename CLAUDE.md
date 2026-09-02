@@ -23,6 +23,12 @@ dallo stesso motore. L'A4 resta, non è più il fuoco.
 
 **Nessuna scadenza esterna.** Costruiamo le fondamenta prima di ristrutturare.
 
+**L'identità visiva esiste, ed è UNA (2026-09-02, D20).** Il GAV ha un manuale
+d'identità (`docs/GAV-design-system.pdf`): blu notte, giallo stella, neutri. Da lì
+viene l'unica palette del progetto, `brand/palettes/gav.json`. Non si sceglie e non
+si compone: è il marchio. *Le stelle e i pianeti restano coi colori reali — sono
+fisica, non gusto (D2).*
+
 ---
 
 ## Architettura reale (verificata, non dichiarata)
@@ -59,11 +65,11 @@ il compositore senza toccare il cielo.
 | `strumenti/cielo/engine.py` | 127 | L'assemblaggio: init + `generate()` + dispatch. |
 | `engine/generate.py` | 17 | **Un ponte**, non il motore: re-esporta `Engine`/`bv2hex`/`STARS` perché `cielo.py` e `app/main.py` importavano da lì. Si potrà togliere aggiornando quei due import. |
 | `cielo.py` | 90 | Il CLI (D1). Mappa i formati ai file di layout e **compone** motore + `render`. |
-| `validate.py` | 355 | Validazione input (R4) + contratto del tema (D2). Condiviso da CLI e web, **non** importato dal motore (invariante #1). |
+| `validate.py` | 246 | Validazione input (R4) + contratto del tema (D2). Condiviso da CLI e web, **non** importato dal motore (invariante #1). *(355 → 246 in #7r: via l'editor e la cartella delle palette utente. **Non c'è più un nome di palette da validare**: `carica_palette()` non prende argomenti.)* |
 | `render.py` | 68 | SVG→PNG via resvg. Usato dal CLI **e** dalla web app. |
-| `app/main.py` | 814 | Web app FastAPI: `/`, `/preview`, `/download`, + l'editor di palette (D18). **L'HTML sta dentro il `.py`**, non in template (debito `#7f`) — ma è una **raw string** `PAGINA = r"""…"""` riempita con `.replace()`, **NON una f-string**: le graffe del CSS non sono un problema, il CSS si riscrive libero. **La UI ESPONE i formati** (`<button class="fmt" data-fmt=…>`, riga ~309) + la barra laterale (D10). *(Riga riscritta 2026-07-16: diceva «98 righe» (erano 811), «f-string» (è `r"""`) e «espone solo l'A4, niente selettore di formato» (il selettore c'è). **Tre errori in una riga**: quinta smentita di questo file per misura.)* |
+| `app/main.py` | 510 | Web app FastAPI: `/`, `/preview`, `/download`. *(814 → 510 in #7r: via i due endpoint dell'editor, la sua modale, il suo CSS/JS, e la riga di scelta della palette — che con **una palette sola** non ha più nulla da scegliere.)* **L'HTML sta dentro il `.py`**, non in template (debito `#7f`) — ma è una **raw string** `PAGINA = r"""…"""` riempita con `.replace()`, **NON una f-string**: le graffe del CSS non sono un problema, il CSS si riscrive libero. **La UI ESPONE i formati** (`<button class="fmt" data-fmt=…>`, riga ~309) + la barra laterale (D10). *(Riga riscritta 2026-07-16: diceva «98 righe» (erano 811), «f-string» (è `r"""`) e «espone solo l'A4, niente selettore di formato» (il selettore c'è). **Tre errori in una riga**: quinta smentita di questo file per misura.)* |
 | `brand/layouts/*.json` | — | La composizione come dati. `a4`, `profondo` (pagina 2), + i quattro quadrati `dashboard`/`parata`/`cornice`/`zenit` (set finale; ritirati `post`/`editorial`/`rail`). Aggiungerne uno = aggiungere un file. |
-| `brand/palettes/*.json` | — | I temi. **Non** in `themes/`. |
+| `brand/palettes/gav.json` | — | **LA** palette: una sola, l'identità visiva del GAV (D20). **Non** in `themes/`. |
 | `data/stars6.json` | — | 5044 stelle GeoJSON, tutte con `mag` e `bv`. |
 
 **Nessun file supera 520 righe** *(max: `messier.py`, 518 — ricontato 2026-07-19).* Il problema "apro un file e devo leggere
@@ -125,7 +131,11 @@ descrive lo fa scollare al primo cambiamento.
   `render`; `--png` produce il PNG accanto all'SVG, larghezza per formato.)*
 - **D2 — Il tema è un contratto validato, non un dict libero.** Una palette a
   cui manca una chiave deve dare un errore leggibile, non un `KeyError`.
-  Motivazione: stiamo per moltiplicare le palette. *(FATTO, #6n: `validate.py`
+  Motivazione *(originale, 2026: «stiamo per moltiplicare le palette» — **premessa
+  caduta con D20**, il contratto no)*: oggi la palette è **una**, e il contratto
+  vale ancora — anzi vale **di più**, perché è l'unico cancello fra il manuale
+  d'identità e l'output. Se qualcuno traducesse male un token del manuale, D2 lo
+  fa diventare **rosso** invece che sbagliato in silenzio. *(FATTO, #6n: `validate.py`
   dice QUALE chiave manca e in QUALE file. Distingue STILE — colori liberi — da
   FISICA: `star_ramp` deve avere B-V crescente e rosso↑/blu↓ al crescere di B-V,
   monotonia DEBOLE — i canali saturano a 255; `planet_colors` coi 7 pianeti e
@@ -359,7 +369,14 @@ descrive lo fa scollare al primo cambiamento.
     offset: l'utente trascina) e i 3-4 file di layout.
   - **NON si creano cartelle o file di Pillole in anticipo.** Una cartella vuota
     attira decisioni prese al buio. Si scrive quando si scrive.
-- **D13 — Una palette sola per tutti gli strumenti; ciò che varia è il CONTRATTO.**
+- **D13 — ⚠️ SUPERATA DA D20 (2026-09-02): il SET di sei palette non esiste più.**
+  Ciò che **sopravvive** di D13, e che resta vero: la palette è **un file solo**
+  (non si spezza per strumento — duplicare il marchio vuol dire cambiare l'oro del
+  GAV in quattro posti e dimenticarsene uno), e la distinzione fra i **token di
+  marca** e le **2 chiavi di astronomia pura**. Ciò che **cade**: le sei palette, la
+  scelta fra loro, e l'idea che il valore stesse nella varietà.
+  *(Testo originale, per memoria:)*
+  **D13 — Una palette sola per tutti gli strumenti; ciò che varia è il CONTRATTO.**
   Una palette ha ~20 chiavi **di marca** (`bg`, `text`, `panel`, `neon`, `gold`,
   `border`, `status`…) e 2 chiavi che sono **astronomia pura** (`star_ramp`,
   `planet_colors`). Le prime le vuole qualunque strumento, le seconde solo chi
@@ -517,7 +534,20 @@ descrive lo fa scollare al primo cambiamento.
   `validate.py`, `CREDITI.md`, + il launcher. **Launcher da rifinire (Milestone
   2):** `Avvia.bat` oggi fissa la porta 8000; renderla configurabile (se un socio
   ha la 8000 occupata, oggi fallirebbe il bind).
-- **D18 — L'editor dei colori è un EDITOR DI PALETTE, non un ricolore del poster.**
+- **D18 — ⚠️ DECADUTA E RIMOSSA DAL CODICE (2026-09-02, commit `80ed047`).**
+  L'editor esisteva per una ragione esplicita: *«Marco ha piena autonomia sui colori
+  senza passare dal designer»*. **Con il manuale d'identità quella ragione non c'è
+  più — si rovescia.** Il manuale ammette solo blu, giallo e neutri: uno strumento
+  che permette a un socio di inventarsi i colori lavora **contro** l'identità.
+  Notare che D18 conteneva **già l'argomento della propria fine** e nessuno l'aveva
+  letto così: *«trenta soci, trenta identità visive»* era la ragione per cui il
+  ricolore per-poster fu vietato. Il passo successivo — **una sola palette** — era
+  la stessa frase portata fino in fondo.
+  Ciò che **sopravvive** di D18: il principio che le **2 chiavi astronomiche non si
+  toccano**, che oggi è strutturale invece che sorvegliato (non c'è più nessun
+  cliente che possa mandarle).
+  *(Testo originale, per memoria:)*
+  **D18 — L'editor dei colori è un EDITOR DI PALETTE, non un ricolore del poster.**
   *(Marco, 2026-07-15: «slider sui colori come un programma di fotoritocco, per ogni
   elemento». Forma decisa con l'architetto.)*
   **Cosa produce, e perché conta:** l'output dell'editor è **una palette nuova
@@ -575,6 +605,54 @@ descrive lo fa scollare al primo cambiamento.
   *Applicato in #7l: guscio acciaio (`--acc #6f89a8`), zero token del poster nel
   chrome. I due colori del poster compaiono solo COME CONTENUTO — i pallini delle
   palette e i campioni dell'editor.*
+  **⚠️ L'ARGOMENTO DI D19 È CADUTO CON D20, LA CONCLUSIONE NO — e vale la pena
+  saperlo, perché la domanda tornerà.** «Un guscio dipinto con uno dei sei litiga
+  con gli altri cinque» non ha più senso: di cieli ce n'è **uno**, e in teoria il
+  guscio *potrebbe* indossarlo. **Resta neutro lo stesso**, per una ragione diversa
+  e più semplice: dentro il guscio c'è l'**anteprima del poster**, e se guscio e
+  poster fossero blu-notte uguali **sparirebbe il confine fra l'applicazione e ciò
+  che l'applicazione produce** — il socio non saprebbe più dove finisce la UI e
+  dove comincia il suo volantino. *(E i due esempi che D19 citava come «contenuto»
+  — i pallini delle palette e i campioni dell'editor — non esistono più: erano
+  proprio le due cose rimosse in #7r.)*
+- **D20 — L'IDENTITÀ È UNA: una sola palette, e non è una scelta dell'utente.**
+  *(Marco, 2026-09-02: «abbiamo un'identità ora ben distinta, quindi rimuovere le
+  varie palette e la possibilità di crearle e farne una standard seguendo il
+  foglio». Forma con l'architetto, dopo lettura del manuale.)*
+  La fonte è il **manuale d'identità visiva del GAV** (edizione agosto 2026, copia
+  in `docs/GAV-design-system.pdf` — **committato apposta**: così la provenienza dei
+  colori è *verificabile*, non asserita). Dice: blu GAV `#024f6d`, giallo stella
+  `#fde875`, grigio luna, blu notte `#01141d`, una scala blu 50→950 e dei neutri —
+  e **«nessun altro colore decorativo oltre a blu, giallo e neutri»**.
+  **Il ribaltamento rispetto a D13/D18, ed è il punto:** sei palette erano una
+  ricchezza finché l'identità non c'era. Con un manuale in mano diventano
+  un'**ambiguità** — e l'editor, che serviva a comporne altre, diventa uno strumento
+  che lavora *contro* il marchio. Non è una semplificazione per pigrizia: è che la
+  premessa è cambiata.
+  - **`brand/palettes/gav.json`** — i 26 colori di marca, ognuno un passo della scala
+    del manuale o un suo token semantico del «tema notte». Nessun colore inventato.
+  - **Due token li ha decisi Marco perché il manuale non li copre:** il **neon**
+    (`#9dccdc`, blu 200 = il `--link` del tema notte — il manuale non ha un «neon»,
+    e l'invariante #4 lo pretende) e i quattro **`status`**, **neutralizzati** dentro
+    la tavolozza (via il verde e l'ambra: erano il quinto e il sesto colore).
+  - **DUE token li ha decisi il RENDER, non la carta**, ed è la parte che vale:
+    `border` da blu 400 a **600** (a 400 la cornice del disco era la cosa più satura
+    del poster e **rubava l'occhio alle costellazioni**) e `grid` da blu 800 a **700**
+    (a 800 i cerchi d'altezza **sparivano** sotto `opacity .7`). Nessuna delle due si
+    poteva vedere sulla tavolozza: si vedono **guardando il poster ritagliato al 3×**.
+  - **`star_ramp` e `planet_colors` NON cambiano — copiate verbatim.** Il divieto del
+    manuale governa il **marchio**, non il **dato**: Antares rossa non è decorazione,
+    è il contenuto. Questa è D2, e non è negoziabile.
+  - **La palette non è più un PARAMETRO in nessun entry point**: via `--palette` dal
+    CLI, via `?theme=` dai tre endpoint, via la riga dalla barra laterale. *L'input
+    più sicuro è quello che non esiste* — ed è R4/D4, non estetica: un parametro che
+    può avere un valore solo è superficie d'errore a costo zero di beneficio.
+  - **Prezzo accettato, e sappilo:** `luce-rossa` **è persa**, e non era un gusto —
+    portava una **funzione** (`nota: "si guarda stando al telescopio"`: il poster che
+    non rovina l'adattamento al buio). Marco l'ha scelto sapendolo. Resta nella
+    storia: `git show 80ed047^:brand/palettes/luce-rossa.json`.
+  **⚠️ IL MANUALE E IL REPO NON SONO ALLINEATI SUI FONT — vedi R16.** Il giro dei
+  colori si è fermato lì apposta.
 - **D15 — L'`.exe` apre il browser; e cosa manca DAVVERO per averlo.**
   *(Deciso da Marco, 2026-07-14.)* Doppio clic ⇒ il programma parte in silenzio e
   **apre il browser** sull'interfaccia dell'app. Niente terminale, niente Python
@@ -1129,6 +1207,33 @@ imprevisto.
    - **La rete sull'allineamento**: vedi **R14, risolta**.
    *(E l'ultimo residuo del carosello — una regola CSS morta — è sparito: Marco aveva
    chiesto «l'eliminazione del carosello», quindi era **dentro** la richiesta.)*
+4i. **#7r — UNA SOLA PALETTE: l'identità GAV dal manuale.** *(2026-09-02, chiesto da
+   Marco. Vedi **D20**; D13 e D18 cadono.)* Due commit, `80ed047` (via l'editor) e
+   `458f2b0` (la palette). `validate.py` 355→246, `app/main.py` 814→510, sei palette →
+   una, e la palette smette di essere un parametro.
+   **IL GOLDEN SI È MOSSO, E LA PREVISIONE ERA FALSIFICABILE:** *«ogni differenza è un
+   colore, zero coordinate»*. Verificata per **due strade indipendenti** — (a)
+   sostituendo ogni `#hex` con un segnaposto, il nuovo output e il golden congelato
+   sono **byte-identici** (idem per i 5 formati resi con la vecchia e la nuova
+   palette); (b) il diff del golden A4 è **536 righe cambiate su 536** e **ogni riga
+   contiene un `#hex`**. *È la differenza fra un golden **mosso** e uno rigenerato
+   perché era rosso.*
+   **E il conto torna per la RAGIONE giusta**, che è la verifica che vale davvero: sul
+   golden del disco cambiano **85 hex su 1130** — gli altri **1045 sono le STELLE**,
+   che non devono cambiare colore. Se fossero cambiati tutti, avremmo mentito
+   sull'astronomia senza accorgercene. *(Rifatta anche la fotografia dei 20 SVG.)*
+   **Le reti non sono state annacquate ma RIESPRESSE**, ed è la parte da imitare:
+   `test_icona_colorata_dal_tema` sorvegliava *«il colore viene dal token, non è
+   cablato»* usando **due palette su disco** — con una palette sola sarebbe stato
+   comodo cancellarlo; invece costruisce il secondo tema **in memoria** variando UN
+   token. *La rete guarda il difetto, non il numero di file.* E
+   `test_layouts_smoke` ora pretende **una** palette **e che sia `gav.json`**: se ne
+   ricompare una seconda dev'essere una decisione, non una ricaduta.
+   **Suite 244 → 210, e il calo è CONTATO, non subìto:** −8 (i test dell'editor
+   rimosso), −25 (`test_layouts_smoke` parametrizza formati × palette: 5×6=30 casi →
+   5×1=5), −1 (`?theme=arcobaleno` non è più un input possibile). Torna.
+   **Coda: due difetti trovati GUARDANDO e non corretti** (regola #4) — vedi **R15**
+   e la riconferma di **R13**.
 5. **Il packaging: l'`.exe` in GitHub Actions (D4 + D15).** *(Anticipato su Pillole —
    deciso da Marco, 2026-07-14: «prima l'exe che funziona e lo condivido, poi
    progettiamo Pillole».)*
@@ -1469,6 +1574,48 @@ Ordinato per rischio reale.
   contiene ancora «Deneb Kaitos» (β Ceti, la stella sconosciuta che stava sull'A4 al posto
   di Sirio). **Non rimossa** (regola #4): resta viva per il ramo naive e per un test.
 
+- **R15 — LE NOTE DEI PIANETI SI SCRIVONO ADDOSSO SU ZENIT. La SETTIMA categoria,
+  che lo strumento non può vedere.** *(Trovata 2026-09-02 guardando il render di
+  Zenit al 4×, subito dopo che `tools/collisioni.py` aveva dato **zero** su tutte e
+  cinque le sue categorie per quel poster.)* Nel riquadro dei pianeti si legge
+  letteralmente `…ne notteNon osservabile, vicino al Sole` **sovrapposto** a
+  `Non osservabile, vicino al Sole`: la nota di Nettuno tocca quella di Mercurio, e
+  quella di Mercurio finisce **sopra** quella di Giove. **Due testi illeggibili al
+  posto di due leggibili.**
+  **È PREESISTENTE, e per esecuzione non per deduzione:** in #7r è stato dimostrato
+  che lo scheletro SVG (tolti i `#hex`) è **byte-identico** prima e dopo il cambio di
+  palette — quindi quelle coordinate erano già lì. Il cambio di colori non muove un
+  testo.
+  **Perché nessuna rete lo vede, ed è il punto:** le cinque categorie dello strumento
+  sono *sotto-pannello · banda · etichetta↔etichetta **del disco** · cardinale ·
+  tacca-testo*. Questo è **testo↔testo DENTRO un pannello** — non è in nessuna. **È la
+  SETTIMA volta** che questo progetto trova un buco **della stessa forma del bug**
+  (cardinali fuori canvas → cardinale sotto un pannello → la banda che non è un
+  `panel` → le linee delle figure (R13) → nessuna rete sull'allineamento (R14) →
+  questa). *La lezione non è «aggiungi la settima categoria»: è che l'occhio trova
+  ciò che lo strumento non modella, e va usato **insieme**, non dopo.*
+  **Non corretta** (regola #4: il commit era a scopo unico). Prima di un fix va
+  **misurata l'estensione sui 60 poster**: sospetto che Zenit sia l'unico colpito
+  perché è il formato dove il riquadro pianeti è più stretto, ma è un sospetto, non
+  una misura.
+
+- **R16 — IL MANUALE D'IDENTITÀ E IL REPO NON SONO D'ACCORDO SUI FONT.**
+  *(Registrato 2026-09-02 con D20.)* Il manuale prescrive **Space Grotesk** (display)
+  **+ Work Sans** (corpo). Il repo ha **Barlow Semi Condensed + Instrument Sans**,
+  scelti dal designer il 2026-07-12 e presenti in `brand/fonts/` (vedi D4/R6).
+  **Uno dei due è sbagliato, e va riconciliato** — non lasciato divergere: è
+  esattamente il modo in cui questo file è stato smentito sette volte.
+  **Ma NON è un ritocco, ed è la ragione per cui il giro dei colori si è fermato
+  qui.** Barlow Semi Condensed è **condensato**; Space Grotesk **no**. Tutta
+  l'anti-collisione portata a zero in #7p/#7q è calibrata su un fattore di larghezza
+  **0,40** che viene *proprio* da quello (`tools/collisioni.py:23-27`). Con un font
+  più largo **ogni etichetta cresce** e il lavoro delle collisioni si riapre su tutti
+  e 60 i poster.
+  Il fix, quando si farà: **ricalibrare il fattore rendendo stringhe isolate** (la
+  tecnica di #7p) **prima** di guardare i risultati, o si misurerà rumore. E prima
+  ancora, decidere **chi ha ragione**: è una domanda per Marco e per il designer, non
+  per l'esecutore.
+
 **Mai verificato:** la correttezza astronomica dell'output. Sappiamo che il
 codice produce un SVG. Non sappiamo che sia giusto.
 *(Da riverificare: esistono ora `tests/test_correctness.py`, `test_planets.py`,
@@ -1576,25 +1723,36 @@ dal computer di Marco, **si chiede** — non si fa di iniziativa.
 
 ---
 
-## Comandi (verificati su Windows/PowerShell, 2026-07-09)
+## Comandi (rieseguiti su Windows, 2026-09-02)
+
+*Ogni comando qui sotto è stato **eseguito**, non ricopiato. La versione
+precedente di questa sezione citava `--format post` (formato ritirato da mesi) e
+un `--theme themes/...` che non è mai esistito: **ottava smentita di questo file
+per misura**, e proprio nella sezione che serve a essere copiata e incollata.*
 
 ```powershell
 # NB: non esiste una .venv nel repo. Oggi gira sul Python globale (3.12.2),
 # che ha già le dipendenze. Un venv + lockfile diventeranno utili al packaging
-# (D4, giro #9), non prima. Per crearne uno ora, se lo vuoi isolato:
+# (D4), non prima. Per crearne uno ora, se lo vuoi isolato:
 #   python -m venv .venv ; .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 
-# CLI (D1): A4 in SVG (default)
-python cielo.py --year 2026 --month 8 --place Vicenza
-# A4 in SVG + PNG (larghezza 1800)
-python cielo.py --year 2026 --month 8 --place Vicenza --png
-# post quadrato 1080 in SVG + PNG (larghezza 1080)
-python cielo.py --year 2026 --month 8 --format post --png
+# CLI (D1). Il FORMATO si sceglie; la PALETTE no: è una sola (D20).
+# Formati: dashboard (default della UI) · parata · zenit · a4 · deep-space
+python cielo.py --year 2026 --month 8 --place Vicenza                        # A4, SVG
+python cielo.py --year 2026 --month 8 --place Vicenza --png                  # A4, SVG + PNG (1800px)
+python cielo.py --year 2026 --month 8 --format dashboard --png               # quadrato 1080
+python cielo.py --year 2026 --month 3 --format deep-space --png              # i Messier
 
-# web app
+# web app (poi apri http://localhost:8000)
 python -m uvicorn app.main:app --reload --port 8000
+
+# LE DUE RETI. La suite copre tutto; la fotografia copre il buco dei golden,
+# che sorvegliano SOLO l'A4 di agosto (vedi #7q).
+python -m pytest -q                    # 210 verdi
+python tools/fotografia.py             # 20 SVG (5 formati x 4 mesi), byte per byte
+python tools/fotografia.py --scatta    # SOLO dopo un cambiamento DELIBERATO
 ```
 
-Il tema di default è già `brand/palettes/osservatorio.json`: non passare
-`--theme themes/...` (quel percorso non esiste).
+**`--palette` non esiste più** (D20): la palette è `brand/palettes/gav.json` e
+basta. Nemmeno la web app la espone — `?theme=` è stato tolto dai tre endpoint.
