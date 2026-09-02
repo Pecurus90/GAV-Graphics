@@ -1,7 +1,7 @@
 {
   "scheda": {"nome": "Dashboard", "tag": "Quadrato · mappa + pannelli", "aspect": "sq", "ordine": 1},
   "_nota": "Design 'dashboard' (docs/mockups/dashboard.svg) come DATI. Testata a sinistra, disco a sinistra, colonna destra con pannello pianeti + legenda colori; calendario lunare a riga da 31 in basso. Colori = TOKEN del tema (mai hex): regge tutte le palette. Font del brand (D4).",
-  "canvas": {"w": 1080, "h": 1080, "font_family": "Barlow Semi Condensed, Instrument Sans, Helvetica, Arial, sans-serif"},
+  "canvas": {"w": 1080, "h": 1080, "font_family": "Space Grotesk, Work Sans, Helvetica, Arial, sans-serif"},
   "blocks": [
     {"type": "background",
      "starfield": {"seed": 7, "count": 220, "r_min": 0.4, "r_max": 1.6,

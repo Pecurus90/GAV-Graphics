@@ -83,7 +83,7 @@ def disc_document(eng, theme):
     un <svg> di cornice. E' cio' che un compositore assembla per il disco da solo.
     Funzione pubblica: la usa anche lo script che (ri)genera il golden."""
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="900" height="950" '
-            f'viewBox="0 0 900 950" font-family="Helvetica,Arial,sans-serif">\n'
+            f'viewBox="0 0 900 950" font-family="Space Grotesk, Work Sans, Helvetica, Arial, sans-serif">\n'
             + eng.defs_svg(theme) + '\n'
             + _fragment(eng, theme, social=True) + '\n'
             + '</svg>')

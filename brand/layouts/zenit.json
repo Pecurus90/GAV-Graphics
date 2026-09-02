@@ -1,7 +1,7 @@
 {
   "scheda": {"nome": "Zenit", "tag": "Quadrato · disco a tutto campo", "aspect": "sq", "ordine": 4},
   "_nota": "Design 'Zenit' RIDISPOSTO il 2026-07-19 (proposta del designer, 'leva fascia bassa', approvata da Marco sul render). Prima: disco a tutto campo (rad 445) con pannelli HUD negli angoli, che gli finivano SOPRA -> 56 etichette l'anno sepolte sotto i pannelli (picco 11 a novembre). Ora: testata a FASCIA piena in cima (0-100), disco RICENTRATO fra testata e fascia (cx540 cy490 rad384 = 71% del canvas) che NON sborda piu' sotto i pannelli -> 0 etichette sepolte su tutti i 12 mesi, per costruzione. Fascia inferiore COMPRESSA in fondo (recuperati ~34px di spazio morto interno; margine di fondo gia' a 6px): pianeti in PARATA orizzontale (planet_parade, come A4/parata) affiancati alla legenda colori, striscia lune sotto. Il riquadro pianeti e' allargato a 784px (col_step 108) rubando alla legenda colori (scesa a 200px, che regge: nome+temperatura ci stanno) perche' la nota piu' lunga «Telescopico, a fine notte» (99px) non entrava nelle colonne da 90px. Tacche dei gradi RIACCESE (il bordo e' di nuovo dentro il canvas). cardinal_gap -22 (il disco e' rientrato: i cardinali tornano DENTRO il bordo). Colori = TOKEN, mai hex. N in alto, E a sinistra (invariante #3).",
-  "canvas": {"w": 1080, "h": 1080, "font_family": "Barlow Semi Condensed, Instrument Sans, Helvetica, Arial, sans-serif"},
+  "canvas": {"w": 1080, "h": 1080, "font_family": "Space Grotesk, Work Sans, Helvetica, Arial, sans-serif"},
   "blocks": [
     {"type": "background",
      "starfield": {"seed": 8, "count": 240, "r_min": 0.4, "r_max": 1.7,

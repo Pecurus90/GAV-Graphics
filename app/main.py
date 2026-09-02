@@ -224,18 +224,18 @@ PAGINA = r"""<!DOCTYPE html><html lang="it"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cielo del Mese · GAV</title>
 <style>
-@font-face{font-family:'Barlow Semi Condensed';src:url('/fonts/BarlowSemiCondensed-SemiBold.ttf') format('truetype');font-weight:600;font-display:swap}
-@font-face{font-family:'Barlow Semi Condensed';src:url('/fonts/BarlowSemiCondensed-ExtraBold.ttf') format('truetype');font-weight:800;font-display:swap}
-@font-face{font-family:'Instrument Sans';src:url('/fonts/InstrumentSans-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
-@font-face{font-family:'Instrument Sans';src:url('/fonts/InstrumentSans-Medium.ttf') format('truetype');font-weight:500;font-display:swap}
-@font-face{font-family:'Instrument Sans';src:url('/fonts/InstrumentSans-SemiBold.ttf') format('truetype');font-weight:600;font-display:swap}
+@font-face{font-family:'Space Grotesk';src:url('/fonts/SpaceGrotesk-Medium.ttf') format('truetype');font-weight:500;font-display:swap}
+@font-face{font-family:'Space Grotesk';src:url('/fonts/SpaceGrotesk-Bold.ttf') format('truetype');font-weight:700;font-display:swap}
+@font-face{font-family:'Work Sans';src:url('/fonts/WorkSans-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:'Work Sans';src:url('/fonts/WorkSans-Medium.ttf') format('truetype');font-weight:500;font-display:swap}
+@font-face{font-family:'Work Sans';src:url('/fonts/WorkSans-SemiBold.ttf') format('truetype');font-weight:600;font-display:swap}
 :root{--bg:#0b0e13;--panel:#10141b;--surf:#161c25;--surf2:#1d2530;
 --hair:rgba(132,158,192,.12);--hair2:rgba(132,158,192,.24);
 --t1:#eaf0f8;--t2:#a2afc4;--t3:#75839a;--t4:#556074;
 --acc:#6f89a8;--acc2:#8fa7c4;--prim:#3f5f83;--primtx:#f2f7ff;
 --warn:#e8b45f;--danger:#e0664a;--ok:#5fd08a;
---display:'Barlow Semi Condensed','Arial Narrow',system-ui,sans-serif;
---testo:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif}
+--display:'Space Grotesk',system-ui,sans-serif;
+--testo:'Work Sans',system-ui,-apple-system,'Segoe UI',sans-serif}
 *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
 body{font-family:var(--testo);color:var(--t1);background:var(--bg);overflow:hidden;-webkit-font-smoothing:antialiased}
 a{color:var(--acc);text-decoration:none}a:hover{color:var(--acc2)}

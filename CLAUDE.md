@@ -178,6 +178,11 @@ descrive lo fa scollare al primo cambiamento.
     distribuzione» — cioè **l'`.exe` di D4 deve portare i crediti con sé** (una
     schermata "Informazioni", o un file di note accanto all'eseguibile). Non è un
     cavillo: è la condizione a cui abbiamo il diritto di usare quei dati.
+  - **⚠️ FONT DEL BRAND — SUPERATI (2026-09-02, vedi R16 e D20).** Oggi sono
+    **Space Grotesk + Work Sans**, quelli del manuale d'identità: Marco, messo
+    davanti alla divergenza, ha deciso che *«il manuale ha ragione»*. Barlow Semi
+    Condensed e Instrument Sans sono stati **rimossi dal repo**. *(Testo originale,
+    per memoria:)*
   - **Font del brand (decisi dal designer, 2026-07-12): Barlow Semi Condensed**
     (testata, titoli, etichette, cardinali) **+ Instrument Sans** (corpo: nomi,
     orari, note, date). Entrambi **SIL Open Font License**: ridistribuibili nel
@@ -1268,6 +1273,24 @@ imprevisto.
    5×1=5), −1 (`?theme=arcobaleno` non è più un input possibile). Torna.
    **Coda: due difetti trovati GUARDANDO e non corretti** (regola #4) — vedi **R15**
    e la riconferma di **R13**.
+4j. **#7s — I FONT DEL MANUALE.** *(2026-09-02. Marco: «il manuale ha ragione».)*
+   Chiude **R16** e la coda di **R6**; apre **R17**. Space Grotesk + Work Sans (OFL,
+   statici) al posto di Barlow + Instrument, che sono stati rimossi dal repo.
+   Toccati: i 5 layout, `render.py` (`SANS`), i `@font-face` e le due variabili del
+   guscio dell'app, `tools/collisioni.py` (ricalibrato), `brand/fonts/LEGGIMI.md`
+   (riscritto: diceva ancora che i `.ttf` non erano nel repo e citava un
+   `SANS = "Inter"` che non esisteva più).
+   **L'ordine ha fatto il giro:** prima la misura che decideva se era fattibile
+   (0,516 contro lo 0,55 del motore), poi la baseline delle collisioni sui 60, poi il
+   cambio, poi la rimisura, poi l'occhio al 4× sull'unico caso sospetto. *Se la
+   misura iniziale avesse dato > 0,55, il giro sarebbe stato un altro — e lo si
+   sarebbe saputo prima di toccare un file.*
+   **Curiosità che vale come promemoria sul metodo:** la primissima proposta di font
+   del progetto era *Space Grotesk + Inter*; fu superata dal designer a luglio
+   (Barlow + Instrument); il manuale d'identità ha poi prescritto *Space Grotesk +
+   Work Sans*. **Il cerchio si è chiuso sulla proposta iniziale, per la strada più
+   lunga** — e non era tempo perso: senza il manuale nessuno avrebbe saputo *quale*
+   delle due avesse ragione.
 5. **Il packaging: l'`.exe` in GitHub Actions (D4 + D15).** *(Anticipato su Pillole —
    deciso da Marco, 2026-07-14: «prima l'exe che funziona e lo condivido, poi
    progettiamo Pillole».)*
@@ -1319,10 +1342,13 @@ Ordinato per rischio reale.
   Regular/Medium/SemiBold, con le licenze OFL). **Verificato**, non dedotto:
   `render._font_dirs()` restituisce la cartella e `resvg` carica i font — la
   tipografia di `docs/mockups/dashboard.svg` non è più il fallback di sistema.
-  *Resta*: `a4.json` e `post.json` dichiarano ancora
-  `Helvetica,Arial,sans-serif` nel canvas. Cambiarlo **muove i golden**: si fa
-  nel giro deliberato (#6e), insieme alla rimozione di `moon_panel`. (I tre
-  design social nuovi dichiarano gia' i font del brand: non hanno golden.)
+  **CODA CHIUSA (2026-09-02, #7s).** Per un mese e mezzo `a4.json` ha continuato a
+  dichiarare `Helvetica,Arial,sans-serif`: cioè **il volantino che si STAMPA era
+  l'unico dei cinque a non avere una tipografia d'associazione** — usava il font di
+  sistema. Nessuno se n'era accorto perché la coda era registrata come «si fa nel
+  giro deliberato», e il giro deliberato non arrivava mai. *(`post.json` nel
+  frattempo era stato ritirato del tutto.)* Ora tutti e cinque dichiarano i font
+  del manuale. **Il golden si è mosso di UNA riga**, quella del canvas.
 - **R7 — RISOLTO (prima di quanto credessimo).** Dichiarava codice morto:
   `render.py:DISPLAY`, `NAKED_EYE`, il param `obs` di `planet_table`. **Andato a
   cercarlo in #7e: non esiste più niente di tutto ciò** — era già stato tolto in
@@ -1633,7 +1659,41 @@ Ordinato per rischio reale.
   perché è il formato dove il riquadro pianeti è più stretto, ma è un sospetto, non
   una misura.
 
-- **R16 — IL MANUALE D'IDENTITÀ E IL REPO NON SONO D'ACCORDO SUI FONT.**
+- **R16 — RISOLTO (2026-09-02, #7s): il repo è passato a Space Grotesk + Work Sans.**
+  Marco: *«il manuale ha ragione, il file PDF ha tutto quello che serve per
+  decidere»*. `.ttf` **statici** (non variable: `resvg` con gli statici è
+  verificato, coi variabili no — e non è una cosa da scoprire a metà giro), OFL,
+  dai repository degli autori.
+  **LA DOMANDA CHE DECIDEVA IL GIRO ERA UNA SOLA, ED È STATA MISURATA PRIMA DI
+  TOCCARE QUALSIASI COSA:** il motore stima la larghezza del testo con un fattore
+  **0,55 cablato** (`disc.py:259`), che **non dipende dal font**. Se Space Grotesk
+  fosse stato più largo di 0,55 il motore avrebbe iniziato a **sottostimare** e le
+  collisioni sarebbero esplose. Misurato sul raster: **0,516** — il motore resta
+  conservativo, margine 0,034 (era 0,15 con Barlow). **Non è stato toccato.**
+  *È la misura che ha reso il giro fattibile invece che un salto nel buio.*
+  **Costo reale, misurato sui 60 poster** — non stimato: i quasi-contatti
+  etichetta↔etichetta salgono da **104 a 155** (dashboard 29→46, parata 34→49,
+  zenit 14→23, a4 18→28, deep-space 9→9). **Sotto-pannello, banda, cardinale e
+  tacca-testo restano TUTTI a zero.** Le sovrapposizioni *vere* (distanza negativa)
+  sono **2 su 60**, entrambe a −0,3 px, cioè **dentro il margine d'errore ±1 px
+  dello strumento** — e guardate al 4× («Ercole» / «Corona Boreale» su parata-agosto)
+  **non si sovrappongono affatto**: sono affiancate, entrambe leggibili. *Lo
+  strumento aveva torto e l'occhio l'ha smentito, esattamente come il suo stesso
+  manuale d'uso prescrive.*
+  **Lo strumento è stato RICALIBRATO con la tecnica originale** (stringhe vere rese
+  isolate e misurate sul raster, non un rapporto stimato): `F_MISTO` 0,40 → **0,52**;
+  `F_MAIUSC` 0,50 → **0,50**, praticamente invariato. *Scoperta controintuitiva: le
+  minuscole di Space Grotesk sono ~29% più larghe, le MAIUSCOLE no — Barlow è
+  condensato ma ha maiuscole relativamente larghe.* Aggiornata anche la riga di
+  esempi nel commento, che altrimenti restava a mentire coi numeri di Barlow.
+  **Il golden si è mosso di UNA riga per file**, quella del canvas — previsione
+  fatta prima e verificata: *il font non entra nel calcolo delle posizioni*.
+  **E qui c'è la lezione:** il golden è cambiato di **una riga** mentre il poster
+  cambiava **dappertutto**. È R10 in forma pura — *il golden sorveglia l'SVG, non i
+  pixel*. La rete che ha visto il cambiamento vero è stata `tools/collisioni.py`,
+  non il golden. Due reti, maglie di forma diversa, e serviva quella giusta.
+  *(Testo originale del debito, per memoria:)*
+  **R16 — IL MANUALE D'IDENTITÀ E IL REPO NON SONO D'ACCORDO SUI FONT.**
   *(Registrato 2026-09-02 con D20.)* Il manuale prescrive **Space Grotesk** (display)
   **+ Work Sans** (corpo). Il repo ha **Barlow Semi Condensed + Instrument Sans**,
   scelti dal designer il 2026-07-12 e presenti in `brand/fonts/` (vedi D4/R6).
@@ -1649,6 +1709,34 @@ Ordinato per rischio reale.
   tecnica di #7p) **prima** di guardare i risultati, o si misurerà rumore. E prima
   ancora, decidere **chi ha ragione**: è una domanda per Marco e per il designer, non
   per l'esecutore.
+
+- **R17 — LA «COPPIA DI FONT» DEL BRAND NON È MAI ESISTITA: il poster usa UN FONT
+  SOLO.** *(Trovato 2026-09-02 mentre si cambiavano i font, cercando dove assegnare
+  il display e dove il corpo.)* Il compositore emette **un solo `font-family`**, sul
+  tag `<svg>` radice (`compositor.py:146`), preso da `canvas.font_family`. Nessun
+  blocco può dichiararne uno proprio. E poiché quel valore è una **lista CSS**, vince
+  il primo che esiste: il poster è **interamente** nel primo font.
+  **Non è una regressione di oggi — era già così con Barlow.** `"Barlow Semi
+  Condensed, Instrument Sans, …"` significava «tutto Barlow», e **Instrument Sans non
+  è mai stato disegnato una sola volta** in nessun poster, in nessun mese. Cioè: D4
+  dichiarava dal 2026-07-12 una coppia *«Barlow (testate) + Instrument Sans (corpo)»*
+  che il codice non ha mai implementato, e per un mese e mezzo il file lo ha ripetuto
+  senza che nessuno lo verificasse. **Nona smentita di questo file per misura.**
+  Oggi vale identicamente per `"Space Grotesk, Work Sans, …"`: tutto Space Grotesk.
+  **Perché conta davvero, e non è pignoleria tipografica:** il manuale (sez.4) assegna
+  ruoli **diversi** — Space Grotesk al *display* (titoli, numeri, etichette), Work Sans
+  al *testo corrente* (note, sottotitoli, crediti). Con un font solo stiamo seguendo
+  **metà** della prescrizione. Sul poster il danno è piccolo (è quasi tutto display);
+  **su Pillole (D12) sarebbe grosso** — è una pagina di testo, dove il corpo è il
+  contenuto.
+  **Rimedio, non fatto (giro a sé):** un `font_family` **opzionale per blocco** nel
+  compositore, additivo esattamente come `fill_opacity` e `cardinal_gap` (assente ⇒
+  output identico, golden fermi). Poi i blocchi di testo corrente lo dichiarano.
+  ⚠️ **Non basta il compositore:** le note dei pianeti e le righe Messier le genera
+  `panels.py`/`messier.py`, che dovrebbero ereditare il font dal blocco — è lì che il
+  lavoro smette di essere di due righe.
+  *Non corretto in #7s (regola #4): il commit era a scopo unico, e il difetto è
+  preesistente di un mese e mezzo, non introdotto dal cambio di font.*
 
 **Mai verificato:** la correttezza astronomica dell'output. Sappiamo che il
 codice produce un SVG. Non sappiamo che sia giusto.

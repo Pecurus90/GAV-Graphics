@@ -1,7 +1,7 @@
 {
   "scheda": {"nome": "Deep Space", "tag": "Quadrato · profondo cielo (Messier)", "aspect": "sq", "ordine": 6},
   "_nota": "Deep Space: il profondo cielo (catalogo Messier), FORMATO A SE' generato singolarmente (2026-07-19: il carosello a due pagine e' stato tolto - Deep Space si abbina a mano, in pubblicazione, al formato che si vuole). Stesso poster scuro, disco neon, testata oro, font del brand. Tradotto dal secondo SVG di design_handoff_pagina2_profondo_cielo. Colori = TOKEN (mai hex). ORIENTAMENTO: i cardinali sono quelli del motore (E a SINISTRA, invariante #3); il mockup li aveva specchiati (E a destra) - vedi report. La sezione 'messier' e' la config astronomica: disco (deve combaciare col blocco 'disc') + N della tabella.",
-  "canvas": {"w": 1080, "h": 1080, "font_family": "Barlow Semi Condensed, Instrument Sans, Helvetica, Arial, sans-serif"},
+  "canvas": {"w": 1080, "h": 1080, "font_family": "Space Grotesk, Work Sans, Helvetica, Arial, sans-serif"},
 
   "messier": {"cx": 300, "cy": 572, "rad": 246, "n": 15},
 

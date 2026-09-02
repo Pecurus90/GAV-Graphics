@@ -1,7 +1,7 @@
 {
   "scheda": {"nome": "Volantino A4", "tag": "Verticale · per la stampa e la bacheca", "aspect": "a4", "ordine": 5},
   "_nota": "Layout A4 come DATI (D7). Testata + disco come prima (int-vs-float storico: 450.0 viene da CX=450.0). La FASCIA INFERIORE (sotto il disco, y>=900) e' il ridisegno del designer, proposta B 'Schieramento' (#7h, docs/design_handoff/a4_fascia_inferiore): DUE CORSIE ORIZZONTALI - i 7 pianeti in parata (planet_parade) sopra, la striscia lunare 1->31 (moon_calendar, lo stesso blocco del dashboard) sotto, un divisore netto in mezzo. Le corsie non condividono spazio verticale: risolve la collisione R10. Colori dai TOKEN del tema (planet_colors resta per-pianeta).",
-  "canvas": {"w": 900, "h": 1273, "font_family": "Helvetica,Arial,sans-serif"},
+  "canvas": {"w": 900, "h": 1273, "font_family": "Space Grotesk, Work Sans, Helvetica, Arial, sans-serif"},
   "blocks": [
     {"type": "background",
      "starfield": {"seed": 7, "count": 240, "r_min": 0.3, "r_max": 1.0,

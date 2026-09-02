@@ -1,7 +1,7 @@
 {
   "scheda": {"nome": "Parata", "tag": "Quadrato · corsie orizzontali", "aspect": "sq", "ordine": 2},
   "_nota": "Design 'Parata' (docs/design_handoff/formati_social, erede di 'colonna'/rail). Lettura ORIZZONTALE a corsie: testata · la PARATA DEI PIANETI in banda a tutta larghezza (planet_parade, lo stesso blocco dell'A4) · il disco al centro affiancato dalla legenda stellare a due colonne (colori a sinistra, temperatura a destra, che riempie i due fianchi) · la striscia lunare 1->31 a pie' di pagina. Colori = TOKEN. Nessun blocco nuovo.",
-  "canvas": {"w": 1080, "h": 1080, "font_family": "Barlow Semi Condensed, Instrument Sans, Helvetica, Arial, sans-serif"},
+  "canvas": {"w": 1080, "h": 1080, "font_family": "Space Grotesk, Work Sans, Helvetica, Arial, sans-serif"},
   "blocks": [
     {"type": "background",
      "starfield": {"seed": 3, "count": 220, "r_min": 0.4, "r_max": 1.6,

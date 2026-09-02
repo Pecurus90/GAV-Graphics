@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1273" viewBox="0 0 900 1273" font-family="Helvetica,Arial,sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1273" viewBox="0 0 900 1273" font-family="Space Grotesk, Work Sans, Helvetica, Arial, sans-serif">
 <defs>
 <radialGradient id="bg" cx="50%" cy="38%" r="75%"><stop offset="0%" stop-color="#013247"/><stop offset="55%" stop-color="#002936"/><stop offset="100%" stop-color="#01141d"/></radialGradient>
 <radialGradient id="disk" cx="50%" cy="46%" r="55%"><stop offset="0%" stop-color="#002936"/><stop offset="80%" stop-color="#01141d"/><stop offset="100%" stop-color="#002936"/></radialGradient>

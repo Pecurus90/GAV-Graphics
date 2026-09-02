@@ -19,10 +19,16 @@ IL PUNTO DURO - LA LARGHEZZA DEL TESTO NON STA NELL'SVG.
 La stimo:  width = n_char * corpo * FATTORE.
 FATTORE calibrato RENDENDO stringhe isolate su fondo piatto (stesso font_family e
 stesso motore resvg dei poster) e misurandone la larghezza in pixel dal raster:
-    Capella .384  Auriga .393  Cassiopea .423  Orsa Maggiore .413  Betelgeuse .420
-  -> etichette maiuscole/minuscole MISTE: FATTORE = 0.40 +/- 0.02 (~5%)
-  -> testi TUTTO-MAIUSCOLO / con cifre ("TEMPERATURA", "7.000 K"): ~0.50 (piu' larghi)
-Barlow Semi Condensed e' un font CONDENSATO -> glifi stretti. L'anti-collisione del
+    Capella .493  Auriga .504  Cassiopea .539  Orsa Maggiore .525  Betelgeuse .532
+  -> etichette maiuscole/minuscole MISTE: FATTORE = 0.52 +/- 0.02 (~5%)
+  -> testi TUTTO-MAIUSCOLO / con cifre ("TEMPERATURA", "7.000 K"): ~0.50
+  RICALIBRATI il 2026-09-02 col passaggio ai font del MANUALE (Space Grotesk +
+  Work Sans, R16). Con Barlow Semi Condensed erano 0.40 e 0.50: le minuscole di
+  Space Grotesk sono ~29% piu' larghe (0.400 -> 0.516 misurato sul raster), le
+  MAIUSCOLE quasi identiche (0.500 -> 0.498) - Barlow e' condensato ma ha
+  maiuscole relativamente larghe. Misura rifatta con la tecnica originale:
+  stringhe VERE del poster rese isolate e misurate sul raster, non stimate.
+Space Grotesk non e' condensato. L'anti-collisione del
 MOTORE usa 0.55 (sovrastima prudente): con quel modello impacchetta le etichette
 "senza sovrapporsi", ma la larghezza VERA (0.40) e' minore -> restano dei vuoti.
 Conseguenza: sui formati con anti-collisione (dashboard/parata/zenit) due etichette
@@ -59,7 +65,7 @@ MESI_IT = ["", "gen", "feb", "mar", "apr", "mag", "giu",
 
 # Larghezza testo (vedi intestazione). Etichette miste 0.40; per prudenza sul
 # tick-vs-testo (che tocca testi con cifre/maiuscole, ~0.50) uso un fattore per tipo.
-F_MISTO = 0.40      # etichette del disco (maiuscole/minuscole)
+F_MISTO = 0.52      # etichette del disco (maiuscole/minuscole)
 F_MAIUSC = 0.50     # testi tutto-maiuscolo o con cifre
 CAP = 0.72          # altezza del glifo sopra la baseline, in unita' di corpo
 DESC = 0.10         # discesa sotto la baseline (g, p, ...)

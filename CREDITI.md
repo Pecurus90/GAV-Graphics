@@ -32,13 +32,19 @@ non è la licenza dei dati.
 
 ## Font del brand — SIL Open Font License 1.1
 
-- **File:** `brand/fonts/BarlowSemiCondensed-*.ttf`,
-  `brand/fonts/InstrumentSans-*.ttf`
-- **Barlow Semi Condensed:** Jeremy Tribby (The Barlow Project Authors).
-- **Instrument Sans:** Rhys Newey, Jordan Egstad (Instrument).
-- **Licenza:** SIL Open Font License 1.1. Ridistribuibili nel repo e nell'`.exe`;
-  la nota va inclusa nella distribuzione. Testi completi:
-  `brand/fonts/OFL-Barlow.txt`, `brand/fonts/OFL-InstrumentSans.txt`.
+- **File:** `brand/fonts/SpaceGrotesk-*.ttf`, `brand/fonts/WorkSans-*.ttf`
+- **Space Grotesk:** Copyright 2020 The Space Grotesk Project Authors
+  (Florian Karsten) — https://github.com/floriankarsten/space-grotesk
+- **Work Sans:** Copyright 2019 The Work Sans Project Authors
+  (Wei Huang) — https://github.com/weiweihuanghuang/Work-Sans
+- **Licenza:** SIL Open Font License 1.1. Ridistribuibili nel repo e nel
+  pacchetto; la nota va inclusa nella distribuzione. Testi completi:
+  `brand/fonts/OFL-SpaceGrotesk.txt`, `brand/fonts/OFL-WorkSans.txt`.
+
+> *Fino al 2026-09-02 il brand usava **Barlow Semi Condensed** (Jeremy Tribby) e
+> **Instrument Sans** (Rhys Newey, Jordan Egstad), anch'essi OFL 1.1. Sostituiti
+> dai font prescritti dal manuale d'identità del GAV; i loro file non sono più
+> distribuiti, quindi la nota di licenza non è più dovuta.*
 
 ## Effemeridi — DE421 · pubblico dominio
 
