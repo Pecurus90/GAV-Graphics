@@ -23,6 +23,12 @@ dist/
 # ...e i mockup del designer sono RIFERIMENTI di design, non artefatti di build
 !docs/mockups/
 !docs/mockups/**
+# ...idem gli HANDOFF del designer: gli .html erano tracciati ma i loro assets/*.png
+# no, quindi chi clonava apriva la pagina e vedeva le immagini ROTTE (R12). docs/ e'
+# "cio' che serve agli UMANI" e sta nel repo; out/ e' usa-e-getta. L'ignore globale
+# *.png era scritto per il secondo e si mangiava anche il primo. Costo: ~1,5 MB.
+!docs/design_handoff/
+!docs/design_handoff/**
 # ...e il logo e' un ASSET che il motore legge a runtime (va anche nell'.exe, D4)
 !brand/logo/
 !brand/logo/**
