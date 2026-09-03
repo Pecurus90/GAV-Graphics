@@ -576,7 +576,9 @@ Suite **211 → 216**.
   NO   11,5 px =  7,6 pt   x4       NO   17,8 px = 11,8 pt   x4
   NO   11,7 px =  7,7 pt   x21      OK   21,0 px = 13,9 pt   x1
                                     OK   30,0 px = 19,8 pt   x1
-  --> 107 testi su 109 sotto i 12 pt (98%)
+  --> 111 testi su 113 sotto i 12 pt (98%)
+  (ricontato 2026-09-03 a fine giro: il conteggio si e' mosso coi cambiamenti
+   stessi - la percentuale no)
 ```
 Passano **solo** la testata e il titolo.
 

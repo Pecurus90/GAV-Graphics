@@ -58,22 +58,40 @@ il compositore senza toccare il cielo.
 |---|---|---|
 | `compose/compositor.py` | 171 | **CONDIVISO.** Il compositore: cammina i blocchi di un file di layout ed è **tool-agnostico** (hook `_render_block_tool` per i blocchi propri di uno strumento). Le primitive: testo, riga, pannello, **immagine (base64)**, icona, sfondo. **È ciò che Pillole eredita.** |
 | `strumenti/cielo/messier.py` | 518 | Il profondo cielo (pagina 2): simboli, tabella, anti-collisione a tre strati, nomi delle costellazioni. Ospita `CONST_IT_MINORI` (vedi il confine, D14). |
-| `strumenti/cielo/disc.py` | 288 | Il disco sigillato (D7). Legge `CONST_IT`, **non** `CONST_IT_MINORI`. |
-| `strumenti/cielo/panels.py` | 247 | Pannelli: luna, pianeti, colori. |
-| `strumenti/cielo/catalog.py` | 193 | Dati + funzioni pure: cataloghi, `SkyData`, `bv2hex`, geometria. Ospita `CONST_IT`. |
+| `strumenti/cielo/disc.py` | 297 | Il disco sigillato (D7). Legge `CONST_IT`, **non** `CONST_IT_MINORI`. |
+| `strumenti/cielo/panels.py` | 223 | Pannelli: luna, pianeti, colori. |
+| `strumenti/cielo/catalog.py` | 195 | Dati + funzioni pure: cataloghi, `SkyData`, `bv2hex`, geometria. Ospita `CONST_IT`. |
 | `strumenti/cielo/ephemeris.py` | 184 | Effemeridi, proiezione. **Il cuore astronomico.** |
-| `strumenti/cielo/engine.py` | 127 | L'assemblaggio: init + `generate()` + dispatch. |
+| `strumenti/cielo/engine.py` | 126 | L'assemblaggio: init + `generate()` + dispatch. |
 | `engine/generate.py` | 17 | **Un ponte**, non il motore: re-esporta `Engine`/`bv2hex`/`STARS` perché `cielo.py` e `app/main.py` importavano da lì. Si potrà togliere aggiornando quei due import. |
-| `cielo.py` | 90 | Il CLI (D1). Mappa i formati ai file di layout e **compone** motore + `render`. |
+| `cielo.py` | 84 | Il CLI (D1). Mappa i formati ai file di layout e **compone** motore + `render`. |
 | `validate.py` | 246 | Validazione input (R4) + contratto del tema (D2). Condiviso da CLI e web, **non** importato dal motore (invariante #1). *(355 → 246 in #7r: via l'editor e la cartella delle palette utente. **Non c'è più un nome di palette da validare**: `carica_palette()` non prende argomenti.)* |
 | `render.py` | 68 | SVG→PNG via resvg. Usato dal CLI **e** dalla web app. |
-| `app/main.py` | 510 | Web app FastAPI: `/`, `/preview`, `/download`. *(814 → 510 in #7r: via i due endpoint dell'editor, la sua modale, il suo CSS/JS, e la riga di scelta della palette — che con **una palette sola** non ha più nulla da scegliere.)* **L'HTML sta dentro il `.py`**, non in template (debito `#7f`) — ma è una **raw string** `PAGINA = r"""…"""` riempita con `.replace()`, **NON una f-string**: le graffe del CSS non sono un problema, il CSS si riscrive libero. **La UI ESPONE i formati** (`<button class="fmt" data-fmt=…>`, riga ~309) + la barra laterale (D10). *(Riga riscritta 2026-07-16: diceva «98 righe» (erano 811), «f-string» (è `r"""`) e «espone solo l'A4, niente selettore di formato» (il selettore c'è). **Tre errori in una riga**: quinta smentita di questo file per misura.)* |
-| `brand/layouts/*.json` | — | La composizione come dati. `a4`, `profondo` (pagina 2), + i quattro quadrati `dashboard`/`parata`/`cornice`/`zenit` (set finale; ritirati `post`/`editorial`/`rail`). Aggiungerne uno = aggiungere un file. |
+| `app/main.py` | 512 | Web app FastAPI: `/`, `/preview`, `/download`. *(814 → 510 in #7r: via i due endpoint dell'editor, la sua modale, il suo CSS/JS, e la riga di scelta della palette — che con **una palette sola** non ha più nulla da scegliere.)* **L'HTML sta dentro il `.py`**, non in template (debito `#7f`) — ma è una **raw string** `PAGINA = r"""…"""` riempita con `.replace()`, **NON una f-string**: le graffe del CSS non sono un problema, il CSS si riscrive libero. **La UI ESPONE i formati** (`<button class="fmt" data-fmt=…>`, riga ~309) + la barra laterale (D10). *(Riga riscritta 2026-07-16: diceva «98 righe» (erano 811), «f-string» (è `r"""`) e «espone solo l'A4, niente selettore di formato» (il selettore c'è). **Tre errori in una riga**: quinta smentita di questo file per misura.)* |
+| `brand/layouts/*.json` | — | La composizione come dati. Il set è **`a4` · `dashboard` · `parata` · `zenit` · `deep-space`**. Aggiungerne uno = aggiungere un file. *(Riga corretta 2026-09-03: diceva ancora `profondo` — rinominato `deep-space` — e `cornice`, **ritirato in #7m**. Nominava cioè un file che non esiste e un formato che non esiste.)* |
 | `brand/palettes/gav.json` | — | **LA** palette: una sola, l'identità visiva del GAV (D20). **Non** in `themes/`. |
 | `data/stars6.json` | — | 5044 stelle GeoJSON, tutte con `mag` e `bv`. |
 
-**Nessun file supera 520 righe** *(max: `messier.py`, 518 — ricontato 2026-07-19).* Il problema "apro un file e devo leggere
+**Nessun file supera 520 righe** *(max: `messier.py`, 518 — ricontato 2026-09-03).* Il problema "apro un file e devo leggere
 migliaia di righe" non esiste più.
+
+> ⚠️ **OTTAVA SMENTITA PER MISURA, ED È LA STESSA DELLA SETTIMA.** #7q corresse questi
+> conteggi il 2026-07-19 chiamandolo *«il caso più imbarazzante»*, e **sei settimane
+> dopo 5 righe su 12 erano di nuovo sbagliate** — `panels.py` dato 247 quando erano
+> 223, `cielo.py` 90 quando erano 84 — **prima** che questa sessione toccasse
+> qualsiasi cosa. Più due righe che nominavano **file inesistenti**.
+> *Il conteggio delle righe è la parte di questo file che marcisce per prima: cambia
+> a ogni commit e nessuno lo guarda.* Ricontarlo costa una riga, e va fatto **prima**
+> di fidarsi della tabella:
+> ```powershell
+> Get-ChildItem compose,strumenti,engine,app -Filter *.py -Recurse |
+>   Where-Object { $_.Name -ne '__init__.py' } |
+>   ForEach-Object { "{0,5}  {1}" -f (Get-Content $_.FullName).Count, $_.Name } | Sort-Object -Descending
+> ```
+> *Due trappole, entrambe prese ESEGUENDO il comando prima di scriverlo qui:* dentro
+> `ForEach-Object` serve **`$_.FullName`** (con `$_` PowerShell passa il **nome** e
+> `Get-Content` non trova il file), e serve **`.Count`** — **`Measure-Object -Line`
+> NON conta le righe vuote** e dà 496 dove `wc -l` dà 518.
 
 ---
 
@@ -620,6 +638,18 @@ descrive lo fa scollare al primo cambiamento.
   dove comincia il suo volantino. *(E i due esempi che D19 citava come «contenuto»
   — i pallini delle palette e i campioni dell'editor — non esistono più: erano
   proprio le due cose rimosse in #7r.)*
+  **CODA APERTA (#7t, 2026-09-03).** L'audit di conformità ha misurato che il guscio usa
+  **19 colori che non stanno nel manuale** (tutti i suoi hex distinti). Metà della questione **si è chiusa da
+  sola**: il verde `#5fd08a` e l'ambra `#e8b45f` erano **dichiarati e mai usati** — zero
+  occorrenze di `var(--ok)`/`var(--warn)` — cioè codice morto, tolto.
+  Resta il rosso `#e0664a` degli errori, e la **raccomandazione è di tenerlo**: il
+  manuale dichiara il proprio perimetro alla prima riga — *«sito web, slide, social,
+  locandine e brochure»* — non descrive **stati d'interfaccia** e non definisce un
+  colore d'errore. Un errore in giallo sarebbe indistinguibile da un accento. *È lo
+  stesso confine per cui `star_ramp` è fuori dal perimetro: il manuale governa ciò che
+  governa.*
+  **La domanda che resta è di Marco, ed è quella di D19:** l'acciaio resta, o il guscio
+  passa ai neutri del manuale?
 - **D20 — L'IDENTITÀ È UNA: una sola palette, e non è una scelta dell'utente.**
   *(Marco, 2026-09-02: «abbiamo un'identità ora ben distinta, quindi rimuovere le
   varie palette e la possibilità di crearle e farne una standard seguendo il
@@ -689,6 +719,15 @@ descrive lo fa scollare al primo cambiamento.
   (scheletro identico, il titolo non ci sta dentro); l'**A4** colori **+ UNA sola riga
   non-colore**, e stessa `x`, stessa `y`, stesso corpo — solo il testo. Verificato
   prima di rigenerare.
+  **✅ E DAL 2026-09-03 D20 HA UNA RETE, non più solo la disciplina** (#7t):
+  `tests/test_identita_manuale.py` pretende che **ogni** colore di marca sia un passo
+  della tavolozza del manuale — i cui valori sono **estratti dagli oggetti vettoriali
+  del PDF**, non letti a schermo. Sorveglia il colore **inventato**, non *quale* passo:
+  ritarare `border` da blu 400 a 600 (ciò che D20 stesso ha fatto guardando il poster)
+  resta legittimo. `star_ramp`/`planet_colors` sono esclusi **strutturalmente**, e un
+  test dimostra che l'esclusione **non è vacua**. C'è una **guardia**: un token nuovo
+  non può scivolare fuori dalla rete, va classificato a mano.
+  *Prima di questo, ritoccare un blu lasciava la suite verde.*
   **⚠️ IL MANUALE E IL REPO NON SONO ALLINEATI SUI FONT — vedi R16.** Il giro dei
   colori si è fermato lì apposta: è il disallineamento **più visibile che resta**
   (la tipografia si riconosce prima del colore), ma costa un giro intero.
@@ -1291,6 +1330,55 @@ imprevisto.
    Work Sans*. **Il cerchio si è chiuso sulla proposta iniziale, per la strada più
    lunga** — e non era tempo perso: senza il manuale nessuno avrebbe saputo *quale*
    delle due avesse ragione.
+4k. **#7t — LA CONFORMITÀ AL MANUALE, voce per voce.** *(2026-09-03, chiesto da Marco:
+   «controlla se il progetto è conforme al manuale in tutto e per tutto», poi «fixare i
+   problemi uno a uno».)* 15 commit. Piano e verifiche in
+   **`docs/CONFORMITA-manuale.md`**, una casella per divergenza con la misura accanto.
+   **Nove divergenze trovate, nove chiuse** *(§1 denominazione · §1 sigla nel guscio ·
+   §2 area di rispetto · §4 tracking · §5 raggi e pillole · §5 raggio dei pannelli · §7
+   set e colore delle icone · §7 motivo decorativo · la rete mancante)*, **più un bug
+   vero e più il tracking delle etichette di mappa**.
+   - **Il PDF del manuale ha il testo VETTORIALIZZATO:** `get_text()` torna **vuoto**.
+     Si legge rendendo le pagine (`get_pixmap`) e i colori si estraggono dagli oggetti
+     vettoriali (`get_drawings()`). *Chi ci riprova senza saperlo conclude che il PDF è
+     illeggibile.*
+   - **§1 era la più grave: `"Giorgio Abetti"` e `APS` avevano ZERO occorrenze** in tutti
+     e 5 i layout, negli SVG resi, nel README e in `CREDITI.md`. E l'A4 è **tre** dei
+     quattro casi che §1 nomina in una volta: è una *locandina*, la sua testata è un
+     *lockup*, e ha un *piedino*. Il template del manuale (pag.5) ha esattamente
+     `GRUPPO ASTROFILI VICENTINI "GIORGIO ABETTI" · APS`.
+     Sull'A4 il corpo scende 21→19: a 21 la stringa completa **invade l'area di
+     rispetto del logo**, a 19 restano 34,6 px di margine **e** 12,6 pt (sopra il minimo
+     di stampa). *A corpo 20 entrava per 0,5 px: dentro il margine d'errore, scartata.*
+   - **⚠️ Z1 — UN BUG VERO, TROVATO GUARDANDO UN RITAGLIO, NON CERCANDOLO.** Il piedino
+     di **zenit** stampava `Gruppo Astrofili Vicentin✉` (icona email sovrapposta di
+     **9,8 px**) e `info@astrofilivicentini.it` **tagliato dal canvas** di 4,4 px.
+     **Preesistente, dimostrato per esecuzione** rendendo col layout di `a67ce4d`.
+     Causa: **#7s** — le `x` furono fissate in #7p con **Barlow condensato**, e R16 ha
+     misurato che le minuscole di Space Grotesk sono **~29% più larghe**. Le icone non
+     si sono mosse: il testo si è allungato sotto di loro.
+     Ed è **solo zenit** (misurate tutte e cinque le righe contatti): è l'unico che
+     mette i contatti **in testata accanto al titolo** invece che in un piedino a tutta
+     larghezza. La riga era **impaccata a gap ZERO**, quindi non c'era nulla da
+     recuperare spostando: ricalcolata, corpo 13→12 *(a 13 non ci sta: il titolo di
+     settembre arriva a x=510 e servirebbe partire da x≤526)*. **Verificata sui 12
+     mesi**, non su quello guardato: stacco minimo 38 px.
+     **È l'OTTAVA volta che una rete ha un buco della forma del bug** — le cinque
+     categorie di `tools/collisioni.py` non contengono *testo di layout contro icona di
+     layout*.
+   - **Il rimedio strutturale a Z1 NON è stato fatto, e la ragione è un vincolo:** le
+     posizioni restano **cablate**. Derivarle dalla larghezza del testo richiederebbe
+     **metriche di font, che il motore non ha** — Pillow non è in `requirements.txt` e
+     aggiungerla vorrebbe dire impacchettarla (D17). La stima già in uso nel progetto
+     (`n × corpo × fattore`) ha ~5% d'errore, cioè ±25 px su quella riga: quasi tutto il
+     margine. **Decisione architetturale, non un ritocco.**
+   - **Le collisioni sono rimaste a 155 per undici voci su dodici, ed era il segno
+     giusto:** nessuna di quelle toccava le etichette del disco. Sono calate solo con
+     l'ultima (il tracking delle etichette di mappa): **155 → 134**, e con esse **6
+     `tacca-testo` di deep-space**, cioè un pezzo di **R13** che nessuno stava cercando.
+   - **`docs/CONFORMITA-manuale.md` resta come registro**, con le due decisioni aperte
+     (R18 e la coda di D19) e le misure per riaprirle senza rifarle.
+
 5. **Il packaging: l'`.exe` in GitHub Actions (D4 + D15).** *(Anticipato su Pillole —
    deciso da Marco, 2026-07-14: «prima l'exe che funziona e lo condivido, poi
    progettiamo Pillole».)*
@@ -1738,6 +1826,20 @@ Ordinato per rischio reale.
   *Non corretto in #7s (regola #4): il commit era a scopo unico, e il difetto è
   preesistente di un mese e mezzo, non introdotto dal cambio di font.*
 
+- **R18 — L'A4 SFONDA IL MINIMO DI 12 pt IN STAMPA: 111 testi su 113.**
+  *(Misurato in #7t, 2026-09-03. **Decisione aperta, non un fix.**)*
+  **Manuale §4:** *«Corpi minimi: 12 pt in stampa, 24 px su slide 1920×1080.»*
+  Misurato **sull'SVG reso** (900 px = 210 mm → 12 pt = **18,1 px**): passano **solo**
+  la testata (12,6 pt) e il titolo (19,8 pt): **111 testi su 113 sono sotto (98%)**, e il
+  grosso sta fra **6,3 e 7,7 pt** — 31 a 6,3, 23 a 7,7, 15 a 6,9, 15 a 7,1.
+  **Perché è una decisione e non lavoro d'esecuzione:** D16 ha già deciso i corpi
+  piccoli, ma **misurando il telefono** — parlava dei formati social, dove il socio
+  zooma. **L'A4 si stampa, e un foglio non si zooma.** Portarlo a 12 pt significa
+  **metà del contenuto o metà mappa**: è *un altro poster*, cioè lavoro col designer,
+  esattamente come D16 stesso prescrive per questo caso.
+  *Nessun altro formato è toccato: sono social, e lì il minimo del manuale è «24 px su
+  slide 1920×1080», che non è la nostra unità.*
+
 **Mai verificato:** la correttezza astronomica dell'output. Sappiamo che il
 codice produce un SVG. Non sappiamo che sia giusto.
 *(Da riverificare: esistono ora `tests/test_correctness.py`, `test_planets.py`,
@@ -1821,6 +1923,46 @@ si esegue **`git status -sb`** e si guarda `ahead/behind`. Se il ramo è **ahead
 pacchetto che uscirà **non conterrà il lavoro**. E il push, che è l'unica azione che esce
 dal computer di Marco, **si chiede** — non si fa di iniziativa.
 
+### Un numero può MIGLIORARE mentre stai sbagliando — 2026-09-03
+
+Il progetto sapeva già che *«guardare trova solo ciò che stai cercando»* (R10, i
+cardinali, R13, R15). #7t ha trovato il rovescio, ed è peggio: **una metrica che ti dà
+ragione mentre sbagli.**
+
+Applicando il tracking del manuale alle etichette di mappa, avevo messo **−0,02em**
+anche su `deep-space`. Le collisioni sui 60 poster scendevano da 24 a **13**: il
+numero più basso della sessione. Ma su deep-space i nomi sono **MAIUSCOLI**
+(`messier.py:398` fa `.upper()`, `disc.py` no), e §4 dà al maiuscolo **+0,08em** —
+comprimere delle maiuscole è proprio ciò che quella riga esiste per impedire. Col
+valore **giusto** le collisioni scendono a **17**, non a 13.
+
+**Guardando solo la tabella avrei tenuto il valore sbagliato, perché "dava un
+risultato migliore".** L'ho preso confrontando due render affiancati.
+
+*La lezione operativa:* `tools/collisioni.py` misura la **sovrapposizione**, non la
+**correttezza tipografica**. Un miglioramento del suo numero **non è** una prova che
+la modifica sia giusta — è solo una prova che non hai rotto la spaziatura. Le due
+domande sono diverse e vogliono due strumenti diversi.
+
+### Strumenti di MISURA, fuori dal motore
+
+Nessuno dei tre è dipendenza di `requirements.txt`: servono a **decidere prima** e a
+**verificare dopo**, non a girare in produzione.
+
+- **Il PDF del manuale ha il testo vettorializzato:** `page.get_text()` torna
+  **vuoto**. Si legge rendendo (`page.get_pixmap(dpi=…)`) e i **colori veri** si
+  prendono da `page.get_drawings()`, mai da uno screenshot.
+- **Pillow misura la larghezza vera** col `.ttf` del brand
+  (`ImageFont.truetype(...).getlength(s)`): serve **prima** di toccare un layout, per
+  sapere se una stringa ci sta. In #7t ha deciso tre volte il valore da scrivere
+  (lockup a 127 px su 133; testata A4 a corpo 19; riga contatti di zenit a corpo 12).
+  *Il motore invece stima (`n × corpo × fattore`) perché non può caricare font.*
+- **Chrome headless fotografa il guscio dell'app** quando l'estensione del browser non
+  è connessa:
+  `chrome.exe --headless=new --disable-gpu --window-size=1400,900 --screenshot=out.png --virtual-time-budget=4000 http://127.0.0.1:PORTA/`
+  Con un confronto pixel-per-pixel (`ImageChops.difference(...).getbbox() is None`)
+  diventa una **prova** che un refactor del CSS non ha cambiato nulla.
+
 ### Regole di ingaggio — sempre attive
 
 1. **Se non l'hai verificato, scrivi che non l'hai verificato.** Mai
@@ -1871,7 +2013,7 @@ python -m uvicorn app.main:app --reload --port 8000
 
 # LE DUE RETI. La suite copre tutto; la fotografia copre il buco dei golden,
 # che sorvegliano SOLO l'A4 di agosto (vedi #7q).
-python -m pytest -q                    # 210 verdi
+python -m pytest -q                    # 216 verdi
 python tools/fotografia.py             # 20 SVG (5 formati x 4 mesi), byte per byte
 python tools/fotografia.py --scatta    # SOLO dopo un cambiamento DELIBERATO
 ```
