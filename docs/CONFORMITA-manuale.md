@@ -147,7 +147,7 @@ glifi restano nitidi. Suite 210 verdi.
 
 ## Blocco B — i layout *(ognuno muove il golden: uno per commit)*
 
-### [ ] B1 — Il tracking è 2-3× più largo del prescritto
+### [x] B1 — Il tracking è 2-3× più largo del prescritto — **FATTO 2026-09-03**
 **Manuale §4:** etichetta maiuscola **+0,08em**; display **−0,02em**.
 **Misurato** (`letter_spacing ÷ size`, tutti e 5 i layout):
 
@@ -159,10 +159,65 @@ glifi restano nitidi. Suite 210 verdi.
 
 I titoli non sono solo fuori misura: vanno nella **direzione opposta** al manuale.
 
-⚠️ **Il tracking entra nella larghezza vera ma NON nella stima dello strumento**
-(`tools/collisioni.py`: `width = n_char × corpo × FATTORE`, il fattore **non**
-include `letter_spacing`). Stringere le etichette le rende più corte: le collisioni
-possono solo migliorare, ma **va rimisurato sui 60**, non assunto.
+**Fatto: 24 blocchi su 5 layout.** Maiuscole → `0,08 × corpo`; titoli → `−0,02 × corpo`.
+Il diff dei layout è **48 righe, tutte con `letter_spacing`** e **zero d'altro tipo**.
+
+**La previsione, scritta PRIMA di toccare un file, e verificata:** *«il golden dell'A4
+cambia esattamente 5 righe, e ognuna differisce SOLO nel valore di `letter-spacing`;
+il golden del disco resta fermo»*. Reale: **5 righe fuori, 5 dentro**, e sostituendo
+il valore del tracking con un segnaposto le due versioni sono **identiche** — nessuna
+`x`, nessuna `y`, nessun elemento aggiunto o tolto. Il golden del disco è **passato
+senza essere toccato**.
+*Regge perché i 5 blocchi hanno `x` fisso: tre sono `anchor="middle"` (il testo si
+stringe attorno al proprio centro) e due sono ancorati a sinistra.*
+
+**Collisioni sui 60 poster: 155 → 155, ogni cella identica.** Ed è il risultato
+**giusto**, non un non-risultato: nessuna delle 155 coinvolge un blocco di layout —
+sono tutte etichette **del disco**, il cui tracking è cablato in `disc.py` e che B1
+non tocca (vedi B1-bis). Le quattro categorie di collisione «dure» (sotto-pannello,
+banda, cardinale, tacca-testo) restano a **zero** su dashboard, parata, zenit e a4.
+
+⚠️ **Una mia affermazione ritrattata, perché il metodo conta più della conclusione.**
+Avevo scritto qui che lo strumento *«non include `letter_spacing`»* e che quindi
+sarebbe stato **cieco** al cambiamento — cioè che la misura sarebbe stata vuota.
+**Falso, e l'ho letto io male:** `collisioni.py:112` fa
+`w = len(text) * size * f + ls * (len(text)-1)`. Il tracking **c'è**. Avevo letto il
+*docstring*, che semplifica in `n × corpo × FATTORE`, invece del codice.
+*È la lezione del progetto al contrario: qui il commento mentiva e il codice aveva
+ragione — e per un momento ho creduto al commento.*
+
+**Guardato, non solo misurato:** dashboard di settembre reso prima e dopo, testata
+affiancata a 1,6×. La testata smette di essere spaziata come una carta intestata e
+la gerarchia che §4 descrive — *etichetta maiuscola piccola → titolo grande → testo* —
+diventa finalmente leggibile. La fotografia dei 20 SVG è stata **riscattata**
+(movimento deliberato); suite **210 verdi**.
+
+### [ ] B1-bis — Il tracking dei NOMI DI COSTELLAZIONE è cablato in `disc.py`
+*(Trovato eseguendo B1, non previsto dalla ricognizione.)*
+**Misurato:** il golden dell'A4 ha **28** `letter-spacing`, non 5. I 23 in più sono i
+**nomi delle costellazioni** (`Orsa Maggiore`, `Pegaso`, …) a corpo 11,7 e tracking
+`0,5` = **+0,043em**, emessi da `disc.py:111` con il valore **scritto nel codice**
+(e un secondo punto, `disc.py:253`).
+
+**Perché è la stessa violazione:** §4 mette le **etichette** fra i casi *display*, e
+il display vuole **−0,02em**. Quindi +0,043em è fuori norma esattamente come lo erano
+i blocchi di layout.
+
+**Perché NON l'ho fatto dentro B1**, ed è una scelta, non una dimenticanza:
+1. **È un'altra unità di lavoro.** B1 è dati (5 file JSON); questo è **codice**, e
+   tocca `disc.py`, cioè il disco sigillato (D7).
+2. **Muove una rete diversa.** I nomi delle costellazioni **sono** le etichette che
+   producono tutte e 155 le collisioni misurate. Stringerle cambia i numeri di
+   `tools/collisioni.py` — che in B1 dovevano restare fermi per dimostrare che B1
+   non aveva perturbato nulla. Mischiare le due cose avrebbe reso **impossibile
+   dire quale delle due ha mosso cosa**: due variabili, nessuna diagnosi. *È
+   l'argomento con cui #7q ha ordinato le zodiacali dopo il declutter.*
+3. Il valore `0,5` è **cablato**: portarlo in un token o in un parametro di layout è
+   una decisione di forma, non una sostituzione.
+
+*Previsione per quando si farà:* le collisioni possono solo **calare** (le etichette
+si accorciano di ~0,73 px per lettera), e il golden si muove su **28 righe** invece
+di 5. Da verificare, non da assumere.
 
 ### [ ] B2 — Manca la denominazione completa *(la più grave)*
 **Manuale §1:** *«La denominazione completa è Gruppo Astrofili Vicentini "Giorgio
