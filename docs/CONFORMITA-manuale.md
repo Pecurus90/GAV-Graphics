@@ -527,6 +527,25 @@ giallo del manuale.
 2. L'acciaio resta, o il guscio passa ai neutri del manuale? *(rimette in
    discussione D19)*
 
+**AGGIORNAMENTO 2026-09-03 — la domanda 1 si è sciolta quasi da sola, misurando.**
+Andando a vedere **dove sono usati**, i tre colori di stato non erano tre:
+- **`--ok` (verde `#5fd08a`) e `--warn` (ambra `#e8b45f`) erano DICHIARATI E MAI
+  USATI.** Zero occorrenze di `var(--ok)` e `var(--warn)` in tutto il file. Non
+  erano una scelta di design da discutere: erano **codice morto**. Tolti.
+- **Resta solo `--danger` (`#e0664a`)**, usato una volta per il campo numerico
+  fuori intervallo, più due volte cablato nella scheda d'errore.
+
+**E su quello la mia raccomandazione è di LASCIARLO, con un argomento che vale la
+pena scrivere:** il manuale è un manuale di **marchio**, e dichiara il proprio
+perimetro alla prima riga — *«sito web, slide, social, locandine e brochure»*. Non
+descrive **stati d'interfaccia**, e infatti non definisce nessun colore d'errore.
+Sostituire il rosso col giallo del manuale non renderebbe l'app più conforme:
+renderebbe **un errore indistinguibile da un accento**. È lo stesso confine per cui
+`star_ramp` è fuori dal perimetro: il manuale governa ciò che governa.
+*Se Marco decide diversamente è un token solo.*
+
+Quindi la domanda 1 **è chiusa**; resta aperta solo la **2**.
+
 ---
 
 ## Trovato eseguendo, NON è conformità — un difetto vero, preesistente
@@ -620,8 +639,9 @@ lasciata fuori.
 
 ## Fuori scope, trovato passando
 
-- `app/main.py:243-244` — il CSS di `input[type=color]` è **residuo morto**
-  dell'editor rimosso in #7r. Non è conformità: è pulizia.
+- ~~`app/main.py:243-244` — il CSS di `input[type=color]`~~ **TOLTO (2026-09-03).**
+  Era il residuo dell'editor rimosso in #7r: entrambe le occorrenze di `type=color`
+  nel file erano **le regole CSS stesse**, nessun `input` di quel tipo esiste più.
 - **Tensione da segnare, non da risolvere qui:** l'invariante #4 dichiara *«stile
   neon + glow: identità del brand»*, e l'SVG dell'A4 usa i filtri **22 volte**. Il
   manuale non nomina il glow da nessuna parte, e su tema notte prescrive le card

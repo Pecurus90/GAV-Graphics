@@ -233,15 +233,13 @@ PAGINA = r"""<!DOCTYPE html><html lang="it"><head><meta charset="utf-8">
 --hair:rgba(132,158,192,.12);--hair2:rgba(132,158,192,.24);
 --t1:#eaf0f8;--t2:#a2afc4;--t3:#75839a;--t4:#556074;
 --acc:#6f89a8;--acc2:#8fa7c4;--prim:#3f5f83;--primtx:#f2f7ff;
---warn:#e8b45f;--danger:#e0664a;--ok:#5fd08a;
+--danger:#e0664a;
 --display:'Space Grotesk',system-ui,sans-serif;
 --testo:'Work Sans',system-ui,-apple-system,'Segoe UI',sans-serif}
 *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
 body{font-family:var(--testo);color:var(--t1);background:var(--bg);overflow:hidden;-webkit-font-smoothing:antialiased}
 a{color:var(--acc);text-decoration:none}a:hover{color:var(--acc2)}
 ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:rgba(132,158,192,.2);border-radius:999px}::-webkit-scrollbar-track{background:transparent}
-input[type=color]{-webkit-appearance:none;-moz-appearance:none;appearance:none;border:none;padding:0;background:none;cursor:pointer}
-input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-webkit-color-swatch{border:none;border-radius:5px}input[type=color]::-moz-color-swatch{border:none;border-radius:5px}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:.55}50%{opacity:1}}
 /* --- titlebar --- */
