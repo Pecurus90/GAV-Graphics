@@ -239,7 +239,7 @@ PAGINA = r"""<!DOCTYPE html><html lang="it"><head><meta charset="utf-8">
 *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
 body{font-family:var(--testo);color:var(--t1);background:var(--bg);overflow:hidden;-webkit-font-smoothing:antialiased}
 a{color:var(--acc);text-decoration:none}a:hover{color:var(--acc2)}
-::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:rgba(132,158,192,.2);border-radius:9px}::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:rgba(132,158,192,.2);border-radius:999px}::-webkit-scrollbar-track{background:transparent}
 input[type=color]{-webkit-appearance:none;-moz-appearance:none;appearance:none;border:none;padding:0;background:none;cursor:pointer}
 input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-webkit-color-swatch{border:none;border-radius:5px}input[type=color]::-moz-color-swatch{border:none;border-radius:5px}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -260,7 +260,7 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
 .nav .nav-brand .nb-txt{font-family:var(--display);font-weight:700;font-size:15px;line-height:1.16;letter-spacing:-.02em;color:var(--t1)}
 .nav .nav-brand .nb-sub{font-family:var(--display);font-weight:500;font-size:10px;color:var(--t4);margin-top:4px}
 .nav .nav-cap{font-family:var(--display);font-weight:600;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--t4);padding:0 9px 7px}
-.nav-item{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:none;border:1px solid transparent;border-radius:7px;padding:11px 10px;cursor:pointer;transition:.14s;color:var(--t2);font-family:var(--testo)}
+.nav-item{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:none;border:1px solid transparent;border-radius:6px;padding:11px 10px;cursor:pointer;transition:.14s;color:var(--t2);font-family:var(--testo)}
 .nav-item .ic{flex:0 0 19px;width:19px;height:19px;color:var(--t3);transition:.14s}
 .nav-item .nm{font-size:14.5px;font-weight:600;line-height:1.12}
 .nav-item .badge{font-family:var(--display);font-weight:600;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--t4);margin-top:3px;display:block}
@@ -273,12 +273,12 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
 .panel{width:404px;flex:0 0 404px;height:100%;display:flex;flex-direction:column;background:var(--panel);border-right:1px solid var(--hair);min-height:0}
 .panel-toolbar{flex:0 0 auto;padding:12px 16px;border-bottom:1px solid var(--hair);display:flex;align-items:center;gap:9px}
 .panel-body{flex:1;min-height:0;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:16px}
-.genera{flex:1;background:var(--prim);color:var(--primtx);border:none;border-radius:7px;padding:12px;font-family:var(--display);font-weight:800;font-size:15.5px;letter-spacing:.03em;cursor:pointer;transition:.14s}
+.genera{flex:1;background:var(--prim);color:var(--primtx);border:none;border-radius:999px;padding:12px;font-family:var(--display);font-weight:800;font-size:15.5px;letter-spacing:.03em;cursor:pointer;transition:.14s}
 .genera:hover{background:#4a6d96}.genera:disabled{opacity:.55;cursor:not-allowed}
 .blk-lbl{font-family:var(--display);font-weight:700;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--t3);margin-bottom:9px}
 .field-lbl{font-size:11.5px;color:var(--t3);margin-bottom:5px;font-weight:500}
 /* Quando · Dove */
-.qd-card{border:1px solid var(--hair);border-radius:9px;overflow:hidden}
+.qd-card{border:1px solid var(--hair);border-radius:12px;overflow:hidden}
 .qd-head{padding:8px 12px;background:var(--surf);border-bottom:1px solid var(--hair);font-family:var(--display);font-weight:700;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--t3)}
 .qd-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 12px;border-bottom:1px solid var(--hair)}
 .qd-lbl{font-size:12.5px;color:var(--t3);flex:0 0 auto}
@@ -298,9 +298,9 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
 .coord-toggle .chev{transition:transform .18s;display:inline-block}.coord-toggle.open .chev{transform:rotate(90deg)}
 .coord-wrap{max-height:0;overflow:hidden;transition:max-height .22s ease}.coord-wrap.open{max-height:120px}
 .coord-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:11px}
-.coord-grid .qd-loc{text-align:left;max-width:none;width:100%;background:var(--surf);border:1px solid var(--hair);border-radius:7px;padding:9px 10px;font-size:13px}
+.coord-grid .qd-loc{text-align:left;max-width:none;width:100%;background:var(--surf);border:1px solid var(--hair);border-radius:6px;padding:9px 10px;font-size:13px}
 /* Formato segmentato */
-.formats{display:flex;border:1px solid var(--hair2);border-radius:8px;overflow:hidden}
+.formats{display:flex;border:1px solid var(--hair2);border-radius:999px;overflow:hidden}
 .fmt{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 2px;cursor:pointer;background:none;border:none;border-left:1px solid var(--hair);color:var(--t2);transition:.13s;font-family:var(--testo)}
 .fmt:first-child{border-left:none}
 .fmt:hover{background:rgba(132,158,192,.06);color:var(--t1)}
@@ -311,10 +311,10 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
 /* --- stage --- */
 .stage{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;padding:18px 22px;gap:14px;position:relative}
 .meta-chips{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
-.chip{font-size:11.5px;color:var(--t2);background:var(--surf);border:1px solid var(--hair);border-radius:5px;padding:5px 10px;display:inline-flex;align-items:center;gap:6px;text-transform:uppercase}
+.chip{font-size:11.5px;color:var(--t2);background:var(--surf);border:1px solid var(--hair);border-radius:999px;padding:5px 10px;display:inline-flex;align-items:center;gap:6px;text-transform:uppercase}
 .chip b{color:var(--t1);font-weight:600}
 .chip .sw{width:9px;height:9px;border-radius:50%}
-.stage-box{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.26);border:1px solid var(--hair);border-radius:10px;padding:20px;position:relative;overflow:hidden}
+.stage-box{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.26);border:1px solid var(--hair);border-radius:20px;padding:20px;position:relative;overflow:hidden}
 .state{display:none;width:100%;height:100%;align-items:center;justify-content:center}
 .state.active{display:flex}
 /* stato iniziale */
@@ -331,10 +331,10 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
 .gen-title{font-family:var(--display);font-weight:800;font-size:23px;color:var(--t1);line-height:1.05;margin-top:3px}
 .gen-sub{font-size:12px;color:var(--t4);margin-top:2px}
 .seg-strip{display:flex;gap:5px}
-.seg{flex:1;height:5px;border-radius:3px;background:var(--surf2);transition:.2s}
+.seg{flex:1;height:5px;border-radius:999px;background:var(--surf2);transition:.2s}
 #s-generating:has(.phase[data-ph="0"].done) .seg[data-seg="0"],#s-generating:has(.phase[data-ph="1"].done) .seg[data-seg="1"],#s-generating:has(.phase[data-ph="2"].done) .seg[data-seg="2"],#s-generating:has(.phase[data-ph="3"].done) .seg[data-seg="3"]{background:var(--acc)}
 #s-generating:has(.phase[data-ph="0"].active) .seg[data-seg="0"],#s-generating:has(.phase[data-ph="1"].active) .seg[data-seg="1"],#s-generating:has(.phase[data-ph="2"].active) .seg[data-seg="2"],#s-generating:has(.phase[data-ph="3"].active) .seg[data-seg="3"]{background:linear-gradient(90deg,var(--acc),var(--acc2));box-shadow:0 0 10px var(--acc)}
-.phases{border:1px solid var(--hair);border-radius:9px;overflow:hidden;background:rgba(0,0,0,.2)}
+.phases{border:1px solid var(--hair);border-radius:12px;overflow:hidden;background:rgba(0,0,0,.2)}
 .phase{display:flex;align-items:center;gap:12px;padding:11px 13px;border-bottom:1px solid var(--hair);transition:.2s}
 .phase:last-child{border-bottom:none}
 .phase .dot{flex:0 0 24px;width:24px;height:24px;border-radius:50%;position:relative;border:1.5px solid var(--hair2);background:var(--surf);display:flex;align-items:center;justify-content:center;transition:.2s}
@@ -356,7 +356,7 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
    palco), il vincolo di LARGHEZZA e' viewport meno la chrome fissa a sinistra
    (nav 212 + pannello 404 + padding/bordi ~= 704, +8 di margine). Aspetto intatto
    -> mai stirata; sempre tutto il poster (object-fit:contain). Niente cap a 640. */
-.poster-frame{height:min(100%,100vw - 712px);width:auto;max-width:100%;aspect-ratio:1/1;border-radius:10px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.55);border:1px solid var(--hair);background:#05070f}
+.poster-frame{height:min(100%,100vw - 712px);width:auto;max-width:100%;aspect-ratio:1/1;border-radius:12px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.55);border:1px solid var(--hair);background:#05070f}
 .poster-frame.a4{aspect-ratio:1/1.414;height:min(100%,calc((100vw - 712px) * 1.414))}
 .poster-frame img{width:100%;height:100%;object-fit:contain;display:block}
 .save-row{display:flex;gap:9px;align-items:center;flex-wrap:wrap;justify-content:center}
@@ -366,10 +366,10 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
 .btn-ghost{background:var(--surf2);border-color:var(--hair2);color:var(--t1)}.btn-ghost:hover{border-color:var(--acc)}
 .btn-text{background:none;border:none;color:var(--t3);font-family:var(--testo);font-weight:500;font-size:13px;cursor:pointer;padding:8px}.btn-text:hover{color:var(--acc2)}
 /* stato errore */
-.err-card{max-width:460px;background:var(--surf);border:1px solid rgba(224,102,74,.4);border-radius:14px;padding:30px 32px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.err-card{max-width:460px;background:var(--surf);border:1px solid rgba(224,102,74,.4);border-radius:12px;padding:30px 32px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5)}
 .err-icon{width:54px;height:54px;border-radius:50%;background:rgba(224,102,74,.14);display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
 .err-title{font-family:var(--display);font-weight:800;font-size:22px;color:#f2d3c9;margin-bottom:11px}
-.err-msg{font-size:15px;color:#f0c6b6;line-height:1.5;font-weight:500;background:rgba(224,102,74,.09);border:1px solid rgba(224,102,74,.22);border-radius:10px;padding:13px 16px;margin-bottom:16px}
+.err-msg{font-size:15px;color:#f0c6b6;line-height:1.5;font-weight:500;background:rgba(224,102,74,.09);border:1px solid rgba(224,102,74,.22);border-radius:6px;padding:13px 16px;margin-bottom:16px}
 .err-hint{font-size:13px;color:var(--t3);line-height:1.55;margin-bottom:20px}
 </style></head>
 <body>

@@ -87,11 +87,37 @@ virgolette, in grigio. Riportato a quello.)*
 tondo è alto quanto tutto il blocco di testo; da noi è ~32 px contro ~50. Il manuale
 non prescrive un rapporto, quindi non l'ho toccato.
 
-### [ ] A2 — Bottoni non a pillola, raggi fuori scala
+### [x] A2 — Bottoni non a pillola, raggi fuori scala — **FATTO 2026-09-03**
 **Manuale §5:** *«Bottoni — sempre a pillola»*; *«Raggi: 6 px (campi), 12 px (card),
 20 px (blocchi grandi), pillola per bottoni e badge.»*
 **Misurato in `app/main.py`:** raggi 3 · 5 · 6 · 7 · 8 · 9 · 10 · 14 — **solo il 6 è
 in scala**. `.genera` e `.btn` hanno `border-radius:7px`: non sono pillole.
+
+**Fatto — e la parte che conta è la CLASSIFICAZIONE, non i numeri.** Il manuale non
+dà una lista di selettori: dà **quattro categorie**. Ogni raggio è stato assegnato a
+una, e l'assegnazione è la decisione:
+
+| | manuale | assegnati |
+|---|---|---|
+| **bottoni e badge → pillola** | `999px` | `.genera` · `.btn` · `.chip` · `.formats` · `.seg` · thumb della barra di scorrimento |
+| **campi → 6** | `6px` | `.nav-item` · `.coord-grid .qd-loc` · `.err-msg` |
+| **card → 12** | `12px` | `.qd-card` · `.phases` · `.poster-frame` · `.err-card` |
+| **blocchi grandi → 20** | `20px` | `.stage-box` |
+
+**Dove NON l'ho applicata, e perché:** i cerchi (`.titlebar .dot`, `.chip .sw`,
+`.phase .dot`, gli spinner) restano al `50%`. Non sono raggi fuori scala: sono
+**cerchi**, e §5 non parla di loro. Applicare la scala lì avrebbe voluto dire
+scambiare la regola per un'operazione di ricerca-e-sostituzione.
+
+*Due scelte discutibili, dichiarate perché si vedano:* `.nav-item` è una **riga
+interattiva**, non un bottone-CTA — l'ho messa fra i campi (6), non fra le pillole,
+perché una barra laterale di pillole non è ciò che §5 disegna. E `.formats` (il
+controllo segmentato) è un **gruppo di bottoni**: pillola. Reso e guardato al 3×, la
+cella selezionata riempie l'estremità tonda ed è proprio l'*«eco del tondo del logo»*
+che il manuale nomina.
+
+**Verificato:** screenshot Chrome headless dell'app, ritagli al **3×** sul controllo
+dei formati e sulla barra laterale. Suite verde.
 
 ### [ ] A3 — Icone dell'app col tratto sbagliato
 **Manuale §7:** *«Icone: set Lucide (stile linea, tratto 2 px)»*.
