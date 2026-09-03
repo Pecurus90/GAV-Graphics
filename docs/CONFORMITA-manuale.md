@@ -273,7 +273,7 @@ il parametro canonico. `test_golden_svg_invariato` è diventato rosso e l'ha fer
 cella identica; fotografia dei 20 SVG riscattata; testate di A4 e zenit **guardate**
 ai ritagli.
 
-### [ ] B3 — Area di rispetto del logo violata su 4 formati su 5
+### [x] B3 — Area di rispetto del logo violata su 4 formati su 5 — **FATTO 2026-09-03**
 **Manuale §2:** *«Area di rispetto: attorno al tondo lasciare almeno ¼ del suo
 diametro libero da testi e grafica.»*
 **Misurato** (bordo destro del logo → primo testo a fianco):
@@ -286,8 +286,36 @@ diametro libero da testi e grafica.»*
 | `zenit` | 68 | 17,0 px | **14,0** | ✗ |
 | `a4` | 82 | 20,5 px | 67-134 | ✓ *(testata centrata)* |
 
-**Da fare DOPO B2**, non prima: B2 allunga la testata e potrebbe obbligare a
-rientrare, non ad allargare. Misurare una volta sola, alla fine.
+**Fatto, e nell'ordine giusto: dopo B2.** *(La ragione era operativa e ha retto: B2
+allunga la testata di 22 caratteri, quindi misurare lo spazio prima avrebbe voluto
+dire misurarlo due volte.)*
+
+**Ho spostato i TESTI, non rimpicciolito il tondo** — e la scelta ha un argomento:
+§2 fissa anche una *dimensione minima* del marchio, e §5 chiede *«molta aria»*.
+Rimpicciolire il logo avrebbe rispettato la lettera dell'area di rispetto
+indebolendo il lockup; spostare la testata dà l'aria che il manuale chiede davvero.
+
+| | richiesto | prima | dopo |
+|---|---|---|---|
+| dashboard | 25,0 | 22,0 | **26,0** |
+| deep-space | 23,5 | 16,0 | **24,0** |
+| parata | 22,0 | 16,0 | **23,0** |
+| zenit | 17,0 | 14,0 | **18,0** |
+| a4 | 20,5 | 67-134 | invariato *(testata centrata)* |
+
+**Un difetto minore sanato passando:** su dashboard, deep-space e parata il **titolo
+era disallineato di 2 px** rispetto a testata e sottotitolo (x=178 contro 180, 154
+contro 156, 160 contro 162). Ora i tre blocchi sono **allineati sullo stesso asse**.
+*Non l'avevo cercato: è saltato fuori leggendo le `x` per spostarle.*
+
+**Il rischio vero era su zenit, e l'ho misurato:** la testata lì si sposta **verso**
+la riga contatti appena rifatta in Z1. Ricontrollati i 12 mesi: lo stacco minimo
+scende da 42,0 a **38,0 px** (settembre) — resta ampio.
+
+**Previsione, verificata:** *«il golden dell'A4 non si muove — a4 non è toccato — e
+nella fotografia si muovono 16 SVG su 20»*. Reale: suite **210 verdi**, e la
+fotografia segnala **4 dashboard + 4 deep-space + 4 parata + 4 zenit**, con i **4
+dell'A4 fermi**. Collisioni sui 60: **155 → 155**.
 
 ### [ ] B4 — Raggio dei pannelli fuori scala
 **Manuale §5:** raggi 6 / 12 / 20.
