@@ -49,9 +49,36 @@ def test_icona_colorata_dal_tema(eng, root, tmp_path):
     assert f'fill="{altro["gold"]}"' in b
 
 
-def test_icona_fill_rule_envelope(eng, root, tmp_path):
-    """L'envelope usa fill-rule evenodd (per il lembo): deve finire nell'output."""
+def test_icona_a_tratto_esce_a_tratto(eng, root, tmp_path):
+    """Un glifo che si dichiara `stroke` esce A TRATTO, non pieno: e' la
+    convenzione Lucide che il manuale (sez.7) prescrive - griglia 24, tratto 2,
+    estremi tondi. Il colore resta un TOKEN, come per i glifi pieni.
+
+    Sorveglia il DIFETTO che conta: se qualcuno tornasse a disegnare `fill=<token>`
+    su un'icona a tratto, l'envelope diventerebbe una macchia nera piena."""
+    theme = _palette(root, "gav")
     svg = _gen(eng, tmp_path, [
-        {"type": "icon", "name": "email", "x": 10, "y": 10, "size": 24, "fill": "text"}
-    ], _palette(root, "gav"))
+        {"type": "icon", "name": "email", "x": 10, "y": 10, "size": 24, "fill": "gold"}
+    ], theme)
+    assert 'fill="none"' in svg, "l'icona a tratto e' stata riempita"
+    assert f'stroke="{theme["gold"]}"' in svg, "il colore del tratto non viene dal tema"
+    assert 'stroke-width="2"' in svg, "il tratto non e' 2 (griglia 24 di Lucide)"
+    assert f'<path d="M4 4H20' in svg and f'fill="{theme["gold"]}"' not in svg
+
+
+def test_icona_piena_conserva_il_fill_rule(eng, root, tmp_path):
+    """Un glifo PIENO che dichiara `fill_rule` deve ancora emetterlo: e' la
+    capacita' che serviva alla vecchia envelope (il lembo si ritagliava con
+    evenodd).
+
+    Nessuna icona SU DISCO la usa piu', quindi il glifo di prova si inietta
+    IN MEMORIA: la rete guarda la primitiva, non l'inventario di
+    brand/icons/icons.json. (Stessa mossa di #7r col secondo tema.)"""
+    eng._icons_cache = {"prova": {"fill_rule": "evenodd", "d": "M0 0h24v24H0Z"}}
+    try:
+        svg = _gen(eng, tmp_path, [
+            {"type": "icon", "name": "prova", "x": 10, "y": 10, "size": 24, "fill": "text"}
+        ], _palette(root, "gav"))
+    finally:
+        del eng._icons_cache
     assert 'fill-rule="evenodd"' in svg

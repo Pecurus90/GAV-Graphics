@@ -76,13 +76,13 @@
 
     {"type": "line", "x1": 40, "y1": 1006, "x2": 1040, "y2": 1006,
      "stroke": "divider", "stroke_width": 1},
-    {"type": "icon", "name": "instagram", "x": 40, "y": 1027, "size": 16, "fill": "text3"},
+    {"type": "icon", "name": "instagram", "x": 40, "y": 1027, "size": 16, "fill": "gold"},
     {"type": "text", "x": 64, "y": 1040, "fill": "text3", "size": 13, "weight": "500",
      "content": "@astrofilivicentini"},
-    {"type": "icon", "name": "facebook", "x": 300, "y": 1027, "size": 16, "fill": "text3"},
+    {"type": "icon", "name": "facebook", "x": 300, "y": 1027, "size": 16, "fill": "gold"},
     {"type": "text", "x": 324, "y": 1040, "fill": "text3", "size": 13, "weight": "500",
      "content": "Gruppo Astrofili Vicentini"},
-    {"type": "icon", "name": "email", "x": 620, "y": 1027, "size": 16, "fill": "text3"},
+    {"type": "icon", "name": "email", "x": 620, "y": 1027, "size": 16, "fill": "gold"},
     {"type": "text", "x": 644, "y": 1040, "fill": "text3", "size": 13, "weight": "500",
      "content": "info@astrofilivicentini.it"}
   ]

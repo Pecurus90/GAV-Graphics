@@ -119,9 +119,17 @@ class Compositor:
         TOKEN del tema (mai cablato): l'icona si ricolora con la palette."""
         g=self._icons()[b["name"]]
         s=b["size"]/24.0
-        fr=f' fill-rule="{g["fill_rule"]}"' if g.get("fill_rule") else ""
+        col=theme[b["fill"]]
+        if g.get("stroke"):
+            # Icona A TRATTO (convenzione Lucide: griglia 24, tratto 2, estremi
+            # tondi) - manuale sez.7. Additivo: senza la chiave "stroke" si resta
+            # sul glifo pieno di prima, byte per byte.
+            pen=(f'fill="none" stroke="{col}" stroke-width="2" '
+                 f'stroke-linecap="round" stroke-linejoin="round"')
+        else:
+            pen=f'fill="{col}"'+(f' fill-rule="{g["fill_rule"]}"' if g.get("fill_rule") else "")
         return (f'<g transform="translate({b["x"]},{b["y"]}) scale({s:.5f})">'
-                f'<path d="{g["d"]}" fill="{theme[b["fill"]]}"{fr}/></g>')
+                f'<path d="{g["d"]}" {pen}/></g>')
 
     def _render_background(self, b, theme, w, h):
         """Sfondo pagina + campo di micro-stelle. La sequenza pseudo-casuale

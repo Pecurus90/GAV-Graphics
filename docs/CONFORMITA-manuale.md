@@ -322,7 +322,7 @@ dell'A4 fermi**. Collisioni sui 60: **155 → 155**.
 **Misurato:** i 5 pannelli di `dashboard` e `zenit` usano **`rx: 16`**.
 *(Il pannello a tutta larghezza di zenit ha `rx: 0`, ed è corretto: è una fascia.)*
 
-### [ ] B5 — Le icone del piedino: set e colore sbagliati
+### [x] B5 — Le icone del piedino: set e colore sbagliati — **FATTO 2026-09-03**
 **Manuale §7:** *«Icone: set Lucide (stile linea, tratto 2 px) — blu su chiaro,
 gialle su notte.»*
 **Misurato in `brand/icons/icons.json`:**
@@ -333,6 +333,45 @@ gialle su notte.»*
   esattamente il caso che §7 governa, e Lucide ha `mail`. **Va sostituita.**
 - Tutte e tre sono rese con `fill: text3` (`#9dccdc`): **azzurre, non gialle su
   notte.**
+
+**Fatto, in due mosse.**
+
+**(1) Il compositore ha imparato il TRATTO.** `_render_icon` sapeva emettere solo
+`fill`: un'icona di linea era **impossibile da rappresentare**. Ora un glifo che si
+dichiara `"stroke": true` esce con `fill="none" stroke=<token> stroke-width="2"` ed
+estremi tondi — la convenzione Lucide. **Additivo**, esattamente come `fill_opacity`
+(#7i) e `cardinal_gap` (#7j): un glifo senza quella chiave esce **byte per byte come
+prima**, quindi i due marchi non si muovono.
+
+**(2) `email` è ora il glifo `mail` di Lucide**, a tratto, e le tre icone sono
+**gialle** (`gold`) invece che azzurre.
+
+**Cosa NON ho toccato, e l'argomento:** `instagram` e `facebook` restano i glifi
+**pieni** di Simple Icons. §7 governa il **set di icone**, non i **marchi di terzi**:
+Lucide non ha logo di aziende, e ridisegnare il logo di Instagram «alla Lucide»
+sarebbe **alterare un marchio altrui** — cioè un problema più grosso di quello che
+risolverebbe. Il colore invece è nostro, e quello segue il manuale.
+
+**Guardato al 3×, perché il dubbio era visivo e non misurabile:** un'icona a tratto
+accanto a due marchi pieni poteva sembrare sbilanciata. Non lo è — il glifo di
+Instagram è **già** a filo (la fotocamera è un contorno), quindi la riga legge come
+*due contorni + un pieno*, e il pieno è il marchio vero.
+
+**Le reti riespresse, non annacquate.** `test_icona_fill_rule_envelope` sorvegliava
+`fill-rule="evenodd"` sulla vecchia busta: con la busta nuova sarebbe stato comodo
+cancellarlo. Al suo posto ci sono **due** test:
+- `test_icona_a_tratto_esce_a_tratto` — guarda il **difetto** che conta: se qualcuno
+  tornasse a disegnare `fill=<token>` su un'icona a tratto, la busta diventerebbe una
+  **macchia piena**.
+- `test_icona_piena_conserva_il_fill_rule` — la capacità che serviva alla vecchia
+  busta **esiste ancora**. Nessuna icona su disco la usa più, quindi il glifo di prova
+  si **inietta in memoria**: la rete guarda la primitiva, non l'inventario del file.
+  *(È la stessa mossa di #7r col secondo tema.)*
+Suite **210 → 211**.
+
+**Previsione, verificata:** *«nel golden dell'A4 cambiano 3 righe, tutte `<g>` di
+icona»*. Reale: **6 righe di diff = 3 sostituzioni**, e sono tutte `<g
+transform="translate(...)">`. Nient'altro si è mosso.
 
 ### [ ] B6 — Le stelline di sfondo sono azzurre
 **Manuale §7:** *«Motivo decorativo: piccole stelle puntiformi gialle e bianche su
