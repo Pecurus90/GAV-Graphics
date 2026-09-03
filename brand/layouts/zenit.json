@@ -5,7 +5,7 @@
   "blocks": [
     {"type": "background",
      "starfield": {"seed": 8, "count": 240, "r_min": 0.4, "r_max": 1.7,
-                   "op_min": 0.12, "op_max": 0.5, "fill": "bgstar"}},
+                   "op_min": 0.12, "op_max": 0.5, "fill": "bgstar", "fill_alt": "gold", "alt_frac": 0.25}},
 
     {"type": "disc", "cx": 540, "cy": 490, "rad": 384, "declutter": true, "cardinal_gap": -22,
      "ticks": {"minor": 10, "major": 30},

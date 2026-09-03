@@ -384,7 +384,7 @@ Suite **210 → 211**.
 icona»*. Reale: **6 righe di diff = 3 sostituzioni**, e sono tutte `<g
 transform="translate(...)">`. Nient'altro si è mosso.
 
-### [ ] B6 — Le stelline di sfondo sono azzurre
+### [x] B6 — Le stelline di sfondo sono azzurre — **FATTO 2026-09-03**
 **Manuale §7:** *«Motivo decorativo: piccole stelle puntiformi gialle e bianche su
 fondi notte, sempre discrete.»*
 **Misurato:** `bgstar` = `#cbe4ed` (blu 100). Il token viene dal manuale; **la
@@ -393,6 +393,34 @@ prescrizione di §7 no.**
 ⚠️ **Confine da non sbagliare:** questo vale per le stelle **decorative fuori dal
 disco**. Le stelle **dentro** il disco sono `star_ramp`, cioè **fisica** (D2): non si
 toccano, e il manuale non le governa.
+
+**Fatto — e il difetto vero era che il campo aveva UN COLORE SOLO.** Il manuale dice
+*«gialle **e** bianche»*: non bastava cambiare `bgstar`, serviva che il campo ne
+sapesse portare due. `bgstar` è ora **`#ffffff`** (il Bianco di §3) e il giallo è il
+token **`gold`** già esistente — nessun token nuovo, quindi nessuna voce nuova da
+validare.
+
+**Il compositore ha imparato il secondo colore, in modo additivo:** `fill_alt` +
+`alt_frac` opzionali; senza, il campo resta a un colore **byte per byte**. *(Stessa
+forma di `fill_opacity`, `cardinal_gap` e dello `stroke` di B5.)*
+
+**Il dettaglio che rende il diff leggibile, ed era una scelta:** il sorteggio del
+colore usa un **generatore proprio** (seed derivato) invece di pescare dalla sequenza
+principale. Se avessi pescato da quella, si sarebbero spostati **raggi e opacità di
+tutte le 240 stelline** e il diff sarebbe stato illeggibile. Così **cambia solo il
+colore**.
+
+**Previsione, verificata:** *«nel golden cambiano 240 righe, tutte `<circle>` del
+campo, e di ognuna cambia SOLO il `fill` — `cx`, `cy`, `r` e `opacity` identici»*.
+Reale: **240 fuori / 240 dentro**, tutte `<circle cx=`, e sostituendo il `fill` con un
+segnaposto le due versioni **combaciano**. Conteggio dei colori: **180 bianche + 60
+gialle = 25% esatto**.
+
+**Guardato due volte, perché «discrete» non è un numero:** confronto prima/dopo su
+un'area di sfondo a 2,4× — la differenza è **quasi impercettibile**, che è
+esattamente ciò che §7 chiede; e poi zoom a 10× sulla stellina gialla più marcata
+(r 1,41, opacità 0,42) per verificare che il giallo ci sia davvero. C'è, ed è caldo
+senza essere squillante.
 
 ---
 

@@ -136,10 +136,20 @@ class Compositor:
         (seed fisso) e' generazione procedurale: resta qui; il file da' i
         parametri (seed, conteggio, raggi, opacita', colore)."""
         sf=b["starfield"]; col=theme[sf["fill"]]
+        # Manuale sez.7: il motivo decorativo e' fatto di stelline "gialle e
+        # bianche". Il secondo colore e' OPZIONALE (`fill_alt` + `alt_frac`):
+        # senza, si resta al colore unico di prima, byte per byte. Il sorteggio
+        # usa un generatore PROPRIO (seed derivato) per non spostare la sequenza
+        # principale: posizioni, raggi e opacita' restano identici, a cambiare e'
+        # solo QUALE colore prende ogni stellina.
+        col2=theme[sf["fill_alt"]] if sf.get("fill_alt") else None
+        alt=(np.random.default_rng(sf["seed"]+1).random(sf["count"])
+             < sf.get("alt_frac", 0.25)) if col2 else None
         out=[f'<rect width="{w}" height="{h}" fill="url(#bg)"/>']
         rng=np.random.default_rng(sf["seed"])
-        for x,y in zip(rng.uniform(0,w,sf["count"]),rng.uniform(0,h,sf["count"])):
-            out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{rng.uniform(sf["r_min"],sf["r_max"]):.2f}" fill="{col}" opacity="{rng.uniform(sf["op_min"],sf["op_max"]):.2f}"/>')
+        for i,(x,y) in enumerate(zip(rng.uniform(0,w,sf["count"]),rng.uniform(0,h,sf["count"]))):
+            c=col2 if (alt is not None and alt[i]) else col
+            out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{rng.uniform(sf["r_min"],sf["r_max"]):.2f}" fill="{c}" opacity="{rng.uniform(sf["op_min"],sf["op_max"]):.2f}"/>')
         return '\n'.join(out)
 
     # ---- il compositore: cammina i blocchi di un layout (D7) ----

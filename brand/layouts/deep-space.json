@@ -8,7 +8,7 @@
   "blocks": [
     {"type": "background",
      "starfield": {"seed": 7, "count": 220, "r_min": 0.3, "r_max": 1.2,
-                   "op_min": 0.12, "op_max": 0.5, "fill": "bgstar"}},
+                   "op_min": 0.12, "op_max": 0.5, "fill": "bgstar", "fill_alt": "gold", "alt_frac": 0.25}},
 
     {"type": "image", "href": "brand/logo/logo-emblema.png",
      "x": 44, "y": 40, "w": 94, "h": 94},
