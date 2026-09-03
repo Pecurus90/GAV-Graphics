@@ -32,7 +32,7 @@ non torna, ha ragione il codice e questa riga va corretta.
 | B6 | Motivo decorativo gialle+bianche (§7) | ✅ |
 | C1 | La rete che ancora i colori al manuale | ✅ |
 | **Z1** | **Il piedino di zenit si scriveva addosso** *(non conformità: bug vero, preesistente)* | ✅ |
-| **B1-bis** | Tracking dei nomi di costellazione, cablato in `disc.py` | ⬜ aperta |
+| **B1-bis** | Tracking dei nomi di costellazione, cablato in `disc.py` | ✅ |
 | **D-a** | I 12 pt di stampa sull'A4 | ⬜ **decisione di Marco** |
 | **D-b** | Il guscio acciaio contro i neutri del manuale | ⬜ **decisione di Marco** *(la parte sui colori di stato è chiusa)* |
 
@@ -218,7 +218,7 @@ la gerarchia che §4 descrive — *etichetta maiuscola piccola → titolo grande
 diventa finalmente leggibile. La fotografia dei 20 SVG è stata **riscattata**
 (movimento deliberato); suite **210 verdi**.
 
-### [ ] B1-bis — Il tracking dei NOMI DI COSTELLAZIONE è cablato in `disc.py`
+### [x] B1-bis — Il tracking dei NOMI DI COSTELLAZIONE è cablato in `disc.py` — **FATTO 2026-09-03**
 *(Trovato eseguendo B1, non previsto dalla ricognizione.)*
 **Misurato:** il golden dell'A4 ha **28** `letter-spacing`, non 5. I 23 in più sono i
 **nomi delle costellazioni** (`Orsa Maggiore`, `Pegaso`, …) a corpo 11,7 e tracking
@@ -241,9 +241,57 @@ i blocchi di layout.
 3. Il valore `0,5` è **cablato**: portarlo in un token o in un parametro di layout è
    una decisione di forma, non una sostituzione.
 
-*Previsione per quando si farà:* le collisioni possono solo **calare** (le etichette
-si accorciano di ~0,73 px per lettera), e il golden si muove su **28 righe** invece
-di 5. Da verificare, non da assumere.
+**Fatto — ma i posti erano TRE, non due, e la regola NON è la stessa in tutti.**
+
+| dove | come sono rese | regola §4 | valore |
+|---|---|---|---|
+| `disc.py:111` (percorso naive) | `Orsa Maggiore` — tondo | display | **−0,02em** |
+| `disc.py:256` (declutter) | idem | display | **−0,02em** |
+| `deep-space` via `messier.py` | **`ORSA MAGGIORE`** — maiuscolo | **etichetta maiuscola** | **+0,08em** |
+
+**Il terzo l'ho scoperto GUARDANDO, e stavo per sbagliarlo.** Avevo applicato −0,02em
+anche a deep-space; poi, confrontando i render, ho visto che lì i nomi sono
+**MAIUSCOLI** (`messier.py:398` fa `.upper()`, `disc.py` no). §4 tratta il maiuscolo
+come uno stile a sé, e gli dà **+0,08em**: comprimere delle maiuscole è proprio ciò
+che quella riga del manuale esiste per impedire. Corretto a `0,84` (= 0,08 × 10,5).
+
+⚠️ **E il numero mi stava dando ragione mentre sbagliavo.** Col valore errato
+(−0,21) deep-space scendeva a **13** collisioni; col valore giusto (+0,84) scende a
+**17**. *Se avessi guardato solo la tabella avrei tenuto il valore sbagliato, perché
+«dava un risultato migliore».* È la lezione di R10 in forma nuova: lo strumento
+misura la sovrapposizione, non la **correttezza tipografica**.
+
+**Nel codice il tracking non è più un numero magico:** deriva dal corpo
+(`-0.02*12.5*k`), quindi resta giusto a qualunque scala del disco. Su deep-space
+resta **un dato del layout** (`const_tracking`), com'era.
+
+**Due previsioni diverse, perché i due modelli di larghezza sono diversi** — ed è la
+parte tecnicamente interessante:
+- `disc.py` stima la larghezza **senza** il tracking (`len*size*0.55`), quindi il
+  piazzamento **non cambia**: previsto e verificato, **23 righe nel golden A4, solo
+  `letter-spacing`, `x` e `y` identiche**.
+- `messier.py` lo **include** (`len*csz*0.60 + ctr*(n-1)`), quindi lì le etichette si
+  **spostano davvero** — verificato guardando il render di marzo affiancato.
+
+**Una previsione che NON avevo fatto, e avrei dovuto:** è diventato rosso anche il
+**golden del disco**. Ovvio a posteriori — i nomi di costellazione *stanno nel disco*
+(D7) — ma non l'avevo scritto. Verificato prima di rigenerarlo: **28 righe, solo
+`letter-spacing`, tutte `<text>` di costellazione**. *(28 e non 23 perché il golden
+del disco usa tutte le costellazioni, non le 22 curate dell'A4.)*
+
+**Il risultato sui 60 poster, ed è il primo calo vero della sessione:**
+
+| | inizio | fine |
+|---|---|---|
+| dashboard | 46 | **36** |
+| parata | 49 | **39** |
+| zenit | 23 | **19** |
+| a4 | 28 | **23** |
+| deep-space | 24 | **17** *(di cui `tacca-testo` 15 → 10)* |
+| **totale** | **155** | **134** |
+
+Le sei `tacca-testo` chiuse su deep-space sono un pezzo del debito **R13** che nessuno
+stava cercando: cadono perché le etichette si accorciano.
 
 ### [x] B2 — Manca la denominazione completa — **FATTO 2026-09-03**
 **Manuale §1:** *«La denominazione completa è Gruppo Astrofili Vicentini "Giorgio

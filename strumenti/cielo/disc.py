@@ -108,7 +108,7 @@ class DiscMixin:
                     al,zz=self.altaz(allp[:,0],allp[:,1],lst,lat_rad); m=al>3
                     if m.sum()<2: continue
                     x,y=self.project(al[m],zz[m],cx,cy,rad)
-                    a(f'<text x="{x.mean():.1f}" y="{y.mean():.1f}" fill="{theme["label"]}" font-size="{12.5*k:.1f}" opacity="0.82" text-anchor="middle" letter-spacing="0.5">{self._esc(CONST_IT[ab])}</text>')
+                    a(f'<text x="{x.mean():.1f}" y="{y.mean():.1f}" fill="{theme["label"]}" font-size="{12.5*k:.1f}" opacity="0.82" text-anchor="middle" letter-spacing="{-0.02*12.5*k:.2f}">{self._esc(CONST_IT[ab])}</text>')
         else:
             # PERCORSO SOCIAL: dischi delle stelle nominate + etichette con
             # ANTI-COLLISIONE deterministica (vedi _disc_labels_declutter).
@@ -247,10 +247,13 @@ class DiscMixin:
                 area=float((xs.max()-xs.min())*(ys.max()-ys.min()))
                 consts.append((area, ab, float(xs.mean()), float(ys.mean())))
         consts.sort(key=lambda c:-c[0])  # impronta piu' grande prima
+        # Tracking dei nomi di costellazione: sono ETICHETTE, quindi -0.02em
+        # (manuale sez.4). Deriva dal CORPO invece di essere un numero fisso, cosi'
+        # resta giusto a qualunque scala del disco (k = rad/384).
         for rank,(area,ab,mx,my) in enumerate(consts):
             reqs.append({"text":CONST_IT[ab],"x":mx,"y":my,"anchor":"middle",
                          "size":12.5*k,"fill":theme["label"],"opacity":0.82,
-                         "pri":100.0+rank,"extra":' letter-spacing="0.5"'})
+                         "pri":100.0+rank,"extra":f' letter-spacing="{-0.02*12.5*k:.2f}"'})
         # piazzamento greedy
         placed=list(card_boxes); dropped=0; dropped_labels=[]; STEP=6*k
         DIRS=[(0,-1),(1,0),(0,1),(-1,0),(1,-1),(1,1),(-1,1),(-1,-1)]
