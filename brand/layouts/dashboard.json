@@ -30,7 +30,7 @@
                     "Mizar", "Schedar", "Thuban", "Alphecca", "Kaus Australis",
                     "Mirach", "Algol", "Enif"]},
 
-    {"type": "panel", "x": 690, "y": 234, "w": 334, "h": 314, "rx": 16,
+    {"type": "panel", "x": 690, "y": 234, "w": 334, "h": 314, "rx": 12,
      "fill": "panel", "stroke": "border2", "stroke_width": 1},
     {"type": "text", "x": 712, "y": 268, "fill": "label", "size": 13,
      "weight": "600", "letter_spacing": 1.04, "content": "PIANETI VISIBILI"},
@@ -43,7 +43,7 @@
      "name":  {"dx": 34, "fill": "text",  "size": 16, "weight": "600", "content": "{name}"},
      "note":  {"dx": 28, "dy": 16, "fill": "text3", "size": 11.5, "content": "{note_dir}"}},
 
-    {"type": "panel", "x": 690, "y": 564, "w": 334, "h": 245, "rx": 16,
+    {"type": "panel", "x": 690, "y": 564, "w": 334, "h": 245, "rx": 12,
      "fill": "panel", "stroke": "border2", "stroke_width": 1},
     {"type": "text", "x": 712, "y": 598, "fill": "label", "size": 13,
      "weight": "600", "letter_spacing": 1.04, "content": "TEMPERATURA STELLE"},

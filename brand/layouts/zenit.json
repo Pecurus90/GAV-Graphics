@@ -39,7 +39,7 @@
     {"type": "text", "x": 910.1, "y": 84, "fill": "text3", "size": 12, "weight": "500",
      "content": "info@astrofilivicentini.it"},
 
-    {"type": "panel", "x": 40, "y": 880, "w": 784, "h": 118, "rx": 16,
+    {"type": "panel", "x": 40, "y": 880, "w": 784, "h": 118, "rx": 12,
      "fill": "panel", "fill_opacity": 0.6,
      "stroke": "border2", "stroke_width": 1.2, "stroke_opacity": 0.6},
     {"type": "text", "x": 60, "y": 902, "fill": "label", "size": 12,
@@ -52,7 +52,7 @@
      "note1": {"dy": 46, "fill": "text3", "size": 10.5, "content": "{note}"},
      "note2": {"dy": 58, "fill": "text3", "size": 10.5, "content": "{direction}"}},
 
-    {"type": "panel", "x": 840, "y": 880, "w": 200, "h": 118, "rx": 16,
+    {"type": "panel", "x": 840, "y": 880, "w": 200, "h": 118, "rx": 12,
      "fill": "panel", "fill_opacity": 0.6,
      "stroke": "border2", "stroke_width": 1.2, "stroke_opacity": 0.6},
     {"type": "text", "x": 858, "y": 902, "fill": "label", "size": 12,
@@ -69,7 +69,7 @@
        {"bv": 1.3,   "label": "Arancione",      "label2": "≈ 4.000 K"},
        {"bv": 3.3,   "label": "Rossa",          "label2": "sotto 3.000 K"}]},
 
-    {"type": "panel", "x": 40, "y": 1002, "w": 1000, "h": 72, "rx": 16,
+    {"type": "panel", "x": 40, "y": 1002, "w": 1000, "h": 72, "rx": 12,
      "fill": "panel", "fill_opacity": 0.62,
      "stroke": "border2", "stroke_width": 1.2, "stroke_opacity": 0.6},
     {"type": "text", "x": 60, "y": 1020, "fill": "label", "size": 11,

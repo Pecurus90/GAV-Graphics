@@ -317,10 +317,21 @@ nella fotografia si muovono 16 SVG su 20»*. Reale: suite **210 verdi**, e la
 fotografia segnala **4 dashboard + 4 deep-space + 4 parata + 4 zenit**, con i **4
 dell'A4 fermi**. Collisioni sui 60: **155 → 155**.
 
-### [ ] B4 — Raggio dei pannelli fuori scala
+### [x] B4 — Raggio dei pannelli fuori scala — **FATTO 2026-09-03**
 **Manuale §5:** raggi 6 / 12 / 20.
 **Misurato:** i 5 pannelli di `dashboard` e `zenit` usano **`rx: 16`**.
 *(Il pannello a tutta larghezza di zenit ha `rx: 0`, ed è corretto: è una fascia.)*
+
+**Fatto: 16 → 12, cioè la CARD.** Sono contenitori di contenuto con
+un'etichetta e un elenco dentro — l'analogo esatto della *«Card evento»* di §5, che
+il manuale disegna a 12. Non li ho messi a 20 («blocchi grandi»): 20 è per i
+contenitori di **primo livello**, e questi stanno *dentro* la pagina, non la
+compongono.
+
+**L'A4 non ha pannelli** — usa righe e divisori — quindi il golden **non si è
+mosso**, ed era la previsione. Reale: suite **211 verdi** col test golden compreso,
+e la fotografia segnala esattamente **4 dashboard + 4 zenit**. Collisioni: **155 →
+155**.
 
 ### [x] B5 — Le icone del piedino: set e colore sbagliati — **FATTO 2026-09-03**
 **Manuale §7:** *«Icone: set Lucide (stile linea, tratto 2 px) — blu su chiaro,
