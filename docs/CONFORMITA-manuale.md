@@ -387,7 +387,7 @@ giallo del manuale.
 
 ## Trovato eseguendo, NON è conformità — un difetto vero, preesistente
 
-### [ ] Z1 — Il piedino di ZENIT si scrive addosso e ESCE DAL CANVAS
+### [x] Z1 — Il piedino di ZENIT si scrive addosso e ESCE DAL CANVAS — **FATTO 2026-09-03**
 *(Trovato il 2026-09-03 guardando il ritaglio della testata di zenit durante B2.
 **Riportato, non corretto** — regola #4: il commit era a scopo unico.)*
 
@@ -424,11 +424,53 @@ subito dopo che lo strumento aveva dato **zero**.
 *E R16 aveva verificato il cambio di font proprio con quello strumento: la verifica
 era buona, ma la rete non copriva questo caso.*
 
-**Nota di merito per il fix, quando si farà:** non basta spostare le `x`. La riga è
-**larga 490 px su 486 disponibili** con le stringhe di oggi; se domani il GAV cambia
-l'indirizzo email si rompe di nuovo. Il rimedio giusto è **calcolare le posizioni
-dalla larghezza del testo** invece di cablarle — e allora vale per tutti e 4 i
-formati che hanno quella riga, non solo per zenit.
+**Fatto — ed è solo zenit.** La stessa riga esiste su dashboard, parata, a4 e
+deep-space: **misurate tutte e cinque, le altre quattro sono pulite** e con margini
+larghi (su a4 la riga finisce a x=738 su 900; su dashboard a 690 su 1080). Zenit è
+l'unico perché è l'unico che mette i contatti **in testata, accanto al titolo**,
+invece che in un piedino a tutta larghezza.
+
+**Il difetto vero non era «le x sono sbagliate»: la riga era IMPACCATA A GAP ZERO.**
+`@astrofilivicentini` finiva a 734,5 e l'icona di Facebook cominciava a 734,0 — cioè
+non c'era **nessuno spazio** da recuperare spostando le cose. Ricalcolata da zero:
+
+```
+   icon  x=552     instagram          gap icona->testo  7 px
+   text  x=575     @astrofilivicentini    gap fra gruppi   18 px
+   icon  x=700.5   facebook
+   text  x=723.5   Gruppo Astrofili Vicentini
+   icon  x=887.1   email
+   text  x=910.1   info@astrofilivicentini.it
+                   finisce a x=1052,6 -> 27,4 px di margine destro
+```
+
+**Il corpo scende da 13 a 12, e non è arbitrario: a 13 NON CI STA.** Misurato: a
+corpo 13, con un gap fra gruppi appena decente, la riga è larga 525-534 px e
+dovrebbe partire da x≤526 — ma il titolo di **settembre** arriva a x=510, quindi
+resterebbero 8-16 px. A corpo 12 la riga è larga 500,6 e parte da 552: **42 px di
+stacco**. *E 12 è la scala di zenit, non un'eccezione: `PIANETI VISIBILI` e
+`TEMPERATURA STELLE` lì sono già a 12.*
+
+**Verificato su tutti e 12 i mesi**, perché il titolo cambia lunghezza col mese e un
+solo mese guardato non prova niente: stacco minimo **42,0 px** (settembre), massimo
+121,2 (luglio), **zero collisioni**. Poi guardato al 2× su settembre, il mese
+peggiore.
+
+**Previsione, verificata:** *«il golden dell'A4 non si muove — ho toccato solo
+zenit — e nella fotografia si muovono esattamente i 4 SVG di zenit»*. Reale: suite
+**210 verdi** col test golden compreso, e la fotografia segnala **`zenit_02`,
+`zenit_05`, `zenit_08`, `zenit_11`** e nient'altro. Collisioni sui 60: **155 → 155**.
+
+**Quello che NON ho fatto, e resta il rimedio strutturale:** le posizioni sono ancora
+**cablate**. Oggi la riga sta in 500,6 px su 528 disponibili — ma se il GAV cambiasse
+l'indirizzo email con uno più lungo di ~27 px si romperebbe di nuovo, in silenzio.
+Il rimedio vero è **derivare le x dalla larghezza del testo**, e qui c'è un vincolo
+che va detto: **il motore non ha metriche di font** (Pillow non è in
+`requirements.txt`, e aggiungerla vorrebbe dire impacchettarla nell'`.exe` — D17).
+La strada praticabile è la **stima già in uso nel progetto** (`n × corpo × fattore`,
+come `disc.py`), che ha ~5% d'errore: su questa riga sono ±25 px, cioè quasi tutto il
+margine. **È una decisione architetturale, non un ritocco** — per questo l'ho
+lasciata fuori.
 
 ---
 
