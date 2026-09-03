@@ -21,9 +21,9 @@
 
     {"type": "image", "href": "brand/logo/logo-emblema.png",
      "x": 60, "y": 30, "w": 82, "h": 82},
-    {"type": "text", "x": 450.0, "y": 52, "fill": "gold", "size": 21,
-     "weight": "bold", "anchor": "middle", "letter_spacing": 1.68,
-     "content": "GRUPPO ASTROFILI VICENTINI"},
+    {"type": "text", "x": 450.0, "y": 52, "fill": "gold", "size": 19,
+     "weight": "bold", "anchor": "middle", "letter_spacing": 1.52,
+     "content": "GRUPPO ASTROFILI VICENTINI “GIORGIO ABETTI” · APS"},
     {"type": "text", "x": 450.0, "y": 86, "fill": "text", "size": 30,
      "weight": "bold", "anchor": "middle", "letter_spacing": -0.6,
      "content": "Il cielo di {month_name} {year}"},

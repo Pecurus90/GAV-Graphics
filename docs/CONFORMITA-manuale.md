@@ -219,7 +219,7 @@ i blocchi di layout.
 si accorciano di ~0,73 px per lettera), e il golden si muove su **28 righe** invece
 di 5. Da verificare, non da assumere.
 
-### [ ] B2 — Manca la denominazione completa *(la più grave)*
+### [x] B2 — Manca la denominazione completa — **FATTO 2026-09-03**
 **Manuale §1:** *«La denominazione completa è Gruppo Astrofili Vicentini "Giorgio
 Abetti": usarla su materiali istituzionali, lockup, footer e locandine.»*
 **Misurato:** `"Giorgio Abetti"` e `APS` hanno **zero occorrenze** in tutti e 5 i
@@ -232,6 +232,46 @@ un *lockup* (tondo + nome), e ha un *piedino*.
 «Presentazione 16:9») ha come etichetta di testata, in giallo, esattamente
 `GRUPPO ASTROFILI VICENTINI "GIORGIO ABETTI" · APS`. La nostra testata è la stessa
 costruzione, monca della seconda metà.
+
+**Fatto:** la testata di tutti e 5 i formati porta ora la stringa completa, **identica
+a quella del template del manuale**, virgolette curve comprese.
+
+**La stringa è passata da 26 a 48 caratteri, e la misura ha deciso il resto** —
+larghezza calcolata col `.ttf` vero, non stimata:
+
+| | nuova larghezza | esito |
+|---|---|---|
+| dashboard | 459,6 px → finisce a x=640 | OK |
+| parata | 459,6 px → finisce a x=622 | OK |
+| deep-space | 430,9 px → finisce a x=587 | OK |
+| zenit | 373,4 px → finisce a x=483 *(icone a 594)* | OK |
+| **a4** | **603,2 px** → bordo sx a x=148 | **NO: invade l'area di rispetto del logo** (serve x≥162,5) |
+
+**Sull'A4 il corpo scende da 21 a 19**, e i due numeri che rendono la scelta
+difendibile sono questi: a 19 la testata misura **545,8 px** (bordo sinistro a
+x=177, cioè **34,6 px** di margine sull'area di rispetto) **e resta a 12,6 pt**,
+sopra il minimo di stampa di §4. A **corpo 20 sarebbe entrata per 0,5 px** — dentro
+il margine d'errore della stima, quindi scartata.
+*Verificato poi sul RASTER, non sul modello:* primo pixel giallo della testata a
+**x=179,0**, bordo del logo a 142 → **37,0 px liberi** contro i 20,5 richiesti.
+
+**Una decisione presa, non subita: `· APS` c'è.** §1 lo vuole *«quando il contesto è
+istituzionale»*, e un volantino diffuso dall'associazione lo è — ma soprattutto **il
+manuale lo mette nel proprio template**, che è l'analogo più vicino a un poster.
+*Toglierlo è una sola stringa in 5 file, se Marco legge «istituzionale» più stretto.*
+
+**Previsione, scritta prima:** *«nel golden dell'A4 cambia UNA riga sola»*. Reale:
+**1 riga sostituita**, con `x="450.0"` e `y="52"` **invariati** — cambiano solo
+testo, corpo e tracking.
+
+**Un errore mio, preso dalla rete e non da me:** avevo copiato nel golden l'A4 di
+**settembre** (l'avevo reso per il ritaglio) al posto di quello di **agosto**, che è
+il parametro canonico. `test_golden_svg_invariato` è diventato rosso e l'ha fermato.
+*Il golden non serve solo a sorvegliare il motore: sorveglia anche chi lo rigenera.*
+
+**Verificato:** suite **210 verdi**; collisioni sui 60 poster **155 → 155**, ogni
+cella identica; fotografia dei 20 SVG riscattata; testate di A4 e zenit **guardate**
+ai ritagli.
 
 ### [ ] B3 — Area di rispetto del logo violata su 4 formati su 5
 **Manuale §2:** *«Area di rispetto: attorno al tondo lasciare almeno ¼ del suo
@@ -342,6 +382,53 @@ giallo del manuale.
 1. I 3 colori di stato si neutralizzano? *(basso costo, nessun impatto su D19)*
 2. L'acciaio resta, o il guscio passa ai neutri del manuale? *(rimette in
    discussione D19)*
+
+---
+
+## Trovato eseguendo, NON è conformità — un difetto vero, preesistente
+
+### [ ] Z1 — Il piedino di ZENIT si scrive addosso e ESCE DAL CANVAS
+*(Trovato il 2026-09-03 guardando il ritaglio della testata di zenit durante B2.
+**Riportato, non corretto** — regola #4: il commit era a scopo unico.)*
+
+**Non l'ho causato io, ed è dimostrato per esecuzione**, non per deduzione: ho reso
+zenit col layout del commit **`a67ce4d`** (prima di questa sessione) e il difetto
+c'è, **identico**.
+
+**Misurato** (riga contatti, canvas largo 1080):
+
+```
+  x  594,0 ->  610,0   icona instagram
+  x  618,0 ->  734,5   "@astrofilivicentini"
+  x  734,0 ->  750,0   icona facebook          <- il testo la TOCCA (0,5 px)
+  x  758,0 ->  915,8   "Gruppo Astrofili Vicentini"
+  x  906,0 ->  922,0   icona email             <- SOVRAPPOSTA di 9,8 px
+  x  930,0 -> 1084,4   "info@astrofilivicentini.it"
+                                               <- ESCE DAL CANVAS di 4,4 px
+```
+
+Sul poster si legge letteralmente **`Gruppo Astrofili Vicentin✉`**, e l'indirizzo
+email è **tagliato dal bordo**.
+
+**La causa è quasi certamente #7s**, il cambio di font: le `x` di quelle icone furono
+fissate in #7p quando il font era **Barlow Semi Condensed**, e R16 ha misurato che le
+**minuscole di Space Grotesk sono ~29% più larghe** (fattore 0,400 → 0,516). Le icone
+non si sono spostate; il testo si è allungato sotto di loro.
+
+**Perché nessuna rete l'ha visto — ed è l'OTTAVA volta di questa famiglia.** Le
+cinque categorie di `tools/collisioni.py` sono *sotto-pannello · banda ·
+etichetta↔etichetta **del disco** · cardinale · tacca-testo*. Questo è **testo di
+layout contro icona di layout**, e non è in nessuna. È esattamente la stessa forma di
+**R15** (testo↔testo dentro un pannello), trovata allo stesso modo: **guardando**,
+subito dopo che lo strumento aveva dato **zero**.
+*E R16 aveva verificato il cambio di font proprio con quello strumento: la verifica
+era buona, ma la rete non copriva questo caso.*
+
+**Nota di merito per il fix, quando si farà:** non basta spostare le `x`. La riga è
+**larga 490 px su 486 disponibili** con le stringhe di oggi; se domani il GAV cambia
+l'indirizzo email si rompe di nuovo. Il rimedio giusto è **calcolare le posizioni
+dalla larghezza del testo** invece di cablarle — e allora vale per tutti e 4 i
+formati che hanno quella riga, non solo per zenit.
 
 ---
 
