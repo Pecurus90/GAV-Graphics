@@ -1995,10 +1995,43 @@ sud) e `sky_context` contro **Meeus**; `test_star_map.py` contro **posizioni ver
 (Polare alta sull'asse nord, Deneb allo zenit ad agosto, Antares bassa a sud, Sirio
 **sotto** l'orizzonte ad agosto); `test_moon.py` contro il **mese sinodico**.
 
-**Ciò che resta davvero non verificato, ed è più stretto:** nessuno ha mai
-confrontato un **poster intero** con un planetario (Stellarium). I test coprono i
-**componenti**, non l'insieme reso. È un controllo da fare una volta, a occhio, non
-una rete.
+**✅ E ANCHE L'ULTIMO PEZZO È STATO FATTO (2026-09-03, #7v): il confronto col
+planetario.** *(Chiesto da Marco: «il confronto con il planetario lo farai te».)*
+Non con Stellarium — che non si può far girare qui — ma con qualcosa di **più
+verificabile**: `tools/verifica_astronomica.py` ricalcola tutto con **astropy**, cioè
+**ERFA/SOFA**, un'implementazione indipendente da skyfield. *Rifarlo con skyfield
+avrebbe solo provato che skyfield è d'accordo con sé stesso.*
+
+| controllo | scarto |
+|---|---|
+| **23 stelle nominate** | medio **0,30°**, max 0,38° = **1,5 px** su un A4 largo 900 |
+| **7 pianeti + Luna** | max **0,005°** = **0,3 primi d'arco** |
+| **48 fasi lunari** (12 mesi) | **zero discordanze** |
+| **dal catalogo al PIXEL dell'SVG** | medio **1,34 px**, max 2,14 |
+
+**Lo 0,30° delle stelle NON è un errore: è la PRECESSIONE.** Il catalogo è **J2000**
+(`data/stelle_FONTE.md`) e `altaz` lo usa col tempo siderale **apparente di data**:
+26 anni × ~50″/anno = **0,36°**, che è esattamente ciò che si misura. È **più piccolo
+del disco della Luna piena** (0,5°) e più piccolo del pallino con cui disegniamo una
+stella. *Su una carta a occhio nudo è invisibile — su un telescopio da puntamento no,
+ma il poster non serve a quello.*
+**Il quarto controllo è quello che chiude il cerchio:** non verifica la matematica ma
+**il disco disegnato** — posizione attesa da astropy, proiettata con la geometria del
+layout, confrontata col cerchio più vicino nell'SVG **vero**.
+
+**E il controllo che nessun numero dà, fatto a occhio sul disco di agosto:** Polare a
+metà fra centro e bordo nord (*altezza = latitudine*); il **Triangolo Estivo**
+(Vega-Deneb-Altair) **al centro, cioè allo zenit**; le costellazioni d'**autunno**
+(Pegaso, Andromeda, Pesci) **a sinistra = sorgono a Est** e quelle di **primavera**
+(Boote, Vergine, Bilancia) **a destra = tramontano a Ovest**; Scorpione e Sagittario
+bassi a Sud-Ovest, come D9 dichiara per Vicenza. **È la firma di metà agosto alle 23
+da 45°N** — e conferma l'orientamento (invariante #3) per una strada che *non passa
+dalla matematica*.
+
+**Perché è uno STRUMENTO e non un test:** `astropy` **non è** in `requirements.txt` e
+non deve entrarci — peserebbe ~100 MB nel pacchetto portatile (D17) per una verifica
+che si fa una volta ogni tanto. Sta in `tools/` accanto a `collisioni.py` e
+`fotografia.py`: diagnosi su richiesta, non rete permanente.
 
 ---
 
@@ -2169,6 +2202,12 @@ python -m uvicorn app.main:app --reload --port 8000
 python -m pytest -q                    # 221 verdi
 python tools/fotografia.py             # 20 SVG (5 formati x 4 mesi), byte per byte
 python tools/fotografia.py --scatta    # SOLO dopo un cambiamento DELIBERATO
+
+# LA TERZA RETE, su richiesta: il confronto col "planetario" (#7v). Ricalcola
+# stelle, pianeti, Luna e fasi con ASTROPY (ERFA/SOFA), indipendente da skyfield.
+# Richiede `pip install astropy`, che NON e' in requirements.txt di proposito.
+python tools/verifica_astronomica.py            # agosto
+python tools/verifica_astronomica.py --mese 3   # un altro mese
 ```
 
 **`--palette` non esiste più** (D20): la palette è `brand/palettes/gav.json` e
