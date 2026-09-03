@@ -426,7 +426,7 @@ senza essere squillante.
 
 ## Blocco C — la rete
 
-### [ ] C1 — Nessun test ancora la palette al manuale
+### [x] C1 — Nessun test ancora la palette al manuale — **FATTO 2026-09-03**
 **Misurato:** l'unico test che nomina la palette è
 `tests/test_layouts_smoke.py:52`, e asserisce solo che il file **si chiami**
 `gav.json`. **Nessuna asserzione sui valori.**
@@ -439,11 +439,49 @@ fuori canvas → cardinale sotto un pannello → la banda che non è un `panel` 
 linee delle figure (R13) → nessuna rete sull'allineamento (R14) → le note dei
 pianeti (R15) → questa).
 
-*Forma proposta, da discutere:* il test dichiara la **scala del manuale** (i passi
-blu e i neutri, copiati dal PDF) e pretende che **ogni token di marca sia uno di
-quei passi**. Non pretende *quale* — così un ritocco deliberato resta possibile, ma
-un colore **inventato** diventa rosso. Le 2 chiavi astronomiche sono escluse per
-costruzione, non per elenco.
+**Fatto: `tests/test_identita_manuale.py`, 5 test.**
+
+**I valori del manuale non sono stati letti a schermo:** sono stati **estratti dagli
+oggetti vettoriali del PDF** (`page.get_drawings()`, la tecnica del secondo giro di
+D20), campione per campione — gli 11 passi blu e i 7 neutri colorati, confermati uno
+a uno. *Una rete costruita su valori letti male sarebbe peggio di nessuna rete.*
+
+**Cosa sorveglia, e cosa NO — è la parte che decide se è una rete o un placebo:**
+- **SÌ** che ogni colore di marca sia **uno dei passi del manuale**.
+- **NO quale** passo. Ritarare `border` da blu 400 a blu 600 è esattamente ciò che
+  D20 ha fatto **guardando il poster reso**, ed era giusto: la rete non deve
+  impedirlo. Rosso dev'essere il colore **inventato**.
+- **NO** `star_ramp` e `planet_colors` — sono astronomia (D2). L'esclusione è
+  **strutturale**: quelle chiavi non stanno in `validate.STYLE_TOKENS` né fra i
+  gradienti.
+
+**La guardia, senza la quale il resto è aggirabile:** `test_nessuna_chiave_sfugge`
+pretende che **ogni** chiave della palette sia classificata — colore di marca,
+astronomia, o campo non-colore. Un token nuovo non può scivolare fuori dalla rete per
+distrazione: va classificato a mano, cioè **deciso**. *(Stessa forma della guardia di
+R14 sui formati.)*
+
+**L'elenco delle chiavi è DERIVATO da `validate.py`, non ricopiato:** se domani il
+contratto del tema cambia, questa rete lo segue invece di restare indietro.
+
+**Iniezione del guasto — e ha trovato un buco NEL TEST STESSO.** Quattro guasti:
+| guasto | esito |
+|---|---|
+| `border` → `#3a7fd5` (un blu inventato) | **rosso**, col nome del token nel messaggio |
+| `status.ok` → `#5fd08a` (un verde) | **rosso** |
+| un token nuovo `accento2` | **rosso** sulla guardia |
+| `star_ramp` «allineato» al manuale | **VERDE — sbagliato** |
+
+Il quarto doveva diventare rosso e non lo è diventato: controllavo `star_ramp` e
+`planet_colors` **insieme**, quindi bastava che *uno dei due* fosse fuori tavolozza.
+**Il buco aveva la stessa forma del bug che la rete doveva sorvegliare** — l'ennesima
+volta in questo progetto, e stavolta dentro la rete appena scritta. Corretto
+(parametrizzato su una chiave alla volta): ora **entrambi** i guasti diventano rossi,
+indipendentemente.
+
+*Senza l'iniezione avrei consegnato una rete con un buco e l'avrei chiamata verifica.*
+
+Suite **211 → 216**.
 
 ---
 
