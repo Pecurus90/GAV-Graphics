@@ -33,8 +33,14 @@ non torna, ha ragione il codice e questa riga va corretta.
 | C1 | La rete che ancora i colori al manuale | ✅ |
 | **Z1** | **Il piedino di zenit si scriveva addosso** *(non conformità: bug vero, preesistente)* | ✅ |
 | **B1-bis** | Tracking dei nomi di costellazione, cablato in `disc.py` | ✅ |
-| **D-a** | I 12 pt di stampa sull'A4 | ⬜ **decisione di Marco** |
-| **D-b** | Il guscio acciaio contro i neutri del manuale | ⬜ **decisione di Marco** *(la parte sui colori di stato è chiusa)* |
+| **D-a** | I 12 pt di stampa sull'A4 → **R18** | ✅ **chiusa come DECISIONE**: non si applicano a una carta del cielo, e sulla parte editoriale sono geometricamente impossibili (1157 px di fascia contro 820) |
+| **D-b** | Il guscio acciaio contro i neutri del manuale | ✅ **chiusa: l'acciaio resta** — il manuale dichiara il proprio perimetro e non copre gli stati d'interfaccia |
+
+**Seguito (#7u, stesso giorno):** chiusi anche i debiti che NON erano conformità ma
+che un socio avrebbe visto — **R15** (le note dei pianeti di zenit sovrapposte),
+**R13** (le linee delle costellazioni che tagliavano i nomi), **R17** (Work Sans mai
+disegnato), **R11-residuo** (i 13 `_esc()` senza rete) e **R12** (gli asset degli
+handoff fuori da git). Vedi CLAUDE.md, voce di roadmap #7u.
 
 **Stato delle reti a fine giro:** suite **216 verdi** · fotografia dei 20 SVG
 **identica** · collisioni sui 60 poster **155 → 134**, con sotto-pannello · banda ·

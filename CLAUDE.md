@@ -56,10 +56,10 @@ il compositore senza toccare il cielo.
 
 | File | Righe | Ruolo |
 |---|---|---|
-| `compose/compositor.py` | 171 | **CONDIVISO.** Il compositore: cammina i blocchi di un file di layout ed è **tool-agnostico** (hook `_render_block_tool` per i blocchi propri di uno strumento). Le primitive: testo, riga, pannello, **immagine (base64)**, icona, sfondo. **È ciò che Pillole eredita.** |
-| `strumenti/cielo/messier.py` | 518 | Il profondo cielo (pagina 2): simboli, tabella, anti-collisione a tre strati, nomi delle costellazioni. Ospita `CONST_IT_MINORI` (vedi il confine, D14). |
-| `strumenti/cielo/disc.py` | 297 | Il disco sigillato (D7). Legge `CONST_IT`, **non** `CONST_IT_MINORI`. |
-| `strumenti/cielo/panels.py` | 223 | Pannelli: luna, pianeti, colori. |
+| `compose/compositor.py` | 196 | **CONDIVISO.** Il compositore: cammina i blocchi di un file di layout ed è **tool-agnostico** (hook `_render_block_tool` per i blocchi propri di uno strumento). Le primitive: testo, riga, pannello, **immagine (base64)**, icona, sfondo. **È ciò che Pillole eredita.** ⚙️ **Si estende SEMPRE in modo ADDITIVO** — chiave assente ⇒ output identico, golden fermi. Sei casi finora: `fill_opacity` (#7i), `cardinal_gap` (#7j), `stroke` sulle icone e `fill_alt`/`alt_frac` sul campo di stelle (#7t), `font_family` per blocco (R17) e `label_halo` (R13). **È il modo in cui questo progetto aggiunge una primitiva:** si scrive l'opzione, si verifica il no-op, poi i layout la accendono. |
+| `strumenti/cielo/messier.py` | 529 | Il profondo cielo (pagina 2): simboli, tabella, anti-collisione a tre strati, nomi delle costellazioni. Ospita `CONST_IT_MINORI` (vedi il confine, D14). |
+| `strumenti/cielo/disc.py` | 308 | Il disco sigillato (D7). Legge `CONST_IT`, **non** `CONST_IT_MINORI`. |
+| `strumenti/cielo/panels.py` | 228 | Pannelli: luna, pianeti, colori. |
 | `strumenti/cielo/catalog.py` | 195 | Dati + funzioni pure: cataloghi, `SkyData`, `bv2hex`, geometria. Ospita `CONST_IT`. |
 | `strumenti/cielo/ephemeris.py` | 184 | Effemeridi, proiezione. **Il cuore astronomico.** |
 | `strumenti/cielo/engine.py` | 126 | L'assemblaggio: init + `generate()` + dispatch. |
@@ -72,7 +72,10 @@ il compositore senza toccare il cielo.
 | `brand/palettes/gav.json` | — | **LA** palette: una sola, l'identità visiva del GAV (D20). **Non** in `themes/`. |
 | `data/stars6.json` | — | 5044 stelle GeoJSON, tutte con `mag` e `bv`. |
 
-**Nessun file supera 520 righe** *(max: `messier.py`, 518 — ricontato 2026-09-03).* Il problema "apro un file e devo leggere
+**Nessun file supera 530 righe** *(max: `messier.py`, **529** — ricontato 2026-09-03 a
+fine giro #7u; era 518, e ha superato la soglia dei 520 dichiarata prima: i punti
+d'alone e il `body_font` di R13/R17 l'hanno portato oltre. **Non è un problema oggi**,
+ma è il file da guardare per primo se si dovrà tagliare ancora.)* Il problema "apro un file e devo leggere
 migliaia di righe" non esiste più.
 
 > ⚠️ **OTTAVA SMENTITA PER MISURA, ED È LA STESSA DELLA SETTIMA.** #7q corresse questi
@@ -648,8 +651,14 @@ descrive lo fa scollare al primo cambiamento.
   colore d'errore. Un errore in giallo sarebbe indistinguibile da un accento. *È lo
   stesso confine per cui `star_ramp` è fuori dal perimetro: il manuale governa ciò che
   governa.*
-  **La domanda che resta è di Marco, ed è quella di D19:** l'acciaio resta, o il guscio
-  passa ai neutri del manuale?
+  **CHIUSA (2026-09-03, #7u): l'acciaio RESTA.** Il manuale dichiara il proprio
+  perimetro alla prima riga — *«sito web, slide, social, locandine e brochure»* — e il
+  guscio di uno strumento interno non è nessuna di quelle. Ridipingerlo **non cambia
+  nulla di ciò che il pubblico vede**, costa un giro, e mette a rischio l'unica cosa
+  che lì dentro conta davvero: il **confine visivo fra l'applicazione e il poster che
+  ci sta dentro** (l'argomento amendato di D19, che regge ancora).
+  *Registrata come decisione perché la domanda tornerà a ogni audit di conformità: la
+  risposta è che il manuale governa ciò che governa, come per `star_ramp`.*
 - **D20 — L'IDENTITÀ È UNA: una sola palette, e non è una scelta dell'utente.**
   *(Marco, 2026-09-02: «abbiamo un'identità ora ben distinta, quindi rimuovere le
   varie palette e la possibilità di crearle e farne una standard seguendo il
@@ -1379,6 +1388,47 @@ imprevisto.
    - **`docs/CONFORMITA-manuale.md` resta come registro**, con le due decisioni aperte
      (R18 e la coda di D19) e le misure per riaprirle senza rifarle.
 
+4l. **#7u — I DEBITI VISIBILI CHIUSI: R15, R11-residuo, R12, R17, R13.**
+   *(2026-09-03, Marco: «falle tutte».)* Sei commit. Il giro che ha tolto dai poster
+   gli ultimi difetti che **un socio avrebbe visto**, e ha chiuso le due decisioni
+   rimaste aperte da #7t (R18 e la coda di D19).
+   - **La lezione più costosa, e vale oltre il giro: MISURARE PRIMA DECIDE SE IL GIRO
+     È FATTIBILE.** Tre volte, in tre modi diversi:
+     *R17* — Work Sans è **+2,1%** più largo di Space Grotesk ⇒ nessun impatto sulle
+     collisioni, il giro si può fare (se fosse stato molto più largo, sarebbe stato un
+     altro giro, e lo si sarebbe saputo **prima di toccare un file**);
+     *R13* — `resvg` supporta `paint-order`? **Provato con un SVG di prova** prima di
+     scrivere una riga di motore: se non l'avesse supportato, l'unica strada restava
+     spostare 27 etichette su 38;
+     *R15* — per far stare la nota intera servirebbe **corpo 7,2**, illeggibile ⇒ la
+     strada non era il corpo ma il **dato**.
+   - **DUE VOLTE LO STRUMENTO NON POTEVA VEDERE IL PROPRIO FIX**, ed è la novità
+     metodologica di questo giro. Su R13 la linea attraversa ancora *geometricamente*
+     l'etichetta — l'alone la rende **leggibile**, non **assente** — e `collisioni.py`
+     restava a 274 su un poster corretto. La risposta **non** è stata abbassare la
+     soglia: è stata **insegnare allo strumento a leggere `paint-order`** e contare
+     solo le etichette senza alone, con l'iniezione a dimostrare che resta vivo
+     (**275 → 0 → 275**). *Una rete che non sa distinguere «risolto» da «rotto» misura
+     un fatto, non un difetto.*
+   - **Un test che sporca lo stato condiviso è PEGGIO di nessun test.** La prima
+     stesura della rete di R11 faceva `eng._messier_doc = doc`, e `eng` è
+     **session-scoped**: il catalogo avvelenato è rimasto addosso e ha fatto fallire
+     **13 test altrove**. Preso dalla suite, non da me. *Fa arrossire codice sano, che
+     è il modo più veloce per far ignorare una suite.*
+   - **Un `.replace()` senza `assert` non protesta.** Aggiungendo la sesta categoria a
+     `collisioni.py` ho sostituito una stringa che non esisteva: nessun errore, e la
+     categoria misurava **zero** perché non era mai stata inserita. L'ho scoperto solo
+     perché **il numero era troppo bello** (zero su un difetto che sapevo esserci).
+     *In questo repo ogni sostituzione automatica va asserita — lo faccio ovunque, e
+     l'unica volta che l'ho saltato mi è costato.*
+   - **Due debiti erano STALE, e vanno letti come tali:** R12 diceva che
+     `docs/mockups/dashboard.svg` non è in git (**falso** dal commit `fefc3cf`), e
+     R11 parlava di 11 `_esc()` (**sono 13**). *Nona e decima smentita per misura.*
+   - **Una riga di questo file si sospettava da sola e aveva ragione:** *«Mai
+     verificato: la correttezza astronomica»* era **debito già pagato** — la matematica
+     è ancorata a teoremi di astronomia sferica, a Meeus e a posizioni di stelle vere.
+     Resta non verificato solo il **poster intero contro un planetario**.
+
 5. **Il packaging: l'`.exe` in GitHub Actions (D4 + D15).** *(Anticipato su Pillole —
    deciso da Marco, 2026-07-14: «prima l'exe che funziona e lo condivido, poi
    progettiamo Pillole».)*
@@ -1608,6 +1658,19 @@ Ordinato per rischio reale.
   `place` avrebbe tappato *un ingresso*, non *la classe*. Ha evitato la trappola
   giusta: in `messier.py` escapa **i valori** e lascia `<tspan>` e `—` (escapare
   tutta la stringa avrebbe stampato `&lt;tspan&gt;`).
+  **✅ RESIDUO CHIUSO (2026-09-03, #7u), e i punti erano TREDICI non undici**
+  (ricontati: 4 in `disc.py`, 9 in `messier.py`). La rete avvelena i **DATI** — non
+  l'input — con `& < >`: nomi di costellazione (`disc.py` e `messier.py` importano
+  `CONST_IT` **separatamente**, quindi si patchano entrambi i binding), nomi di stelle
+  (la chiave *è* il nome mostrato) e catalogo Messier. Cinque formati.
+  **Iniezione del guasto su quattro punti raggiungibili: tutti rossi** con `ExpatError`.
+  **Limite dichiarato nel test:** due dei 13 restano scoperti perché stanno su **rami
+  non presi** (il percorso naive di `disc.py`, la riga di gruppo della tabella).
+  ⚠️ **E un errore preso dalla suite:** la prima stesura faceva
+  `eng._messier_doc = doc`, ma la fixture `eng` è **session-scoped** — il catalogo
+  avvelenato restava addosso e faceva fallire **13 test altrove**. *Un test che sporca
+  lo stato condiviso è peggio di nessun test: fa arrossire codice sano.*
+  *(Testo originale del residuo, per memoria:)*
   **⚠️ RESIDUO — undici `_esc()` A MANO, non coperti da test.** I bypass di
   `_render_text` sono `disc.py` (4: stella-guida, costellazione, cardinale,
   etichetta anti-collisione) e `messier.py` (7). Il test passa **solo `place`**, che
@@ -1630,7 +1693,20 @@ Ordinato per rischio reale.
   `place` è un giro a parte, perché «cosa sia un nome-luogo lecito» è una domanda
   di prodotto, non di codice.*
 
-- **R12 — Gli asset di `docs/` non sono in git: la documentazione di design è
+- **R12 — RISOLTO in parte, e in parte ERA GIÀ STALE (2026-09-03, #7u).**
+  **Risolto:** `.gitignore` ha ora un'eccezione per `docs/design_handoff/`. Gli
+  handoff avevano gli `.html` tracciati e i loro `assets/*.png` no: chi clonava
+  apriva la pagina e vedeva le **immagini rotte**. Sette PNG, ~1,5 MB.
+  **Era stale:** il debito diceva che `docs/mockups/dashboard.svg` non è in git e che
+  *«la prova che R6 cita esiste solo sul PC di Marco»*. **Falso** — l'eccezione
+  `!docs/mockups/` c'è dal commit `fefc3cf` (#6a) e i tre mockup sono tracciati.
+  Verificato file per file con `git ls-files`, non dedotto.
+  ⚠️ **Riportato e non corretto:** `docs/mockups/` contiene ancora `editorial.svg` e
+  `rail.svg`, mockup di due formati **ritirati in #7i**. È il *«materiale stale come
+  mina»* che il Metodo di lavoro descrive per il progetto design — qui però è nel repo.
+  Toglierli è una decisione, non una pulizia.
+  *(Testo originale, per memoria:)*
+  **R12 — Gli asset di `docs/` non sono in git: la documentazione di design è
   committata a metà.** *(Trovato 2026-07-16, verificato con `git ls-files`.)*
   `.gitignore` ha `*.svg` e `*.png` **globali** — scritti per l'output del motore
   (`out/`), ma sono pattern globali e si mangiano anche `docs/`. Contraddice **la
@@ -1649,7 +1725,28 @@ Ordinato per rischio reale.
   dell'architetto** — va nel prompt dell'esecutore.
   *Marco (2026-07-16): «fermati, ne parliamo dopo» — si decide a coda vuota.*
 
-- **R13 — LE LINEE DELLE COSTELLAZIONI ATTRAVERSANO LE ETICHETTE. La sesta categoria,
+- **R13 — RISOLTO (2026-09-03, #7u) con un ALONE, non spostando le etichette.**
+  Misurata prima l'estensione con la **sesta categoria** di `tools/collisioni.py`
+  (segmento contro riquadro, Liang-Barsky, con la LUNGHEZZA del tratto interno per
+  distinguere l'attraversamento dallo sfioramento): **27 etichette su 38 toccate sul
+  solo A4 di marzo**, 11 per almeno un quarto della larghezza. Molto più esteso di
+  «Cassiopea e Cefeo»: la peggiore era **«Leone», attraversata per l'81%**.
+  **Il fix non muove niente**, ed è la ragione per cui è quello giusto: invece di
+  insegnare all'anti-collisione a schivare 313 segmenti — che avrebbe rispostato 27
+  etichette su 38 e riaperto tutta la geometria di #7p/#7q — le etichette prendono un
+  **alone del colore del fondo** (`paint-order="stroke fill"`): la linea si
+  **interrompe** attorno alle lettere. *È la tecnica degli atlanti stampati.*
+  **Verificato PRIMA che `resvg` lo supportasse**, con un SVG di prova reso dal nostro
+  `render.py`. Additivo su tre livelli (`label_halo` sul blocco disc, `const_halo` sul
+  blocco messier per deep-space, poi i 5 layout).
+  ⚠️ **E lo strumento non poteva vedere il proprio fix:** la linea attraversa ancora
+  *geometricamente* il riquadro — l'alone la rende **leggibile**, non **assente** — e
+  cat.6 restava a 274 su un poster corretto. Gli è stato insegnato a leggere
+  `paint-order` e a contare solo le etichette **senza** alone. Non è annacquare: se
+  qualcuno spegne `label_halo`, torna a suonare — **provato: 275 → 0 → 275**.
+  **Cat.6 sui 60 poster: 1357 → 0.**
+  *(Testo originale del debito, per memoria:)*
+  **R13 — LE LINEE DELLE COSTELLAZIONI ATTRAVERSANO LE ETICHETTE. La sesta categoria,
   che nessuna rete vede.** *(Trovata 2026-07-19 dall'architetto **guardando il PNG**
   dell'A4 di marzo, subito dopo che `tools/collisioni.py` aveva dichiarato quel poster
   privo di sovrapposizioni.)* Sull'A4 di marzo la linea della figura passa **in mezzo
@@ -1722,7 +1819,23 @@ Ordinato per rischio reale.
   contiene ancora «Deneb Kaitos» (β Ceti, la stella sconosciuta che stava sull'A4 al posto
   di Sirio). **Non rimossa** (regola #4): resta viva per il ramo naive e per un test.
 
-- **R15 — LE NOTE DEI PIANETI SI SCRIVONO ADDOSSO SU ZENIT. La SETTIMA categoria,
+- **R15 — RISOLTO (2026-09-03, #7u), ed era un DATO non un bug di codice.**
+  Misurato: la nota più lunga («Non osservabile, vicino al Sole») misurava **151,7 px
+  in colonne da 108**, sforando di 43,7. Ridurre il corpo non era la strada: per
+  entrare servirebbe **7,2 px**, illeggibile.
+  **La causa vera:** zenit usava la nota **intera** (`{note}`/`{direction}`), mentre
+  l'A4 usa già lo **split** (`{note_cat}`/`{note_where}` — la stessa stringa del motore
+  spezzata sulla propria virgola, derivazione di presentazione già in `panels.py`).
+  Il fix è **una riga di layout**: stessa economia di `moon_calendar`. Le 7 colonne ora
+  riempiono tutto il pannello (x0 96, passo 112 = 784/7).
+  **Verificato su tutti e 12 i mesi** (le note cambiano col mese): distanza minima
+  testo-testo **9,7 px**, era negativa.
+  **Prezzo accettato e dichiarato:** su Urano e Nettuno sparisce «a fine notte»
+  — `note_where` preferisce la direzione alla coda. **È ciò che l'A4, il formato che si
+  STAMPA, fa già**: restano «Telescopico» e la direzione, cioè le due informazioni che
+  impediscono a un socio di cercare Urano a occhio nudo.
+  *(Testo originale del debito, per memoria:)*
+  **R15 — LE NOTE DEI PIANETI SI SCRIVONO ADDOSSO SU ZENIT. La SETTIMA categoria,
   che lo strumento non può vedere.** *(Trovata 2026-09-02 guardando il render di
   Zenit al 4×, subito dopo che `tools/collisioni.py` aveva dato **zero** su tutte e
   cinque le sue categorie per quel poster.)* Nel riquadro dei pianeti si legge
@@ -1798,7 +1911,21 @@ Ordinato per rischio reale.
   ancora, decidere **chi ha ragione**: è una domanda per Marco e per il designer, non
   per l'esecutore.
 
-- **R17 — LA «COPPIA DI FONT» DEL BRAND NON È MAI ESISTITA: il poster usa UN FONT
+- **R17 — RISOLTO (2026-09-03, #7u): Work Sans viene finalmente DISEGNATO.**
+  Tre livelli, tutti **additivi**: `font_family` opzionale per blocco nel compositore;
+  `panels.py` lo propaga in **tutti e cinque** i suoi punti d'emissione (il FILE decide,
+  il codice trasporta); `messier.py` prende `body_font` per i due punti di testo
+  corrente che ha in proprio. **33 blocchi** passano a Work Sans su 5 layout —
+  sottotitoli, piedini, note dei pianeti, fasi lunari, tabella e legenda Messier.
+  **Misurato PRIMA, perché decideva la fattibilità** (la lezione di #7s applicata):
+  Work Sans è in media **+2,1%** più largo di Space Grotesk su otto stringhe vere del
+  poster, cioè dentro ogni tolleranza; le collisioni sui 60 non si sono mosse di
+  un'unità. *Se fosse stato molto più largo, il giro sarebbe stato un altro.*
+  **E la prova che conta, perché dichiarare non è rendere:** dashboard reso prima e
+  dopo, confrontati i **pixel** — cambiano, e al 3× sul piedino le lettere sono
+  visibilmente un altro carattere. `resvg` carica Work Sans davvero.
+  *(Testo originale del debito, per memoria:)*
+  **R17 — LA «COPPIA DI FONT» DEL BRAND NON È MAI ESISTITA: il poster usa UN FONT
   SOLO.** *(Trovato 2026-09-02 mentre si cambiavano i font, cercando dove assegnare
   il display e dove il corpo.)* Il compositore emette **un solo `font-family`**, sul
   tag `<svg>` radice (`compositor.py:146`), preso da `canvas.font_family`. Nessun
@@ -1826,8 +1953,26 @@ Ordinato per rischio reale.
   *Non corretto in #7s (regola #4): il commit era a scopo unico, e il difetto è
   preesistente di un mese e mezzo, non introdotto dal cambio di font.*
 
-- **R18 — L'A4 SFONDA IL MINIMO DI 12 pt IN STAMPA: 111 testi su 113.**
-  *(Misurato in #7t, 2026-09-03. **Decisione aperta, non un fix.**)*
+- **R18 — CHIUSA COME DECISIONE (2026-09-03, #7u): i 12 pt NON si applicano alla
+  carta del cielo.** *Registrata come decisione presa, non come debito aperto, perché
+  altrimenti fra due mesi qualcuno rifà questa stessa analisi da capo — che è
+  esattamente ciò che è successo alla tabella dei conteggi.*
+  **La riga «111 su 113» mescolava due cose diverse.** Classificati i 113 testi:
+  **42 sono etichette di MAPPA** (stelle, costellazioni, cardinali), **31 sono i numeri
+  della striscia lunare**, **40 sono testo che si legge**. I 12 pt del manuale sono un
+  **pavimento per la materia leggibile** e stanno in §4 accanto alla scala tipografica
+  dei *documenti*: su una **carta del cielo** non si applicano — gli atlanti stampati
+  veri (Pocket Sky Atlas, Cambridge Star Atlas) stanno a 5-7 pt, ed è il **genere** che
+  lo impone.
+  **E per la parte editoriale è GEOMETRICAMENTE IMPOSSIBILE, non solo costoso — misurato:**
+  la nota più lunga della parata, «Visibile verso l'alba», a 6,9 pt misura 96 px e sta
+  nel passo di 117; **a 12 pt misurerebbe 165 px**, e sette colonne vorrebbero
+  **1157 px di fascia contro gli 820** che l'A4 ha. *Non ci sta nel foglio.*
+  **L'unico erede, stretto:** il testo più piccolo che un socio **legge davvero** sono
+  le note dei pianeti a **6,9 pt**. Se un giorno si vorrà una sola miglioria per la
+  stampa, è quella — ed è una domanda di **spazio nella fascia**, cioè per il designer.
+  *(Testo originale, per memoria:)*
+  **R18 — L'A4 sfonda il minimo di 12 pt in stampa: 111 testi su 113.**
   **Manuale §4:** *«Corpi minimi: 12 pt in stampa, 24 px su slide 1920×1080.»*
   Misurato **sull'SVG reso** (900 px = 210 mm → 12 pt = **18,1 px**): passano **solo**
   la testata (12,6 pt) e il titolo (19,8 pt): **111 testi su 113 sono sotto (98%)**, e il
@@ -1840,12 +1985,20 @@ Ordinato per rischio reale.
   *Nessun altro formato è toccato: sono social, e lì il minimo del manuale è «24 px su
   slide 1920×1080», che non è la nostra unità.*
 
-**Mai verificato:** la correttezza astronomica dell'output. Sappiamo che il
-codice produce un SVG. Non sappiamo che sia giusto.
-*(Da riverificare: esistono ora `tests/test_correctness.py`, `test_planets.py`,
-`test_moon.py`, `test_planet_direction.py`, ancorati a riferimenti esterni.
-Questa riga potrebbe essere debito già pagato di cui il file non si è accorto —
-va letta contro i test veri, non lasciata marcire.)*
+**~~Mai verificato: la correttezza astronomica dell'output.~~ DEBITO GIÀ PAGATO,
+verificato leggendo i test il 2026-09-03** *(#7u)*. Questa riga sospettava di sé
+stessa — *«potrebbe essere debito già pagato di cui il file non si è accorto»* — e
+aveva ragione. La matematica **è** ancorata a riferimenti **esterni**:
+`test_correctness.py` valida `altaz` contro **teoremi di astronomia sferica** (una
+stella al polo celeste sta all'altezza della latitudine; circumpolarità; transito a
+sud) e `sky_context` contro **Meeus**; `test_star_map.py` contro **posizioni vere**
+(Polare alta sull'asse nord, Deneb allo zenit ad agosto, Antares bassa a sud, Sirio
+**sotto** l'orizzonte ad agosto); `test_moon.py` contro il **mese sinodico**.
+
+**Ciò che resta davvero non verificato, ed è più stretto:** nessuno ha mai
+confrontato un **poster intero** con un planetario (Stellarium). I test coprono i
+**componenti**, non l'insieme reso. È un controllo da fare una volta, a occhio, non
+una rete.
 
 ---
 
@@ -2013,7 +2166,7 @@ python -m uvicorn app.main:app --reload --port 8000
 
 # LE DUE RETI. La suite copre tutto; la fotografia copre il buco dei golden,
 # che sorvegliano SOLO l'A4 di agosto (vedi #7q).
-python -m pytest -q                    # 216 verdi
+python -m pytest -q                    # 221 verdi
 python tools/fotografia.py             # 20 SVG (5 formati x 4 mesi), byte per byte
 python tools/fotografia.py --scatta    # SOLO dopo un cambiamento DELIBERATO
 ```
