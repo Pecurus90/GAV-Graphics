@@ -28,7 +28,7 @@
      "size": 4.6, "stroke_width": 1.15, "fill": "gold",
      "label_size": 11, "label_fill": "gold",
      "const_names": "principali", "const_fill": "label", "const_size": 10.5,
-     "const_tracking": 0.84, "const_opacity": 0.7},
+     "const_tracking": 0.84, "const_halo": 2.4, "const_opacity": 0.7},
 
     {"type": "text", "x": 584, "y": 218, "fill": "label", "size": 13,
      "weight": "600", "letter_spacing": 1.04, "content": "OGGETTI MESSIER · MEGLIO PIAZZATI"},

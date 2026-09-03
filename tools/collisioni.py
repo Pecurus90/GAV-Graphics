@@ -13,6 +13,10 @@ Le cinque categorie (tutte gia' viste il 2026-07-19):
   3. ETICHETTA CONTRO ETICHETTA    - due etichette del disco troppo vicine.
   4. CARDINALE SOPRA CONTENUTO     - N/E/S/O sopra pannello / altra banda / testo.
   5. TACCA CHE ATTRAVERSA UN TESTO - la tacca dei gradi taglia una scritta.
+  6. LINEA DI FIGURA CHE ATTRAVERSA UN'ETICHETTA (R13) - aggiunta il 2026-09-03.
+     Era la categoria che MANCAVA: lo strumento modellava testi e rettangoli, e le
+     linee delle costellazioni attraversano tutto il disco. Fu trovata a occhio
+     ("Cassiopea" tagliata in due) su un poster che lo strumento dava a ZERO.
 
 --------------------------------------------------------------------------------
 IL PUNTO DURO - LA LARGHEZZA DEL TESTO NON STA NELL'SVG.
@@ -100,8 +104,11 @@ def leggi_testi(svg):
         weight = _attr(attrs, "font-weight", "")
         op = _attr(attrs, "opacity")
         ls = float(_attr(attrs, "letter-spacing", "0"))
+        # ALONE (paint-order="stroke fill"): il testo si stacca dal fondo e la
+        # linea di figura si INTERROMPE attorno alle lettere. La cat.6 lo usa.
+        alone = "paint-order" in attrs
         out.append(dict(x=x, y=y, size=size, anchor=anchor, weight=weight,
-                        opacity=op, ls=ls, text=cont))
+                        opacity=op, ls=ls, text=cont, alone=alone))
     return out
 
 
@@ -233,6 +240,38 @@ def _seg_seg(p1, p2, p3, p4):
 # ---------------------------------------------------------------------------
 # I cinque rilevatori
 # ---------------------------------------------------------------------------
+def linee_figura(svg):
+    """I segmenti delle FIGURE delle costellazioni (<line> del disco). Sono l'unico
+    <line> con quattro coordinate e senza stroke proprio: lo stile ce l'ha il gruppo."""
+    out = []
+    for m in re.finditer(r'<line x1="([\d.-]+)" y1="([\d.-]+)" x2="([\d.-]+)" y2="([\d.-]+)"\s*/>', svg):
+        out.append(tuple(float(g) for g in m.groups()))
+    return out
+
+
+def segmento_taglia_bbox(seg, bb):
+    """Il segmento attraversa il rettangolo? Slab method (Liang-Barsky).
+    Restituisce la LUNGHEZZA del tratto interno: distingue una linea che
+    ATTRAVERSA una parola da una che ne sfiora l'angolo."""
+    x1, y1, x2, y2 = seg
+    bx0, by0, bx1, by1 = bb
+    dx, dy = x2 - x1, y2 - y1
+    t0, t1 = 0.0, 1.0
+    for p, q in ((-dx, x1 - bx0), (dx, bx1 - x1), (-dy, y1 - by0), (dy, by1 - y1)):
+        if p == 0:
+            if q < 0:
+                return 0.0
+        else:
+            r = q / p
+            if p < 0:
+                if r > t1: return 0.0
+                if r > t0: t0 = r
+            else:
+                if r < t0: return 0.0
+                if r < t1: t1 = r
+    return max(0.0, (t1 - t0)) * math.hypot(dx, dy)
+
+
 def analizza(layout, svg):
     testi = leggi_testi(svg)
     etich = [t for t in testi if e_etichetta_disco(t)]
@@ -312,6 +351,28 @@ def analizza(layout, svg):
             if _seg_interseca_rect((x1, y1), (x2, y2), bbox(t)):
                 trovate.append(("5_tacca",
                                 f"una tacca attraversa «{t['text'][:24]}»", 1.0))
+    # -- cat.6: una LINEA di figura attraversa un'etichetta (R13) --
+    # Le figure CONCAVE (la W di Cassiopea, la casetta di Cefeo) hanno il
+    # baricentro DENTRO la figura, cioe' sulle proprie linee: non e' sfortuna, e'
+    # geometria - ed e' la ragione per cui le vittime sono sempre le stesse.
+    # Soglia: meta' del corpo, per non contare gli sfioramenti d'angolo che a
+    # occhio non si vedono.
+    # ...ma un'etichetta con l'ALONE non e' un difetto: la linea le passa ancora
+    # SOTTO (geometricamente si intersecano), pero' si INTERROMPE attorno alle
+    # lettere e il nome resta leggibile. E' il rimedio della cartografia, non un
+    # trucco: quindi qui si contano solo le etichette SENZA alone. Se qualcuno
+    # spegne `label_halo` in un layout, questa categoria torna a suonare.
+    figs = linee_figura(svg)
+    for t in etich:
+        if t.get("alone"):
+            continue
+        bb = bbox(t)
+        dentro = max((segmento_taglia_bbox(seg, bb) for seg in figs), default=0.0)
+        if dentro >= t["size"] * 0.5:
+            trovate.append(("6_linea",
+                            f"«{t['text']}» attraversata da una linea di figura per "
+                            f"{dentro:.0f} px (corpo {t['size']:.1f})", dentro))
+
     # dedup cat.5 (piu' tacche sullo stesso testo)
     return _dedup(trovate)
 
@@ -340,8 +401,9 @@ def carica_svg(fmt, mese):
         return fh.read()
 
 
-CAT_ORDINE = ["1_pannello", "2_banda", "3_etichette", "4_cardinale", "5_tacca"]
-CAT_NOME = {"1_pannello": "sotto-pannello", "2_banda": "altra-banda",
+CAT_ORDINE = ["1_pannello", "2_banda", "3_etichette", "4_cardinale", "5_tacca", "6_linea"]
+CAT_NOME = {"6_linea": "linea-figura",
+            "1_pannello": "sotto-pannello", "2_banda": "altra-banda",
             "3_etichette": "etichetta-etichetta", "4_cardinale": "cardinale",
             "5_tacca": "tacca-testo"}
 

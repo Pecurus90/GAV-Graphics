@@ -56,6 +56,12 @@ STAR_NAMES23 = ["Sirio", "Vega", "Altair", "Deneb", "Arturo", "Capella",
                 "Mirach", "Algol", "Enif"]
 
 
+# ALONE delle etichette (R13, #7u): l'A4 lo dichiara nel proprio layout
+# ("label_halo": 2.6). Il frammento DEVE usarlo, o smette di essere una fetta
+# verbatim dell'A4 - ed e' proprio cosi' che questa rete se n'e' accorta.
+HALO = 2.6
+
+
 def _theme(root):
     return json.load(open(os.path.join(root, "brand", "palettes", "gav.json"),
                           encoding="utf-8"))
@@ -72,10 +78,10 @@ def _fragment(eng, theme, social=False):
     lst, lat_rad, _ = eng.sky_context(DISC["year"], DISC["month"], DISC["lat"], DISC["lon"])
     if social:
         return eng.sky_disc_svg(DISC["cx"], DISC["cy"], DISC["rad"], lst, lat_rad, theme,
-                                declutter=True, ticks=TICKS)
+                                declutter=True, ticks=TICKS, label_halo=HALO)
     return eng.sky_disc_svg(DISC["cx"], DISC["cy"], DISC["rad"], lst, lat_rad, theme,
                             declutter=True, ticks=TICKS, labels=LABELS_A4,
-                            star_names=STAR_NAMES23)
+                            star_names=STAR_NAMES23, label_halo=HALO)
 
 
 def disc_document(eng, theme):

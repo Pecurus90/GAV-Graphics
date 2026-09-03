@@ -31,7 +31,7 @@ class DiscMixin:
     def sky_disc_svg(self, cx, cy, rad, lst, lat_rad, theme, ramp=None,
                      cardinals=True, labels=True, marquee=True, ticks=None,
                      star_names=None, declutter=False, clip_id='dclip',
-                     figure_stars=False, cardinal_gap=22):
+                     figure_stars=False, cardinal_gap=22, label_halo=0):
         """Disegna SOLO il disco cielo (cornice + stelle + costellazioni) di
         centro (cx,cy) e raggio rad, a QUALSIASI misura. Restituisce il
         frammento SVG (stringa). Le costanti visive scalano con k=rad/R, quindi
@@ -49,6 +49,16 @@ class DiscMixin:
             a(f'<circle cx="{cx}" cy="{cy}" r="{rr:.1f}" fill="none" stroke="{theme["grid"]}" stroke-width="{0.8*k:.2f}" stroke-dasharray="{2*k:.1f} {5*k:.1f}" opacity="0.7"/>')
         a(f'<clipPath id="{clip_id}"><circle cx="{cx}" cy="{cy}" r="{rad-1}"/></clipPath>')
         a(f'<g clip-path="url(#{clip_id})">')
+        # ALONE delle etichette (R13). Le linee delle figure attraversano tutto il
+        # disco e passano SOTTO i nomi: su figure concave (la W di Cassiopea, il
+        # rettangolo del Leone) il baricentro cade sulle proprie linee, quindi il
+        # nome viene tagliato a meta'. Rimedio della cartografia: un alone del
+        # colore del fondo con `paint-order="stroke fill"` - la linea si interrompe
+        # attorno alle lettere. NON sposta niente: le etichette restano dove
+        # l'anti-collisione le ha messe. Colore da TOKEN (invariante #2), larghezza
+        # dal file. A 0 (default) non si emette nulla: output identico.
+        halo=(f' stroke="{theme["disk"][1]}" stroke-width="{label_halo*k:.2f}"'
+              f' stroke-linejoin="round" paint-order="stroke fill"') if label_halo else ""
         # linee costellazioni
         a(f'<g filter="url(#glow)" stroke="{theme["neon"]}" stroke-width="{1.15*k:.2f}" fill="none" opacity="0.9" stroke-linecap="round">')
         for f in self.clines:
@@ -97,7 +107,7 @@ class DiscMixin:
                     x,y=self.project(al,zz,cx,cy,rad); col=bv2hex(ramp,bv)
                     a(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{7*k:.1f}" fill="{col}" opacity="0.30" filter="url(#softglow)"/>')
                     a(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{2.6*k:.1f}" fill="{col}"/>')
-                    a(f'<text x="{x+7*k:.1f}" y="{y-5*k:.1f}" fill="{theme["text"]}" font-size="{11.5*k:.1f}" opacity="0.95">{self._esc(nm)}</text>')
+                    a(f'<text x="{x+7*k:.1f}" y="{y-5*k:.1f}" fill="{theme["text"]}" font-size="{11.5*k:.1f}" opacity="0.95"{halo}>{self._esc(nm)}</text>')
             if labels:
                 label_set = None if labels is True else set(labels)
                 for f in self.clines:
@@ -108,7 +118,7 @@ class DiscMixin:
                     al,zz=self.altaz(allp[:,0],allp[:,1],lst,lat_rad); m=al>3
                     if m.sum()<2: continue
                     x,y=self.project(al[m],zz[m],cx,cy,rad)
-                    a(f'<text x="{x.mean():.1f}" y="{y.mean():.1f}" fill="{theme["label"]}" font-size="{12.5*k:.1f}" opacity="0.82" text-anchor="middle" letter-spacing="{-0.02*12.5*k:.2f}">{self._esc(CONST_IT[ab])}</text>')
+                    a(f'<text x="{x.mean():.1f}" y="{y.mean():.1f}" fill="{theme["label"]}" font-size="{12.5*k:.1f}" opacity="0.82" text-anchor="middle" letter-spacing="{-0.02*12.5*k:.2f}"{halo}>{self._esc(CONST_IT[ab])}</text>')
         else:
             # PERCORSO SOCIAL: dischi delle stelle nominate + etichette con
             # ANTI-COLLISIONE deterministica (vedi _disc_labels_declutter).
@@ -125,7 +135,7 @@ class DiscMixin:
             avoid = (self._cardinal_boxes(cx, cy, rad, k, cardinals, cardinal_gap)
                      + self._tick_boxes(cx, cy, rad, k, ticks))
             a(self._disc_labels_declutter(cx, cy, rad, k, lst, lat_rad, theme,
-                                          ramp, labels, marquee, star_names, avoid))
+                                          ramp, labels, marquee, star_names, avoid, halo))
         # tacche di azimut (corona SOLO tacche, niente numeri: a 1080 i numeri
         # sono rumore). Default SPENTA -> l'A4 non la disegna. `ticks` e' un dict
         # {"minor":10,"major":30}: una tacca ogni `minor` gradi, piu' lunga ogni
@@ -208,7 +218,7 @@ class DiscMixin:
                 for x1,y1,x2,y2,_long in self._tick_segments(cx, cy, rad, k, ticks)]
 
     def _disc_labels_declutter(self, cx, cy, rad, k, lst, lat_rad, theme, ramp,
-                               labels, marquee, star_names, card_boxes=()):
+                               labels, marquee, star_names, card_boxes=(), halo=""):
         """Etichette (stelle-guida + costellazioni) con ANTI-COLLISIONE
         deterministica. Niente motore a forze: piazzamento greedy per priorita'.
 
@@ -275,7 +285,7 @@ class DiscMixin:
             px,py=chosen[0],chosen[1]
             anc=f' text-anchor="{req["anchor"]}"' if req["anchor"]!="start" else ""
             out.append(f'<text x="{px:.1f}" y="{py:.1f}" fill="{req["fill"]}" '
-                       f'font-size="{req["size"]:.1f}" opacity="{req["opacity"]}"{anc}{req["extra"]}>{self._esc(req["text"])}</text>')
+                       f'font-size="{req["size"]:.1f}" opacity="{req["opacity"]}"{anc}{req["extra"]}{halo}>{self._esc(req["text"])}</text>')
         self._last_dropped=dropped; self._last_dropped_labels=dropped_labels
         return '\n'.join(out)
 
@@ -294,4 +304,5 @@ class DiscMixin:
                                  star_names=b.get("star_names"),
                                  declutter=b.get("declutter", False),
                                  figure_stars=b.get("figure_stars", False),
-                                 cardinal_gap=b.get("cardinal_gap", 22))
+                                 cardinal_gap=b.get("cardinal_gap", 22),
+                                 label_halo=b.get("label_halo", 0))

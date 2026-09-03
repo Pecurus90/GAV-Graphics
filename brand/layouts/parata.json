@@ -32,7 +32,7 @@
 
     {"type": "disc", "cx": 540, "cy": 576, "rad": 250, "cardinal_gap": 14,
      "ticks": {"minor": 10, "major": 30},
-     "declutter": true,
+     "declutter": true, "label_halo": 2.6,
      "labels": ["UMa", "UMi", "Cas", "Cep", "Dra", "Cyg", "Lyr", "Aql", "Her",
                 "CrB", "Boo", "Sco", "Sgr", "Peg", "And", "Per", "Aur", "Ori",
                 "Tau", "Gem", "Leo", "CMa",

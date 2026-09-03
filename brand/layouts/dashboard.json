@@ -19,7 +19,7 @@
      "stroke": "divider", "stroke_width": 1},
 
     {"type": "disc", "cx": 340, "cy": 520, "rad": 270,
-     "declutter": true, "ticks": {"minor": 10, "major": 30},
+     "declutter": true, "label_halo": 2.6, "ticks": {"minor": 10, "major": 30},
      "labels": ["UMa", "UMi", "Cas", "Cep", "Dra", "Cyg", "Lyr", "Aql", "Her",
                 "CrB", "Boo", "Sco", "Sgr", "Peg", "And", "Per", "Aur", "Ori",
                 "Tau", "Gem", "Leo", "CMa",

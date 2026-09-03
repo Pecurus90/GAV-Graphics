@@ -360,6 +360,13 @@ class MessierMixin:
             return ''
         cfill=theme[b.get("const_fill","text4")]
         csz=b.get("const_size",10.5); ctr=b.get("const_tracking",2.2)
+        # ALONE (R13): le linee delle figure passano sotto i nomi delle
+        # costellazioni e su quelle concave li tagliano. `paint-order="stroke fill"`
+        # interrompe la linea attorno alle lettere - la tecnica degli atlanti.
+        # Colore da TOKEN; a 0 (default) non si emette nulla.
+        chl=b.get("const_halo",0)
+        chalo=(f' stroke="{theme["disk"][1]}" stroke-width="{chl}"'
+               f' stroke-linejoin="round" paint-order="stroke fill"') if chl else ""
         cop=b.get("const_opacity",0.85)
         # NOMI: le principali (CONST_IT) + le minori (CONST_IT_MINORI, solo qui:
         # l'A4 non le vede) + i nomi VERIFICATI del catalogo (costellazione_it,
@@ -431,7 +438,7 @@ class MessierMixin:
                                             "vbbox":fig["vbbox"],"margin":M})
             out.append(f'<text x="{px:.1f}" y="{py+h*0.34:.1f}" text-anchor="middle" '
                        f'fill="{cfill}" font-size="{csz}" opacity="{cop}" '
-                       f'letter-spacing="{ctr}">{self._esc(req["text"])}</text>')
+                       f'letter-spacing="{ctr}"{chalo}>{self._esc(req["text"])}</text>')
         return '\n'.join(out)
 
     def _render_messier_table(self, b, theme, mctx):
