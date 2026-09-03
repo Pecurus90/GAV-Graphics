@@ -437,6 +437,7 @@ class MessierMixin:
     def _render_messier_table(self, b, theme, mctx):
         """Colonna destra: le righe della tabella (simbolo · Mxx — nome · tipo ·
         costellazione · strumento). Passo `step`, prima baseline `y0`."""
+        bodyf=f' font-family="{b["body_font"]}"' if b.get("body_font") else ""
         out=[]; x0=b["x0"]; y0=b["y0"]; step=b["step"]
         symx=b.get("sym_dx",8); namex=b.get("name_dx",30); instx=b.get("inst_dx",398)
         s=b.get("size",5); sw=b.get("stroke_width",1.15); col=theme[b.get("sym_fill","gold")]
@@ -468,8 +469,10 @@ class MessierMixin:
                 sec=f'{r["_count"]} galassie (Messier) · {r["costellazione_it"]}'
             else:
                 sec=f'{r["famiglia"][0].upper()+r["famiglia"][1:]} · {r["costellazione_it"]}'
+            # riga secondaria (famiglia . costellazione): TESTO CORRENTE -> il file
+            # puo' darle Work Sans (R17, manuale sez.4). Assente => eredita la radice.
             out.append(f'<text x="{x0+namex:.0f}" y="{y+16:.0f}" fill="{theme["text3"]}" '
-                       f'font-size="11.5">{self._esc(sec)}</text>')
+                       f'font-size="11.5"{bodyf}>{self._esc(sec)}</text>')
             # strumento a destra
             kind="binocolo" if r["visione"]=="binocolo" else "telescopio"
             out.append(self._instrument_icon_svg(kind, x0+instx, y-4, theme["text3"]))
@@ -494,6 +497,7 @@ class MessierMixin:
     def _render_messier_legend(self, b, theme):
         """Legenda: i 5 simboli d'atlante + il segno del grappolo + la chiave
         strumenti. Senza, la mappa e' indecifrabile. Posizioni dal file."""
+        bodyf=f' font-family="{b["body_font"]}"' if b.get("body_font") else ""
         out=[]; y=b["y"]; s=b.get("size",5); sw=b.get("stroke_width",1.15); col=theme[b.get("fill","gold")]
         FAMS=[("galassia","Galassia"),("ammasso aperto","Ammasso aperto"),
               ("ammasso globulare","Ammasso globulare"),("nebulosa diffusa","Nebulosa diffusa"),
@@ -502,7 +506,7 @@ class MessierMixin:
             x=item["x"]; rot=-22 if fam=="galassia" else 0
             out.append(self._messier_symbol_svg(fam, x, y, s, col, sw, rot))
             out.append(f'<text x="{x+16:.0f}" y="{y+4:.0f}" fill="{theme["text"]}" font-size="12.5" '
-                       f'font-weight="500">{self._esc(label)}</text>')
+                       f'font-weight="500"{bodyf}>{self._esc(label)}</text>')
         grp=b.get("gruppo")
         if grp:
             out.append(self._mini_grappolo_svg(grp["x"], y, s, col, sw))

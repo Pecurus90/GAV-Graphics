@@ -58,7 +58,8 @@ class PanelsMixin:
                     continue        # senza nota, editorial senza orari)
                 p=b[part]
                 tb={"x":b["x0"]+p["dx"],"y":y+p.get("dy",0),"fill":p["fill"],
-                    "size":p["size"],"weight":p.get("weight"),"content":p["content"]}
+                    "size":p["size"],"weight":p.get("weight"),"content":p["content"],
+                    "font_family":p.get("font_family")}
                 if p.get("anchor"): tb["anchor"]=p["anchor"]
                 row.append(self._render_text(tb, theme, item))
             # variante A: i non osservabili si spengono (riga piu' tenue).
@@ -118,7 +119,8 @@ class PanelsMixin:
                     continue
                 p=b[part]
                 tb={"x":f"{cx:.1f}","y":cyd+p["dy"],"fill":p["fill"],"size":p["size"],
-                    "weight":p.get("weight"),"anchor":"middle","content":p["content"]}
+                    "weight":p.get("weight"),"anchor":"middle","content":p["content"],
+                    "font_family":p.get("font_family")}   # R17: il font e' della PARTE
                 out.append(self._render_text(tb, theme, item))
         return '\n'.join(out)
 
@@ -172,6 +174,7 @@ class PanelsMixin:
                 fill=(daynum["fill_highlight"] if hi and md.phase_key and "fill_highlight" in daynum
                       else daynum["fill"])
                 tb={"x":f"{cx:.2f}","y":f"{cy+daynum['dy']:.2f}","fill":fill,
+                    "font_family":daynum.get("font_family"),
                     "size":daynum["size"],"anchor":"middle","content":"{day}"}
                 out.append(self._render_text(tb, theme, {"day":md.day}))
         # riga opzionale di etichette delle fasi principali (giorno + nome). Il
@@ -186,6 +189,7 @@ class PanelsMixin:
             for md in (m for m in data.moon_days if m.phase_key):
                 cx=x0+((md.day-1)%cols)*cgap
                 tb={"x":f"{cx:.2f}","y":pl["y"],"fill":pl["fill"],"size":pl["size"],
+                    "font_family":pl.get("font_family"),
                     "weight":pl.get("weight"),"anchor":"middle","content":pl["content"]}
                 out.append(self._render_text(tb, theme, {"day":md.day,"name":names[md.phase_key]}))
         return '\n'.join(out)
@@ -194,6 +198,7 @@ class PanelsMixin:
         """Un'etichetta di campione, con dx/dy dal centro del pallino; opzionali
         weight e anchor (i design social allineano a destra la temperatura)."""
         tb={"x":cx+spec["dx"],"y":cy+spec["dy"],"fill":spec["fill"],
+            "font_family":spec.get("font_family"),
             "size":spec["size"],"content":text}
         if spec.get("weight"): tb["weight"]=spec["weight"]
         if spec.get("anchor"): tb["anchor"]=spec["anchor"]

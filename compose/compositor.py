@@ -67,6 +67,13 @@ class Compositor:
         if b.get("weight"): s+=f' font-weight="{b["weight"]}"'
         if b.get("anchor"): s+=f' text-anchor="{b["anchor"]}"'
         if "letter_spacing" in b: s+=f' letter-spacing="{b["letter_spacing"]}"'
+        # Font PER BLOCCO (R17). Il manuale (sez.4) assegna due ruoli - Space
+        # Grotesk al display, Work Sans al testo corrente - ma il compositore
+        # emetteva un solo font-family, sulla RADICE: essendo una lista CSS
+        # vinceva sempre il primo, quindi il poster era interamente Space Grotesk
+        # e Work Sans non e' mai stato disegnato. Additivo: senza la chiave si
+        # eredita la radice, byte per byte come prima.
+        if b.get("font_family"): s+=f' font-family="{b["font_family"]}"'
         return s+f'>{self._esc(b["content"].format(**ctx))}</text>'
 
     def _render_line(self, b, theme):

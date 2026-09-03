@@ -29,7 +29,7 @@
      "content": "Il cielo di {month_name} {year}"},
     {"type": "text", "x": 450.0, "y": 108, "fill": "text3", "size": 12.5,
      "anchor": "middle",
-     "content": "Cielo visibile dal Nord Italia · {place} · valido ~15 {month_name}, ore {hour}:00"},
+     "font_family": "Work Sans, Helvetica, Arial, sans-serif", "content": "Cielo visibile dal Nord Italia · {place} · valido ~15 {month_name}, ore {hour}:00"},
 
     {"type": "text", "x": 40, "y": 904, "fill": "gold", "size": 10.5,
      "letter_spacing": 0.84, "content": "TEMPERATURA STELLE"},
@@ -52,8 +52,8 @@
      "ring": {"rx": 1.45, "ry": 0.609, "rot": -18, "width": 1.4},
      "sep":  {"y1": 952, "y2": 1092, "stroke": "border2", "width": 1},
      "name":  {"dy": 35, "fill": "text",  "size": 16, "weight": "bold", "content": "{name}"},
-     "note1": {"dy": 57,  "fill": "text3", "size": 10.5, "content": "{note_cat}"},
-     "note2": {"dy": 69, "fill": "text3", "size": 10.5, "content": "{note_where}"}},
+     "note1": {"font_family": "Work Sans, Helvetica, Arial, sans-serif", "dy": 57,  "fill": "text3", "size": 10.5, "content": "{note_cat}"},
+     "note2": {"font_family": "Work Sans, Helvetica, Arial, sans-serif", "dy": 69, "fill": "text3", "size": 10.5, "content": "{note_where}"}},
 
     {"type": "line", "x1": 40, "y1": 1108, "x2": 860, "y2": 1108,
      "stroke": "divider", "stroke_width": 1},
@@ -65,7 +65,7 @@
      "lit_fill": "moon_lit",
      "highlight": {"stroke": "gold", "stroke_width": 1.4, "r_extra": 3.5},
      "day_number": {"dy": 24, "fill": "text3", "size": 9.5, "fill_highlight": "gold"},
-     "phase_labels": {"y": 1212, "fill": "moon_label", "size": 11.5, "weight": "600",
+     "phase_labels": {"font_family": "Work Sans, Helvetica, Arial, sans-serif", "y": 1212, "fill": "moon_label", "size": 11.5, "weight": "600",
                       "content": "{day} {name}",
                       "names": {"new": "Luna Nuova", "first": "Primo Q.",
                                 "full": "Luna Piena", "last": "Ultimo Q."}}},
@@ -74,12 +74,12 @@
      "stroke": "divider", "stroke_width": 1},
     {"type": "icon", "name": "instagram", "x": 40, "y": 1245, "size": 16, "fill": "gold"},
     {"type": "text", "x": 64, "y": 1258, "fill": "text3", "size": 13,
-     "content": "@astrofilivicentini"},
+     "font_family": "Work Sans, Helvetica, Arial, sans-serif", "content": "@astrofilivicentini"},
     {"type": "icon", "name": "facebook", "x": 300, "y": 1245, "size": 16, "fill": "gold"},
     {"type": "text", "x": 324, "y": 1258, "fill": "text3", "size": 13,
-     "content": "Gruppo Astrofili Vicentini"},
+     "font_family": "Work Sans, Helvetica, Arial, sans-serif", "content": "Gruppo Astrofili Vicentini"},
     {"type": "icon", "name": "email", "x": 560, "y": 1245, "size": 16, "fill": "gold"},
     {"type": "text", "x": 584, "y": 1258, "fill": "text3", "size": 13,
-     "content": "info@astrofilivicentini.it"}
+     "font_family": "Work Sans, Helvetica, Arial, sans-serif", "content": "info@astrofilivicentini.it"}
   ]
 }

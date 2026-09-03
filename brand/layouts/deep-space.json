@@ -17,7 +17,7 @@
     {"type": "text", "x": 162, "y": 126, "fill": "text", "size": 50,
      "weight": "800", "letter_spacing": -1, "content": "Il cielo di {month_name} {year}"},
     {"type": "text", "x": 162, "y": 160, "fill": "text3", "size": 15,
-     "content": "Profondo cielo · gli oggetti del catalogo Messier · {place} · valido ~15 {month_name}, ore {hour}:00"},
+     "font_family": "Work Sans, Helvetica, Arial, sans-serif", "content": "Profondo cielo · gli oggetti del catalogo Messier · {place} · valido ~15 {month_name}, ore {hour}:00"},
     {"type": "line", "x1": 56, "y1": 192, "x2": 1024, "y2": 192,
      "stroke": "divider", "stroke_width": 1},
 
@@ -34,7 +34,7 @@
      "weight": "600", "letter_spacing": 1.04, "content": "OGGETTI MESSIER · MEGLIO PIAZZATI"},
     {"type": "line", "x1": 584, "y1": 230, "x2": 1024, "y2": 230,
      "stroke": "divider", "stroke_width": 1},
-    {"type": "messier_table",
+    {"type": "messier_table", "body_font": "Work Sans, Helvetica, Arial, sans-serif",
      "x0": 592, "x1": 1024, "y0": 258, "step": 43,
      "sym_dx": 0, "name_dx": 22, "inst_dx": 390,
      "size": 5, "stroke_width": 1.15, "sym_fill": "gold"},
@@ -43,7 +43,7 @@
      "weight": "600", "letter_spacing": 0.88, "content": "LEGENDA · CONVENZIONE DEGLI ATLANTI STELLARI"},
     {"type": "line", "x1": 56, "y1": 920, "x2": 1024, "y2": 920,
      "stroke": "divider", "stroke_width": 1},
-    {"type": "messier_legend", "y": 942, "size": 5, "stroke_width": 1.15, "fill": "gold",
+    {"type": "messier_legend", "body_font": "Work Sans, Helvetica, Arial, sans-serif", "y": 942, "size": 5, "stroke_width": 1.15, "fill": "gold",
      "items": [{"x": 58}, {"x": 172}, {"x": 312}, {"x": 476}, {"x": 630}],
      "gruppo": {"x": 800, "label": "Grappolo di galassie"},
      "inst_key": {"x": 948}},
@@ -52,12 +52,12 @@
      "stroke": "divider", "stroke_width": 1},
     {"type": "icon", "name": "instagram", "x": 56, "y": 1021, "size": 16, "fill": "gold"},
     {"type": "text", "x": 80, "y": 1034, "fill": "text3", "size": 13, "weight": "500",
-     "content": "@astrofilivicentini"},
+     "font_family": "Work Sans, Helvetica, Arial, sans-serif", "content": "@astrofilivicentini"},
     {"type": "icon", "name": "facebook", "x": 248, "y": 1021, "size": 16, "fill": "gold"},
     {"type": "text", "x": 272, "y": 1034, "fill": "text3", "size": 13, "weight": "500",
-     "content": "Gruppo Astrofili Vicentini"},
+     "font_family": "Work Sans, Helvetica, Arial, sans-serif", "content": "Gruppo Astrofili Vicentini"},
     {"type": "icon", "name": "email", "x": 512, "y": 1021, "size": 16, "fill": "gold"},
     {"type": "text", "x": 536, "y": 1034, "fill": "text3", "size": 13, "weight": "500",
-     "content": "info@astrofilivicentini.it"}
+     "font_family": "Work Sans, Helvetica, Arial, sans-serif", "content": "info@astrofilivicentini.it"}
   ]
 }
