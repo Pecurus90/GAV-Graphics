@@ -222,7 +222,7 @@ def index():
 
 PAGINA = r"""<!DOCTYPE html><html lang="it"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cielo del Mese · GAV</title>
+<title>Cielo del Mese · Gruppo Astrofili Vicentini</title>
 <style>
 @font-face{font-family:'Space Grotesk';src:url('/fonts/SpaceGrotesk-Medium.ttf') format('truetype');font-weight:500;font-display:swap}
 @font-face{font-family:'Space Grotesk';src:url('/fonts/SpaceGrotesk-Bold.ttf') format('truetype');font-weight:700;font-display:swap}
@@ -253,8 +253,12 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
 .nav{width:212px;flex:0 0 212px;height:100%;display:flex;flex-direction:column;padding:17px 12px 15px;gap:3px;background:rgba(0,0,0,.24);border-right:1px solid var(--hair)}
 .nav .nav-brand{display:flex;align-items:center;gap:11px;padding:2px 6px 16px}
 .nav .nav-brand img{width:32px;height:32px;filter:drop-shadow(0 3px 9px rgba(0,0,0,.5))}
-.nav .nav-brand .nb-txt{font-family:var(--display);font-weight:800;font-size:15px;line-height:1;color:var(--t1)}
-.nav .nav-brand .nb-sub{font-family:var(--display);font-weight:600;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--t4);margin-top:3px}
+/* Lockup del manuale (sez.2): tondo + nome in Space Grotesk Bold, "Giorgio Abetti"
+   in corpo minore sotto. L'a-capo sta DOPO "Gruppo" - sez.1 vieta di spezzare fra
+   "Astrofili" e "Vicentini". Misurato col font vero: "Astrofili Vicentini" a 15px
+   Bold = 127px, e nella barra ce ne sono 133. */
+.nav .nav-brand .nb-txt{font-family:var(--display);font-weight:700;font-size:15px;line-height:1.16;letter-spacing:-.02em;color:var(--t1)}
+.nav .nav-brand .nb-sub{font-family:var(--display);font-weight:500;font-size:10px;color:var(--t4);margin-top:4px}
 .nav .nav-cap{font-family:var(--display);font-weight:600;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--t4);padding:0 9px 7px}
 .nav-item{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:none;border:1px solid transparent;border-radius:7px;padding:11px 10px;cursor:pointer;transition:.14s;color:var(--t2);font-family:var(--testo)}
 .nav-item .ic{flex:0 0 19px;width:19px;height:19px;color:var(--t3);transition:.14s}
@@ -373,8 +377,8 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
 <span class="tb-name">Cielo del Mese — Generatore poster · Gruppo Astrofili Vicentini</span></div>
 <div class="app">
   <nav class="nav">
-    <div class="nav-brand"><img src="/assets/logo-emblema.png" alt="GAV">
-      <div><div class="nb-txt">GAV</div><div class="nb-sub">Astrofili Vicentini</div></div></div>
+    <div class="nav-brand"><img src="/assets/logo-emblema.png" alt="Gruppo Astrofili Vicentini &#8220;Giorgio Abetti&#8221;">
+      <div><div class="nb-txt">Gruppo<br>Astrofili Vicentini</div><div class="nb-sub">&#8220;Giorgio Abetti&#8221;</div></div></div>
     <div class="nav-cap">Strumenti</div>
     <button type="button" class="nav-item on" aria-current="page">
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>
