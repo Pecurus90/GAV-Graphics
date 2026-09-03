@@ -119,9 +119,29 @@ che il manuale nomina.
 **Verificato:** screenshot Chrome headless dell'app, ritagli al **3×** sul controllo
 dei formati e sulla barra laterale. Suite verde.
 
-### [ ] A3 — Icone dell'app col tratto sbagliato
+### [x] A3 — Icone dell'app col tratto sbagliato — **FATTO 2026-09-03**
 **Manuale §7:** *«Icone: set Lucide (stile linea, tratto 2 px)»*.
-**Misurato:** `stroke-width` = 1,3 · 1,45 · 1,5 · 1,6 · 2,4 — **mai 2**.
+**Misurato:** `stroke-width` = 1,3 · 1,45 · 1,5 · 1,6 · 2,4 — **mai 2**. Sette punti,
+**sette valori diversi**: non era una scelta, era deriva.
+
+**Fatto:** tutte e sette a `2`. Le icone dell'app hanno già tutte `viewBox="0 0 24 24"`,
+cioè la griglia di Lucide, quindi `stroke-width="2"` **è** la convenzione del set —
+non un numero scelto da noi.
+
+**Un'ambiguità del manuale, risolta e dichiarata perché è discutibile:** *«tratto 2
+px»* si può leggere in due modi — (a) 2 nella griglia 24 di Lucide, (b) 2 px
+**resi a schermo**. Non sono la stessa cosa: la nostra icona di stato vuoto è
+disegnata su 24 ma **mostrata a 46 px**, quindi con (a) il tratto reso è 3,8 px, e
+per ottenere (b) servirebbe `stroke-width: 1,04`. Ho scelto **(a)**, perché la
+frase dice *«set Lucide (stile linea, tratto 2 px)»*: nomina il set e poi ne
+descrive la convenzione, non chiede una compensazione per dimensione — e
+compensando, ogni icona avrebbe un `stroke-width` diverso, che è il contrario di un
+set. *Reso e guardato: a 46 px non è ingolfata.* Se Marco la legge nell'altro modo,
+è un numero solo da cambiare.
+
+**Verificato:** zero `stroke-width` diversi da 2 residui nel file; screenshot
+Chrome headless con ritagli al 3× su barra laterale e controllo dei formati — i
+glifi restano nitidi. Suite 210 verdi.
 
 ---
 

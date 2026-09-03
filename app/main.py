@@ -206,7 +206,7 @@ def _schede_html(default="dashboard"):
             f'data-name="{s["nome"]}" data-ar="{s.get("aspect","sq")}" '
             f'data-sub="{s["tag"]}" title="{s["nome"]} · {s["tag"]}">'
             f'<span class="fg"><svg viewBox="0 0 24 24" width="19" height="19" '
-            f'fill="none" stroke="currentColor" stroke-width="1.45">{glyph}</svg></span>'
+            f'fill="none" stroke="currentColor" stroke-width="2">{glyph}</svg></span>'
             f'<span class="fl">{s["nome"]}</span></button>')
     return "\n".join(out)
 
@@ -282,7 +282,7 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
 .qd-head{padding:8px 12px;background:var(--surf);border-bottom:1px solid var(--hair);font-family:var(--display);font-weight:700;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--t3)}
 .qd-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 12px;border-bottom:1px solid var(--hair)}
 .qd-lbl{font-size:12.5px;color:var(--t3);flex:0 0 auto}
-.qd-sel{flex:1;max-width:210px;background:none;border:none;text-align:right;color:var(--t1);font-family:var(--display);font-weight:800;font-size:15px;font-variant-numeric:tabular-nums;cursor:pointer;-webkit-appearance:none;-moz-appearance:none;appearance:none;padding:2px 20px 2px 4px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2375839a' stroke-width='2.4' stroke-linecap='round'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right center}
+.qd-sel{flex:1;max-width:210px;background:none;border:none;text-align:right;color:var(--t1);font-family:var(--display);font-weight:800;font-size:15px;font-variant-numeric:tabular-nums;cursor:pointer;-webkit-appearance:none;-moz-appearance:none;appearance:none;padding:2px 20px 2px 4px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2375839a' stroke-width='2' stroke-linecap='round'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right center}
 .qd-sel:focus{outline:none;color:var(--acc2)}.qd-sel option{background:#0e1626;color:var(--t1);font-size:14px;text-align:left}
 .qd-step{display:flex;align-items:center;gap:12px}
 .qd-step button{background:none;border:none;color:var(--t3);font-size:17px;line-height:1;cursor:pointer;padding:0 2px;transition:.13s;font-family:var(--testo)}
@@ -381,10 +381,10 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
       <div><div class="nb-txt">Gruppo<br>Astrofili Vicentini</div><div class="nb-sub">&#8220;Giorgio Abetti&#8221;</div></div></div>
     <div class="nav-cap">Strumenti</div>
     <button type="button" class="nav-item on" aria-current="page">
-      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>
       <span class="nm">Cielo del Mese</span></button>
     <button type="button" class="nav-item soon" disabled aria-disabled="true" title="Prossimamente">
-      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M6 6l1.4 1.4M18 6l-1.4 1.4M6 18l1.4-1.4M18 18l-1.4-1.4" stroke-linecap="round"/></svg>
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M6 6l1.4 1.4M18 6l-1.4 1.4M6 18l1.4-1.4M18 18l-1.4-1.4" stroke-linecap="round"/></svg>
       <div><div class="nm">Pillole di astronomia</div><div class="badge">Prossimamente</div></div></button>
     <div class="nav-foot">Altri strumenti arriveranno qui.</div>
   </nav>
@@ -428,7 +428,7 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
     <div class="stage-box">
       <div class="state active" id="s-initial">
         <div class="init-card">
-          <svg class="ii" viewBox="0 0 24 24" width="46" height="46" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18" opacity=".5"/><circle cx="12" cy="12" r="3.2"/></svg>
+          <svg class="ii" viewBox="0 0 24 24" width="46" height="46" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18" opacity=".5"/><circle cx="12" cy="12" r="3.2"/></svg>
           <div class="it">L'anteprima comparirà qui</div>
           <div class="ix">Imposta i parametri nel pannello a sinistra, poi premi <b>Genera anteprima</b>. La barra in alto tiene l'azione sempre a portata.</div>
         </div></div>
@@ -456,7 +456,7 @@ input[type=color]::-webkit-color-swatch-wrapper{padding:0}input[type=color]::-we
           <div class="save-row" id="save-row"></div></div></div>
       <div class="state" id="s-error">
         <div class="err-card"><div class="err-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 8v5" stroke="#e0664a" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="17" r="1.4" fill="#e0664a"/><circle cx="12" cy="12" r="10" stroke="#e0664a" stroke-width="1.6" opacity=".5"/></svg></div>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 8v5" stroke="#e0664a" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1.4" fill="#e0664a"/><circle cx="12" cy="12" r="10" stroke="#e0664a" stroke-width="2" opacity=".5"/></svg></div>
           <div class="err-title">Controlla un dato</div>
           <div class="err-msg" id="err-msg"></div>
           <div class="err-hint">Correggi il valore nel pannello a sinistra e premi di nuovo.</div>
