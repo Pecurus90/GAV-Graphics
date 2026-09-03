@@ -17,6 +17,32 @@ non torna, ha ragione il codice e questa riga va corretta.
 
 ---
 
+## STATO AL 2026-09-03 — 9 divergenze su 9 chiuse, più 1 difetto vero
+
+| | | |
+|---|---|---|
+| A1 | «GAV» come firma nel guscio | ✅ |
+| A2 | Raggi e bottoni a pillola (§5) | ✅ |
+| A3 | Tratto delle icone (§7) | ✅ |
+| B1 | Tracking (§4) | ✅ |
+| B2 | Denominazione completa (§1) | ✅ |
+| B3 | Area di rispetto del logo (§2) | ✅ |
+| B4 | Raggio dei pannelli (§5) | ✅ |
+| B5 | Icone del piedino: set e colore (§7) | ✅ |
+| B6 | Motivo decorativo gialle+bianche (§7) | ✅ |
+| C1 | La rete che ancora i colori al manuale | ✅ |
+| **Z1** | **Il piedino di zenit si scriveva addosso** *(non conformità: bug vero, preesistente)* | ✅ |
+| **B1-bis** | Tracking dei nomi di costellazione, cablato in `disc.py` | ⬜ aperta |
+| **D-a** | I 12 pt di stampa sull'A4 | ⬜ **decisione di Marco** |
+| **D-b** | Il guscio acciaio contro i neutri del manuale | ⬜ **decisione di Marco** *(la parte sui colori di stato è chiusa)* |
+
+**Stato delle reti a fine giro:** suite **216 verdi** · fotografia dei 20 SVG
+**identica** · collisioni sui 60 poster **155**, invariate dall'inizio alla fine, con
+sotto-pannello · banda · cardinale · tacca-testo a **zero** su dashboard, parata,
+zenit e a4.
+
+---
+
 ## Già conforme — verificato, non assunto
 
 | Sezione | Cosa è stato verificato |
