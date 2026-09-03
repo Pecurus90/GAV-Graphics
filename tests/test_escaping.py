@@ -13,6 +13,16 @@ parse fallisce: e' il rosso che dimostra che la rete e' viva.
 NB: NON si valida `place` (scelta di Marco: cosa sia un nome-luogo lecito e' una
 domanda di prodotto, giro a parte). Qui si pretende solo che QUALUNQUE testo non
 rompa l'SVG.
+
+IL RESIDUO DI R11, CHIUSO QUI (2026-09-03). `place` passa da _render_text, che e'
+UN choke point difeso. Ma ci sono **13** punti che lo BYPASSANO e chiamano `_esc()`
+a mano (4 in disc.py, 9 in messier.py), e nessuno era coperto: passavano solo
+perche' i DATI su disco non contengono `&`. Quindi la disciplina reggeva, non la
+rete - e in questo progetto la disciplina e' gia' fallita piu' volte.
+I test in fondo al file avvelenano i **DATI** (nomi di costellazione, di stelle,
+Messier) invece dell'input, che e' dove sta il buco: sono dati che il GAV modifica,
+quindi una `&` li' e' plausibile, non ipotetica.
+*(CLAUDE.md diceva 11 punti: ricontati, sono 13.)*
 """
 import json
 import os
@@ -61,3 +71,66 @@ def test_deep_space_messier_con_place_ostile_parsabile(eng, root, tmp_path):
     eng.generate(2026, 8, 45.5455, 11.5353, PLACE_OSTILE, _theme(root), out,
                  layout=_layout(root, "deep-space"))
     parseString(open(out, encoding="utf-8").read())  # non deve sollevare
+
+
+# ---------------------------------------------------------------------------
+# IL RESIDUO DI R11: i 13 `_esc()` scritti a mano, che bypassano _render_text.
+# Si avvelenano i DATI, non l'input.
+# ---------------------------------------------------------------------------
+OSTILE = "Test & <Prova>"
+
+
+def _avvelena(monkeypatch, eng):
+    """Mette `& < >` in OGNI sorgente di testo che bypassa _render_text:
+    nomi di costellazione (disc.py e messier.py li importano SEPARATAMENTE, quindi
+    si patchano tutti e due i binding), nomi di stelle, e catalogo Messier."""
+    import strumenti.cielo.disc as D
+    import strumenti.cielo.messier as M
+
+    monkeypatch.setattr(D, "CONST_IT", {k: f"{v} {OSTILE}" for k, v in D.CONST_IT.items()})
+    monkeypatch.setattr(M, "CONST_IT", {k: f"{v} {OSTILE}" for k, v in M.CONST_IT.items()})
+    # stelle: la CHIAVE e' il nome mostrato, quindi si rinomina
+    monkeypatch.setattr(D, "STARS", {f"{k} {OSTILE}": v for k, v in D.STARS.items()})
+    monkeypatch.setattr(D, "MARQUEE", [(f"{m[0]} {OSTILE}",) + tuple(m[1:]) for m in D.MARQUEE])
+    # Messier: si avvelena la cache pigra. VIA MONKEYPATCH, non con
+    # `eng._messier_doc = ...`: la fixture `eng` e' SESSION-SCOPED, quindi
+    # un'assegnazione diretta resterebbe addosso e avvelenerebbe gli altri test
+    # (successo davvero: 13 rossi altrove).
+    doc = json.load(open(os.path.join(eng.datadir, "messier.json"), encoding="utf-8"))
+    for o in doc["oggetti"]:
+        for campo in ("nome_it", "sigla", "costellazione_it", "famiglia"):
+            if isinstance(o.get(campo), str):
+                o[campo] = f"{o[campo]} {OSTILE}"
+    monkeypatch.setattr(eng, "_messier_doc", doc, raising=False)
+
+
+def _con_stelle_ostili(layout):
+    """Il layout dichiara i nomi di stelle: vanno rinominati come le chiavi."""
+    lay = json.loads(json.dumps(layout))
+    for b in lay["blocks"]:
+        if b.get("type") == "disc" and "star_names" in b:
+            b["star_names"] = [f"{n} {OSTILE}" for n in b["star_names"]]
+    return lay
+
+
+@pytest.mark.parametrize("fmt", ["a4", "dashboard", "parata", "zenit", "deep-space"])
+def test_dati_ostili_producono_svg_parsabile(eng, root, tmp_path, monkeypatch, fmt):
+    """Costellazioni, stelle e Messier con `& < >` NEI DATI: l'SVG resta ben
+    formato su tutti e cinque i formati.
+
+    Copre i punti RAGGIUNGIBILI dai cinque layout. Provato vivo: togliendo `_esc`
+    dal declutter di disc.py -> 4 rossi con ExpatError; dalla riga secondaria della
+    tabella Messier -> 1 rosso.
+
+    LIMITE DICHIARATO: due dei 13 punti restano scoperti perche' sono su RAMI NON
+    PRESI - il percorso naive di disc.py (nessun formato lo usa piu': tutti e cinque
+    dichiarano declutter) e la riga di gruppo della tabella Messier. Sono
+    test-only/condizionali, non morti: se un giorno un layout li riaccende, questa
+    rete NON li coprira'. Meglio saperlo scritto che scoprirlo."""
+    _avvelena(monkeypatch, eng)
+    out = str(tmp_path / f"{fmt}.svg")
+    eng.generate(2026, 3, 45.5455, 11.5353, "Vicenza", _theme(root), out,
+                 layout=_con_stelle_ostili(_layout(root, fmt)))
+    svg = open(out, encoding="utf-8").read()
+    parseString(svg)          # non deve sollevare: se solleva, l'SVG e' malformato
+    assert "&amp;" in svg, "nessun testo avvelenato e' finito nell'SVG: il test non prova nulla"
