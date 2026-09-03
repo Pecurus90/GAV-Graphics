@@ -37,9 +37,12 @@ non torna, ha ragione il codice e questa riga va corretta.
 | **D-b** | Il guscio acciaio contro i neutri del manuale | ⬜ **decisione di Marco** *(la parte sui colori di stato è chiusa)* |
 
 **Stato delle reti a fine giro:** suite **216 verdi** · fotografia dei 20 SVG
-**identica** · collisioni sui 60 poster **155**, invariate dall'inizio alla fine, con
-sotto-pannello · banda · cardinale · tacca-testo a **zero** su dashboard, parata,
-zenit e a4.
+**identica** · collisioni sui 60 poster **155 → 134**, con sotto-pannello · banda ·
+cardinale · tacca-testo a **zero** su dashboard, parata, zenit e a4.
+
+*Le collisioni sono rimaste ferme a 155 per undici voci su dodici — ed era il segno
+che quei lavori non stavano perturbando niente. Sono calate solo con B1-bis, l'unica
+che tocca le etichette del disco.*
 
 ---
 
