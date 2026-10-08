@@ -59,7 +59,7 @@ jobs:
           Push-Location "$env:BUNDLE"
           & ".\python\python.exe" cielo.py --year 2026 --month 8 --format dashboard --png --out ..\_smoke\post.svg
           Pop-Location
-          & "$env:BUNDLE/python/python.exe" -c "import os,struct; p=os.path.join('dist','_smoke','post.png'); assert os.path.exists(p), 'PNG mancante'; s=os.path.getsize(p); h=open(p,'rb').read(24); assert h[:8]==b'\x89PNG\r\n\x1a\n', 'non e un PNG'; import struct as st; w,hh=st.unpack('>II',h[16:24]); print('PNG',s,'bytes',w,'x',hh); assert s>50000 and (w,hh)==(1080,1080), 'PNG sospetto'"
+          & "$env:BUNDLE/python/python.exe" -c "import os,struct; p=os.path.join('dist','_smoke','post.png'); assert os.path.exists(p), 'PNG mancante'; s=os.path.getsize(p); h=open(p,'rb').read(24); assert h[:8]==b'\x89PNG\r\n\x1a\n', 'non e un PNG'; import struct as st; w,hh=st.unpack('>II',h[16:24]); print('PNG',s,'bytes',w,'x',hh); assert s>50000 and (w,hh)==(1080,1350), 'PNG sospetto'"
           Remove-Item -Recurse -Force dist/_smoke
 
       - name: Pubblica il bundle come artefatto (.zip)

@@ -44,7 +44,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: python cielo.py --year 2026 --month 8 --format dashboard --png --out out/ci_post.svg
 
-      - name: Asserisci che il PNG sia VERO (esiste, PNG valido, > 50 KB, 1080x1080)
+      - name: Asserisci che il PNG sia VERO (esiste, PNG valido, > 50 KB, 1080x1350)
         if: ${{ !cancelled() }}
         shell: python
         run: |
@@ -57,7 +57,7 @@ jobs:
           w, h = struct.unpack(">II", head[16:24])
           print(f"PNG: {size} bytes, {w}x{h}")
           assert size > 50_000, f"PNG sospettosamente piccolo ({size} B): resvg/font da guardare"
-          assert (w, h) == (1080, 1080), f"dimensioni inattese: {w}x{h}"
+          assert (w, h) == (1080, 1350), f"dimensioni inattese: {w}x{h}"
 
       # Sempre: cosi' posso SCARICARE e GUARDARE il PNG anche se l'assert fallisce
       # (un PNG da 2 KB o coi font di sistema e' un fallimento, non un successo).
