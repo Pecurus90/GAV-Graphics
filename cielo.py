@@ -11,7 +11,7 @@ di qui; e' il CLI che tira le fila dei due moduli.
 Uso:
   python cielo.py --year 2026 --month 8 --place Vicenza                       # A4, SVG
   python cielo.py --year 2026 --month 8 --place Vicenza --png                 # A4, SVG + PNG
-  python cielo.py --year 2026 --month 8 --format zenit --png                  # quadrato 1080, SVG + PNG
+  python cielo.py --year 2026 --month 8 --format zenit --png                  # social 4:5 (1080x1350), SVG + PNG
   python cielo.py --year 2026 --month 8 --format parata --png                 # design social
 
 Il formato si sceglie per NOME, non per percorso: i nomi validi sono i file in

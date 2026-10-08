@@ -20,6 +20,8 @@ conversione PNG.
 **Direzione (decisa 2026-07-09):** il valore dei prossimi mesi è la
 **pubblicazione social** — post 1080×1080 e storie 1080×1920 generati ogni mese
 dallo stesso motore. L'A4 resta, non è più il fuoco.
+*(Dal 2026-10-08, #7w: i quattro formati social sono **1080×1350, il verticale 4:5
+di Instagram**. Il quadrato 1080×1080 non esiste più.)*
 
 **Nessuna scadenza esterna.** Costruiamo le fondamenta prima di ristrutturare.
 
@@ -57,7 +59,7 @@ il compositore senza toccare il cielo.
 | File | Righe | Ruolo |
 |---|---|---|
 | `compose/compositor.py` | 196 | **CONDIVISO.** Il compositore: cammina i blocchi di un file di layout ed è **tool-agnostico** (hook `_render_block_tool` per i blocchi propri di uno strumento). Le primitive: testo, riga, pannello, **immagine (base64)**, icona, sfondo. **È ciò che Pillole eredita.** ⚙️ **Si estende SEMPRE in modo ADDITIVO** — chiave assente ⇒ output identico, golden fermi. Sei casi finora: `fill_opacity` (#7i), `cardinal_gap` (#7j), `stroke` sulle icone e `fill_alt`/`alt_frac` sul campo di stelle (#7t), `font_family` per blocco (R17) e `label_halo` (R13). **È il modo in cui questo progetto aggiunge una primitiva:** si scrive l'opzione, si verifica il no-op, poi i layout la accendono. |
-| `strumenti/cielo/messier.py` | 529 | Il profondo cielo (pagina 2): simboli, tabella, anti-collisione a tre strati, nomi delle costellazioni. Ospita `CONST_IT_MINORI` (vedi il confine, D14). |
+| `strumenti/cielo/messier.py` | 531 | Il profondo cielo (pagina 2): simboli, tabella, anti-collisione a tre strati, nomi delle costellazioni. Ospita `CONST_IT_MINORI` (vedi il confine, D14). |
 | `strumenti/cielo/disc.py` | 308 | Il disco sigillato (D7). Legge `CONST_IT`, **non** `CONST_IT_MINORI`. |
 | `strumenti/cielo/panels.py` | 228 | Pannelli: luna, pianeti, colori. |
 | `strumenti/cielo/catalog.py` | 195 | Dati + funzioni pure: cataloghi, `SkyData`, `bv2hex`, geometria. Ospita `CONST_IT`. |
@@ -68,11 +70,12 @@ il compositore senza toccare il cielo.
 | `validate.py` | 246 | Validazione input (R4) + contratto del tema (D2). Condiviso da CLI e web, **non** importato dal motore (invariante #1). *(355 → 246 in #7r: via l'editor e la cartella delle palette utente. **Non c'è più un nome di palette da validare**: `carica_palette()` non prende argomenti.)* |
 | `render.py` | 68 | SVG→PNG via resvg. Usato dal CLI **e** dalla web app. |
 | `app/main.py` | 512 | Web app FastAPI: `/`, `/preview`, `/download`. *(814 → 510 in #7r: via i due endpoint dell'editor, la sua modale, il suo CSS/JS, e la riga di scelta della palette — che con **una palette sola** non ha più nulla da scegliere.)* **L'HTML sta dentro il `.py`**, non in template (debito `#7f`) — ma è una **raw string** `PAGINA = r"""…"""` riempita con `.replace()`, **NON una f-string**: le graffe del CSS non sono un problema, il CSS si riscrive libero. **La UI ESPONE i formati** (`<button class="fmt" data-fmt=…>`, riga ~309) + la barra laterale (D10). *(Riga riscritta 2026-07-16: diceva «98 righe» (erano 811), «f-string» (è `r"""`) e «espone solo l'A4, niente selettore di formato» (il selettore c'è). **Tre errori in una riga**: quinta smentita di questo file per misura.)* |
-| `brand/layouts/*.json` | — | La composizione come dati. Il set è **`a4` · `dashboard` · `parata` · `zenit` · `deep-space`**. Aggiungerne uno = aggiungere un file. *(Riga corretta 2026-09-03: diceva ancora `profondo` — rinominato `deep-space` — e `cornice`, **ritirato in #7m**. Nominava cioè un file che non esiste e un formato che non esiste.)* |
+| `brand/layouts/*.json` | — | La composizione come dati. Il set è **`a4` · `dashboard` · `parata` · `zenit` · `deep-space`**. Aggiungerne uno = aggiungere un file. **`a4` è 900×1273 (stampa); gli altri quattro sono 1080×1350, cioè 4:5 (#7w)** — `scheda.aspect` vale `"a4"` o `"45"` ed è ciò che dà la forma alla cornice dell'anteprima nell'app. *(Riga corretta 2026-09-03: diceva ancora `profondo` — rinominato `deep-space` — e `cornice`, **ritirato in #7m**. Nominava cioè un file che non esiste e un formato che non esiste.)* |
 | `brand/palettes/gav.json` | — | **LA** palette: una sola, l'identità visiva del GAV (D20). **Non** in `themes/`. |
 | `data/stars6.json` | — | 5044 stelle GeoJSON, tutte con `mag` e `bv`. |
 
-**Nessun file supera 530 righe** *(max: `messier.py`, **529** — ricontato 2026-09-03 a
+**Nessun file supera 535 righe** *(max: `messier.py`, **531** dal 2026-10-08, #7w: due
+righe per tenere l'etichetta del gruppo dentro il disco. Era **529** — ricontato 2026-09-03 a
 fine giro #7u; era 518, e ha superato la soglia dei 520 dichiarata prima: i punti
 d'alone e il `body_font` di R13/R17 l'hanno portato oltre. **Non è un problema oggi**,
 ma è il file da guardare per primo se si dovrà tagliare ancora.)* Il problema "apro un file e devo leggere
@@ -1429,6 +1432,44 @@ imprevisto.
      è ancorata a teoremi di astronomia sferica, a Meeus e a posizioni di stelle vere.
      Resta non verificato solo il **poster intero contro un planetario**.
 
+4m. **#7w — I FORMATI SOCIAL PASSANO A 4:5 (1080×1350).** *(2026-10-08, chiesto da
+   Marco: «un nuovo formato per Instagram in 4:5 verticale, e convertire quelli fatti
+   così».)* `dashboard`, `parata`, `zenit`, `deep-space` **convertiti sul posto**; `a4`
+   intatto (golden fermo). I quadrati non sono stati tenuti accanto: stanno in git
+   (`git show 330e6d0:brand/layouts/<nome>.json`).
+   **I 270 px in più sono andati al disco, e in ogni formato la mossa è stata diversa
+   perché diverso era ciò che lo limitava:**
+   | | raggio prima | dopo | cosa lo limitava, e cosa è cambiato |
+   |---|---|---|---|
+   | dashboard | 270 | **334** | la colonna destra: stretta da 334 a 240 px e allungata |
+   | parata | 250 | **342** | la legenda sui fianchi: ora è una riga sotto il disco |
+   | zenit | 384 | **496** | l'altezza: ora lo limita la **larghezza** (92% del canvas) |
+   | deep-space | 246 | **288** | la tabella: stretta al minimo misurato (350 px), 15 → 20 righe |
+   - **Le larghezze sono MISURATE con Pillow, non stimate**, e la misura ha corretto il
+     primo tentativo: sul dashboard la nota con la direzione arriva a **216 px**
+     («Telescopico, a fine notte · basso a Est») in **172** disponibili. Sforava il
+     pannello a maggio e **ad agosto, il mese guardato, no**. Rimedio nel dato: nota e
+     direzione su due righe; la direzione usa la parte `times` di `planet_panel`, libera
+     da quando gli orari sono stati tolti (#7o).
+   - **Un bug vero del motore, emerso col disco più grande** (`messier.py`): l'etichetta
+     «Ammasso della Vergine» è centrata e larga ~130 px, ma il controllo «dentro il
+     disco» guardava **solo il centro** — a febbraio finiva sopra la «E» e toccava il
+     bordo del canvas. Ora si pretendono i **quattro angoli** nel disco. Cardinale su
+     deep-space: 3 → **0**.
+   - **Collisioni sui 60 poster, prima → dopo:** quasi-contatti dashboard 36 → 26, parata
+     39 → 25, zenit 19 → 4, deep-space 7 → 7; tacca-testo deep-space 10 → 3; sotto-pannello,
+     banda, cardinale e linea-figura **zero ovunque**. *Più disco = più spazio fra le
+     etichette: è geometria.*
+   - **Non scelto, e la ragione:** su deep-space il disco resta a sinistra con ~160 px
+     vuoti sopra e sotto. Impilare disco e tabella dà **lo stesso raggio** (calcolato
+     sul bilancio delle altezze, non reso: ~273 con 16 righe) e meno righe; è il vincolo della tabella a due righe per voce.
+   - Rifatta la fotografia dei 20 SVG (16 su 20 cambiano: i quattro formati × 4 mesi).
+     Suite 221 → **222** (`test_i_formati_social_sono_4_5`).
+   **Non verificato:** la cornice 4:5 dell'anteprima **vista nel browser** (verificato
+   che l'app serve `data-ar="45"`, la regola CSS e un'anteprima 1080×1350, non il
+   colpo d'occhio). **Il `README.md` parla ancora di `post` e `profondo` quadrati**:
+   stale da prima di questo giro, riportato e non corretto.
+
 5. **Il packaging: l'`.exe` in GitHub Actions (D4 + D15).** *(Anticipato su Pillole —
    deciso da Marco, 2026-07-14: «prima l'exe che funziona e lo condivido, poi
    progettiamo Pillole».)*
@@ -2191,7 +2232,7 @@ pip install -r requirements.txt
 # Formati: dashboard (default della UI) · parata · zenit · a4 · deep-space
 python cielo.py --year 2026 --month 8 --place Vicenza                        # A4, SVG
 python cielo.py --year 2026 --month 8 --place Vicenza --png                  # A4, SVG + PNG (1800px)
-python cielo.py --year 2026 --month 8 --format dashboard --png               # quadrato 1080
+python cielo.py --year 2026 --month 8 --format dashboard --png               # social 4:5, 1080x1350
 python cielo.py --year 2026 --month 3 --format deep-space --png              # i Messier
 
 # web app (poi apri http://localhost:8000)
@@ -2199,7 +2240,7 @@ python -m uvicorn app.main:app --reload --port 8000
 
 # LE DUE RETI. La suite copre tutto; la fotografia copre il buco dei golden,
 # che sorvegliano SOLO l'A4 di agosto (vedi #7q).
-python -m pytest -q                    # 221 verdi
+python -m pytest -q                    # 222 verdi
 python tools/fotografia.py             # 20 SVG (5 formati x 4 mesi), byte per byte
 python tools/fotografia.py --scatta    # SOLO dopo un cambiamento DELIBERATO
 

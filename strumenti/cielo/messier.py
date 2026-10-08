@@ -285,6 +285,8 @@ class MessierMixin:
                 px,py=req["nx"]+ox, req["ny"]+oy
                 if (px-cx)**2+(py-cy)**2 > (rad-3)**2: continue
                 bb=mkbox(px,py,req); ov=overlaps(bb)
+                # gruppo: TUTTO il riquadro nel disco (col solo centro il testo usciva dal bordo)
+                if req["kind"]=="group" and max((x-cx)**2+(y-cy)**2 for x in bb[::2] for y in bb[1::2]) > (rad-3)**2: continue
                 if ov==0: chosen=(px,py,bb,ox,oy); break
                 if best is None or ov<best[4]: best=(px,py,bb,(ox*ox+oy*oy),ov)
             # non si scarta MAI: se nessun posto e' del tutto libero, si prende il

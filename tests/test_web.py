@@ -79,7 +79,7 @@ def test_niente_endpoint_carosello():
 
 
 def test_deep_space_e_un_formato_generabile():
-    """Deep Space si genera da solo, come gli altri formati quadrati."""
+    """Deep Space si genera da solo, come gli altri formati social."""
     r = client.get("/genera?year=2026&month=8&formato=deep-space")
     assert r.status_code == 200
     assert "event: fatto" in r.text
@@ -94,7 +94,21 @@ def test_larghezza_png_per_formato():
         lay = json.load(open(os.path.join(ROOT, "brand", "layouts", f"{fmt}.json"), encoding="utf-8"))
         return render.png_width(lay)
     assert w("a4") == 1800, "l'A4 (canvas 900) va a 1800"
-    assert w("zenit") == 1080, "il quadrato social va a 1080, NON alla misura dell'A4"
+    assert w("zenit") == 1080, "il formato social va a 1080, NON alla misura dell'A4"
     assert w("deep-space") == 1080
     import cielo
     assert cielo.render.png_width is render.png_width, "il CLI riusa la stessa logica"
+
+
+def test_i_formati_social_sono_4_5():
+    """I quattro formati social sono 1080x1350, il verticale 4:5 di Instagram
+    (convertiti dal quadrato il 2026-10-08), e la scheda lo dichiara alla UI:
+    senza `aspect` la cornice dell'anteprima resterebbe quadrata."""
+    import json, os
+    ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    for fmt in ("dashboard", "parata", "zenit", "deep-space"):
+        lay = json.load(open(os.path.join(ROOT, "brand", "layouts", f"{fmt}.json"), encoding="utf-8"))
+        assert (lay["canvas"]["w"], lay["canvas"]["h"]) == (1080, 1350), fmt
+        assert lay["scheda"]["aspect"] == "45", fmt
+    assert 'data-ar="45"' in client.get("/").text
+    assert ".poster-frame.v45" in client.get("/").text

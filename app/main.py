@@ -356,6 +356,7 @@ a{color:var(--acc);text-decoration:none}a:hover{color:var(--acc2)}
    -> mai stirata; sempre tutto il poster (object-fit:contain). Niente cap a 640. */
 .poster-frame{height:min(100%,100vw - 712px);width:auto;max-width:100%;aspect-ratio:1/1;border-radius:12px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.55);border:1px solid var(--hair);background:#05070f}
 .poster-frame.a4{aspect-ratio:1/1.414;height:min(100%,calc((100vw - 712px) * 1.414))}
+.poster-frame.v45{aspect-ratio:4/5;height:min(100%,calc((100vw - 712px) * 1.25))}
 .poster-frame img{width:100%;height:100%;object-fit:contain;display:block}
 .save-row{display:flex;gap:9px;align-items:center;flex-wrap:wrap;justify-content:center}
 .btn{font-family:var(--testo);font-weight:600;font-size:13px;border-radius:7px;padding:10px 16px;cursor:pointer;transition:.14s;display:inline-flex;align-items:center;gap:8px;border:1px solid transparent;text-decoration:none}
@@ -466,7 +467,7 @@ a{color:var(--acc);text-decoration:none}a:hover{color:var(--acc2)}
 (function(){
  var MESI=["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
  var $=function(id){return document.getElementById(id);};
- var st={fmt:"dashboard",fmtName:"Dashboard",ar:"sq",ora:23};
+ var st={fmt:"dashboard",fmtName:"Dashboard",ar:"45",ora:23};
  // stepper
  document.querySelectorAll('[data-step]').forEach(function(btn){btn.addEventListener('click',function(){
    var w=btn.getAttribute('data-step'),d=parseInt(btn.getAttribute('data-d'),10);
@@ -484,7 +485,7 @@ a{color:var(--acc);text-decoration:none}a:hover{color:var(--acc2)}
  function params(){var m=parseInt($('in-mese').value,10),a=parseInt($('in-anno').value,10);
    return{p:new URLSearchParams({year:$('in-anno').value,month:$('in-mese').value,hour:st.ora,place:$('in-loc').value.trim()||'Vicenza',lat:$('in-lat').value,lon:$('in-lon').value,formato:st.fmt}),m:m,a:a};}
  function fillCaps(m,a){$('cap-when').textContent=MESI[m-1]+' '+a+' · '+(st.ora<10?'0':'')+st.ora+':00';$('cap-loc').textContent=$('in-loc').value.trim()||'Vicenza';$('cap-fmt').textContent=st.fmtName;}
- function frame(token,ar){return '<div class="poster-frame'+(ar==='a4'?' a4':'')+'"><img src="/anteprima?token='+token+'&_='+Date.now()+'"></div>';}
+ function frame(token,ar){return '<div class="poster-frame'+(ar==='a4'?' a4':ar==='45'?' v45':'')+'"><img src="/anteprima?token='+token+'&_='+Date.now()+'"></div>';}
  function dlLink(fmt,formato,label,cls,small){var q=params().p;q.set('fmt',fmt);q.set('formato',formato);return '<a class="btn '+cls+'" href="/download?'+q.toString()+'" download>'+label+(small?' <small>'+small+'</small>':'')+'</a>';}
  function busy(b){$('genera').disabled=b;$('genera').textContent=b?'Generazione in corso…':'Genera anteprima';}
  function fail(msg){$('err-msg').textContent=msg;show('error');busy(false);}
